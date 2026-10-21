@@ -16,7 +16,7 @@ export function SentinelTileLayer() {
   const [currentSubdomains, setCurrentSubdomains] = useState(initialConfig.subdomains || 'abc');
   const [hasFallenBack, setHasFallenBack] = useState(initialConfig.isFallback);
   const [notice, setNotice] = useState<string | null>(
-    initialConfig.isFallback ? (initialConfig.fallbackReason ?? null) : null,
+    initialConfig.notice ?? (initialConfig.isFallback ? (initialConfig.fallbackReason ?? null) : null),
   );
 
   const handleTileError = useCallback(() => {

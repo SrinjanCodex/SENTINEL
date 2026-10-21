@@ -76,27 +76,37 @@ VITE_USE_MOCK_API=true
 
 # ── Map Tile Configuration ──────────────────────────────────────────────────
 # Default: Standard OpenStreetMap raster tiles (100% free, no API key required)
-# Note: OSM standard tiles render local territory languages (e.g. Urdu, Arabic).
+# Note: OSM standard tiles render local territory languages (e.g. Hindi/Bengali in India).
 VITE_MAP_TILE_URL=https://tile.openstreetmap.org/{z}/{x}/{y}.png
 VITE_MAP_ATTRIBUTION=&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors
 VITE_MAP_API_KEY=
 
-# Optional: For English / Latin-script labels, configure a free API key:
-# Option A — CARTO Voyager (Free key at https://carto.com/basemaps/apikey/)
+# Default Map Center & Zoom (Configurable in one place: India Overview)
+VITE_MAP_DEFAULT_LAT=22.5
+VITE_MAP_DEFAULT_LNG=79.0
+VITE_MAP_DEFAULT_ZOOM=5
+
+# Optional: For guaranteed 100% English / Latin-script labels across all regions:
+# Option A — MapTiler Streets English (Recommended)
+# Sign up for a free key (100k requests/month, no credit card) at https://www.maptiler.com/
+# Simply set VITE_MAP_API_KEY=your_key (the app automatically requests language=en tiles)
+# VITE_MAP_TILE_URL=https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key={apiKey}&language=en
+# VITE_MAP_ATTRIBUTION=&copy; <a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>
+# VITE_MAP_API_KEY=your_free_maptiler_key
+
+# Option B — CARTO Voyager (Free key at https://carto.com/basemaps/apikey/)
 # VITE_MAP_TILE_URL=https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?api_key={apiKey}
 # VITE_MAP_ATTRIBUTION=&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>
 # VITE_MAP_API_KEY=your_free_carto_key
-
-# Option B — MapTiler (Free key at https://www.maptiler.com/ - 100k free/mo)
-# VITE_MAP_TILE_URL=https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key={apiKey}
-# VITE_MAP_ATTRIBUTION=&copy; <a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>
-# VITE_MAP_API_KEY=your_free_maptiler_key
 ```
 
 > ⚠️ **Never commit `.env`** — it is in `.gitignore`. Commit only `.env.example`.
 > If you create or change variables in `.env`, restart the frontend dev server (`Ctrl+C` then `npm run dev`) for changes to take effect.
 
 In Milestone 1, `VITE_USE_MOCK_API=true` is the active mode. The map tiles default safely to OpenStreetMap with zero keys needed. If custom tiles fail or are rejected by a provider, the map automatically recovers by displaying standard OpenStreetMap tiles with a gentle notification.
+
+### International Boundaries Notice
+SENTINEL utilizes global OpenStreetMap and MapTiler basemaps. These open basemap providers depict disputed borders (such as the Line of Control [LoC] and Line of Actual Control [LAC] in Jammu & Kashmir and Ladakh) according to *de facto* on-the-ground administration with dashed boundary lines. This differs from the official statutory maps published by the **Survey of India**, which show the entire historical extent of the state within unbroken international boundaries.
 
 ---
 
@@ -110,12 +120,12 @@ npm run test
 Expected output (Milestone 1 Enhanced):
 ```
 ✓ src/__tests__/smoke.test.tsx               (3 tests)
-✓ src/lib/__tests__/mapConfig.test.ts        (7 tests)
+✓ src/lib/__tests__/mapConfig.test.ts        (9 tests)
 ✓ src/lib/__tests__/validation.test.ts      (24 tests)
 ✓ src/lib/__tests__/useCountUp.test.ts        (2 tests)
 ✓ src/lib/__tests__/classification.test.ts   (9 tests)
 Test Files  5 passed (5)
-Tests       45 passed (45)
+Tests       47 passed (47)
 ```
 
 ---

@@ -46,6 +46,10 @@
   - Proactive safeguard: Intercepts key-requiring providers (CARTO, MapTiler, Stadia) if configured without an API key, automatically falling back to standard OpenStreetMap to prevent watermarked or broken tiles
   - Reactive fallback: `SentinelTileLayer` catches tile load errors (`tileerror`), recovers immediately to OpenStreetMap, and presents an accessible, dismissible alert notice
   - Configurable tile provider and optional API key via `VITE_MAP_TILE_URL`, `VITE_MAP_ATTRIBUTION`, and `VITE_MAP_API_KEY`
+  - Automated MapTiler English Streets Resolution: Supplying `VITE_MAP_API_KEY` automatically activates MapTiler Streets with forced English Latin labels (`&language=en`), rendering 100% English labels across all regions
+  - Dual View Controller: Seamless toggling between `🇮🇳 India Overview` (lat 22.5, lng 79.0, zoom 5) and `📍 Street View Reports` (zoom 14) on the GIS Map page
+  - India-Centric Demonstration Data: Relocated demonstration incident reports from Lahore to Kolkata, India (`22.5726, 88.3639`) across Park Street, College Street, Central Avenue, BBD Bagh, and Strand Road, eliminating foreign local script rendering
+  - Configurable Default Extents: Centralized `DEFAULT_MAP_CENTER` and `DEFAULT_MAP_ZOOM` with environment variable overrides (`VITE_MAP_DEFAULT_LAT`, `VITE_MAP_DEFAULT_LNG`, `VITE_MAP_DEFAULT_ZOOM`)
 - Fluid Micro-Animations & Interactions:
   - Smooth route transitions via `MainRoutes` fade-in wrapper and automatic top scrolling
   - Animated numeric count-up on dashboard metric counters (`useCountUp` custom hook with quadratic ease-out)

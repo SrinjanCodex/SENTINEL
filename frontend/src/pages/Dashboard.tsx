@@ -8,6 +8,7 @@ import { MapContainer, CircleMarker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { SentinelTileLayer } from '../components/SentinelTileLayer';
 import { MapErrorBoundary } from '../components/ErrorBoundary';
+import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from '../lib/mapConfig';
 
 import { getApiClient } from '../api';
 import type { DashboardStats, Report, Incident } from '../types';
@@ -303,7 +304,7 @@ export default function Dashboard() {
               <div>
                 <h2 className="font-semibold text-slate-900 text-sm tracking-tight">GIS Spatial Overview</h2>
                 <p className="text-[11px] text-slate-500">
-                  Cluster centroids plotted on OpenStreetMap layer · Radius indicates priority magnitude
+                  Cluster centroids plotted on India spatial layer · Radius indicates priority magnitude
                 </p>
               </div>
             </div>
@@ -320,11 +321,8 @@ export default function Dashboard() {
             <MapErrorBoundary height="340px">
               {mappableIncidents.length > 0 ? (
                 <MapContainer
-                  center={[
-                    mappableIncidents[0].centroid_latitude!,
-                    mappableIncidents[0].centroid_longitude!,
-                  ]}
-                  zoom={13}
+                  center={DEFAULT_MAP_CENTER}
+                  zoom={DEFAULT_MAP_ZOOM}
                   style={{ height: '100%', width: '100%' }}
                   aria-label="Map of potential incident locations"
                 >

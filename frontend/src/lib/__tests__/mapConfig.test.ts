@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { resolveTileConfig, OSM_TILE_URL, OSM_ATTRIBUTION } from '../mapConfig';
+import {
+  resolveTileConfig,
+  OSM_TILE_URL,
+  OSM_ATTRIBUTION,
+  DEFAULT_MAP_CENTER,
+  DEFAULT_MAP_ZOOM,
+} from '../mapConfig';
 
 describe('mapConfig - resolveTileConfig', () => {
   it('defaults to standard OpenStreetMap when no env URL is provided', () => {
@@ -9,6 +15,19 @@ describe('mapConfig - resolveTileConfig', () => {
     expect(config.subdomains).toBe('abc');
     expect(config.isCustom).toBe(false);
     expect(config.isFallback).toBe(false);
+  });
+
+  it('automatically resolves to MapTiler English streets when only API key is provided', () => {
+    const config = resolveTileConfig('', '', 'my_free_key_123');
+    expect(config.tileUrl).toContain('api.maptiler.com');
+    expect(config.tileUrl).toContain('language=en');
+    expect(config.tileUrl).toContain('key=my_free_key_123');
+    expect(config.isEnglish).toBe(true);
+  });
+
+  it('exports default India center coordinates and zoom level', () => {
+    expect(DEFAULT_MAP_CENTER).toEqual([22.5, 79.0]);
+    expect(DEFAULT_MAP_ZOOM).toBe(5);
   });
 
   it('safely falls back to OSM when CARTO is configured without an API key', () => {
@@ -30,7 +49,9 @@ describe('mapConfig - resolveTileConfig', () => {
   it('interpolates {apiKey} placeholder when API key is provided', () => {
     const template = 'https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key={apiKey}';
     const config = resolveTileConfig(template, 'MapTiler Custom Attr', 'test_secret_123');
-    expect(config.tileUrl).toBe('https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=test_secret_123');
+    expect(config.tileUrl).toBe(
+      'https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=test_secret_123&language=en',
+    );
     expect(config.attribution).toBe('MapTiler Custom Attr');
     expect(config.isCustom).toBe(true);
     expect(config.isFallback).toBe(false);

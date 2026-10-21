@@ -12,6 +12,7 @@ import {
 import 'leaflet/dist/leaflet.css';
 import { SentinelTileLayer } from '../components/SentinelTileLayer';
 import { MapErrorBoundary } from '../components/ErrorBoundary';
+import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM, STREET_LEVEL_ZOOM } from '../lib/mapConfig';
 import { Link } from 'react-router-dom';
 import { getApiClient } from '../api';
 import type { Report, ReportCategory } from '../types';
@@ -44,16 +45,21 @@ const CATEGORY_COLOURS: Record<ReportCategory, string> = {
   uncertain:                    '#94a3b8',
 };
 
-function MapFitter({ reports }: { reports: Report[] }) {
+function MapViewController({
+  mode,
+  clusterCenter,
+}: {
+  mode: 'india' | 'cluster';
+  clusterCenter: [number, number];
+}) {
   const map = useMap();
   useEffect(() => {
-    const pts = reports
-      .filter((r) => r.latitude != null && r.longitude != null)
-      .map((r) => [r.latitude!, r.longitude!] as [number, number]);
-    if (pts.length > 0) {
-      map.fitBounds(pts, { padding: [40, 40], maxZoom: 15 });
+    if (mode === 'india') {
+      map.setView(DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM, { animate: true });
+    } else {
+      map.setView(clusterCenter, STREET_LEVEL_ZOOM, { animate: true });
     }
-  }, [reports, map]);
+  }, [mode, clusterCenter, map]);
   return null;
 }
 
@@ -72,6 +78,7 @@ export default function MapPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<ReportCategory | ''>('');
+  const [viewMode, setViewMode] = useState<'india' | 'cluster'>('india');
 
   useEffect(() => {
     getApiClient()
@@ -127,17 +134,44 @@ export default function MapPage() {
           </select>
         </div>
 
-        <div className="flex items-center gap-3 text-xs text-slate-500">
-          <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
-            <strong className="text-slate-800">{mappable.length}</strong> Plotted Points
-          </span>
-          {unmappable.length > 0 && (
-            <span className="flex items-center gap-1.5 text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-              <AlertTriangle className="w-3 h-3 text-amber-600" />
-              <strong>{unmappable.length}</strong> Unmapped Gap
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="inline-flex rounded-lg border border-slate-200/90 bg-white p-0.5 shadow-2xs">
+            <button
+              onClick={() => setViewMode('india')}
+              className={`px-2.5 py-1 text-xs rounded-md font-medium transition-all btn-press ${
+                viewMode === 'india'
+                  ? 'bg-slate-800 text-teal-400 font-semibold shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              🇮🇳 India Overview
+            </button>
+            {mappable.length > 0 && (
+              <button
+                onClick={() => setViewMode('cluster')}
+                className={`px-2.5 py-1 text-xs rounded-md font-medium transition-all btn-press ${
+                  viewMode === 'cluster'
+                    ? 'bg-slate-800 text-teal-400 font-semibold shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                📍 Street View Reports ({mappable.length})
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-3 text-xs text-slate-500">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
+              <strong className="text-slate-800">{mappable.length}</strong> Plotted Points
             </span>
-          )}
+            {unmappable.length > 0 && (
+              <span className="flex items-center gap-1.5 text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                <AlertTriangle className="w-3 h-3 text-amber-600" />
+                <strong>{unmappable.length}</strong> Unmapped Gap
+              </span>
+            )}
+          </div>
         </div>
       </Card>
 
@@ -158,12 +192,15 @@ export default function MapPage() {
               <MapErrorBoundary height="520px">
                 {mappable.length > 0 ? (
                   <MapContainer
-                    center={[mappable[0].latitude!, mappable[0].longitude!]}
-                    zoom={13}
+                    center={DEFAULT_MAP_CENTER}
+                    zoom={DEFAULT_MAP_ZOOM}
                     style={{ height: '100%', width: '100%' }}
                   >
                     <SentinelTileLayer />
-                    <MapFitter reports={filtered} />
+                    <MapViewController
+                      mode={viewMode}
+                      clusterCenter={[mappable[0].latitude!, mappable[0].longitude!]}
+                    />
                     {mappable.map((r) => (
                       <CircleMarker
                         key={r.id}

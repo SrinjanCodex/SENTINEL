@@ -294,7 +294,7 @@ export default function ReportIncident() {
                       step="any"
                       value={form.latitude}
                       onChange={handleChange}
-                      placeholder="Latitude (e.g., 31.5204)"
+                      placeholder="Latitude (e.g., 22.5726)"
                       className={`pl-8 ${inputClass} ${errors.latitude || errors.coordinates ? 'border-rose-400' : ''}`}
                       disabled={submitting}
                     />
@@ -312,7 +312,7 @@ export default function ReportIncident() {
                       step="any"
                       value={form.longitude}
                       onChange={handleChange}
-                      placeholder="Longitude (e.g., 74.3587)"
+                      placeholder="Longitude (e.g., 88.3639)"
                       className={`pl-8 ${inputClass} ${errors.longitude || errors.coordinates ? 'border-rose-400' : ''}`}
                       disabled={submitting}
                     />

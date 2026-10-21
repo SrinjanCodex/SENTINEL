@@ -158,3 +158,22 @@ The final choice will be recorded here when Milestone 4 is implemented, with jus
 1. When `SentinelTileLayer` previously set `subdomains: undefined` for standard OpenStreetMap, Leaflet merged `options.subdomains = undefined`. Upon computing tile URLs, Leaflet executed `this._getSubdomain(coords)` which attempted to read `this.options.subdomains.length`, throwing an uncaught `TypeError: Cannot read properties of undefined (reading 'length')`. Without an Error Boundary, this unhandled exception crashed the React component tree and resulted in a blank white screen.
 2. An application-level `ErrorBoundary` prevents any unhandled component crash from wiping out the screen, presenting a friendly recovery card with diagnostic details and a "Reload Application" action.
 3. A component-level `MapErrorBoundary` isolates spatial/GIS failures specifically to the map frame, ensuring the rest of the dashboard (metrics, intelligence feed, filters, navigation) remains completely interactive and accessible even if a map tile service or canvas error occurs.
+
+---
+
+## 2026-10-21 — India-Centric Map Orientation, English-First Tile Resolution & International Boundary Assessment
+
+**Decision:**
+1. Relocate demonstration incident dataset from Lahore to Kolkata, India (`22.5726, 88.3639`).
+2. Establish centralized India-wide default coordinates (`DEFAULT_MAP_CENTER = [22.5, 79.0]`, `DEFAULT_MAP_ZOOM = 5`, `STREET_LEVEL_ZOOM = 14`) with environment variable overrides.
+3. Keep Leaflet raster architecture with automated MapTiler English Streets (`&language=en`) auto-resolution when `VITE_MAP_API_KEY` is supplied, while retaining zero-credential OpenStreetMap fallback.
+4. Implement a dual view controller on `MapPage` (`🇮🇳 India Overview` vs `📍 Street View Reports`).
+
+**Reason:**
+1. **Root Cause of Urdu Script:** Standard OpenStreetMap raster tiles render geographic names in the territorial script of the coordinates being viewed. Because demonstration incidents were previously situated in Lahore, Pakistan, the map auto-focused onto Lahore and rendered local Urdu script. Relocating incidents to Kolkata, India immediately replaces Urdu with Latin/Bengali scripts on standard OSM, and provides a realistic national scenario.
+2. **Evaluated Approaches:**
+   - *Approach A (Vector Tiles via MapLibre GL):* Evaluated OpenFreeMap (`tiles.openfreemap.org`). While vector tiles allow client-side text filtering (`name:latin`), OpenFreeMap provides no raster tiles. Integrating MapLibre GL requires adding heavy dependencies (`maplibre-gl` ~800 KB and Leaflet bindings) and WebGL hardware contexts that increase memory footprint on low-end devices. Furthermore, upstream styles concatenate non-Latin scripts if present.
+   - *Approach B (Raster Providers with Free Tier — Selected):* MapTiler Streets provides an explicit `&language=en` query parameter on its raster endpoint (`https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key={apiKey}&language=en`). Free Flex tier includes 100,000 requests/month with no credit card required, domain whitelisting, and 100% English Latin text worldwide. CARTO Voyager provides clean Latin-first cartography.
+   - *Approach C (OSM Raster Fallback):* Preserved as the zero-credential fail-safe when no API key is supplied, accompanied by an informative UI notice.
+3. **Cartographic Boundaries Disclosure:** Global open-data tile providers (OpenStreetMap, MapTiler, CARTO) reflect *de facto* control lines (the Line of Control [LoC] and Line of Actual Control [LAC] in Jammu & Kashmir and Ladakh are rendered as dashed borders). Users must be aware that this differs from the official statutory maps published by the **Survey of India**, which delineate the entire boundary with unbroken sovereign lines.
+

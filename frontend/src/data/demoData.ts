@@ -8,20 +8,20 @@
  */
 import type { Report, Incident } from '../types';
 
-// Lahore, Pakistan — approximate coordinates used for demonstration only
-const DEMO_CITY_LAT = 31.5204;
-const DEMO_CITY_LNG = 74.3587;
+// Kolkata, West Bengal, India — approximate coordinates used for demonstration only
+const DEMO_CITY_LAT = 22.5726;
+const DEMO_CITY_LNG = 88.3639;
 
 export const DEMO_REPORTS: Report[] = [
   {
     id: 'demo-001',
     original_description:
-      'Large puddle of standing water has formed outside the main school gate on Gulberg Road. Water is about ankle-deep and blocking the footpath. It has not moved since morning.',
+      'Large puddle of standing water has formed outside the main school gate on Park Street. Water is about ankle-deep and blocking the footpath. It has not moved since morning.',
     category: 'persistent_standing_water',
     category_confidence: 0.87,
     category_uncertain: false,
     reported_severity: 3,
-    address: 'Gulberg Road, near Model Town School',
+    address: 'Park Street, near St. Xavier\'s School',
     latitude: DEMO_CITY_LAT + 0.002,
     longitude: DEMO_CITY_LNG - 0.001,
     observed_at: '2026-10-20T08:30:00+05:30',
@@ -40,7 +40,7 @@ export const DEMO_REPORTS: Report[] = [
     category_confidence: 0.79,
     category_uncertain: false,
     reported_severity: 4,
-    address: 'School entrance road, Gulberg',
+    address: 'School entrance road, Park Street',
     latitude: DEMO_CITY_LAT + 0.0022,
     longitude: DEMO_CITY_LNG - 0.0009,
     observed_at: '2026-10-20T09:15:00+05:30',
@@ -59,7 +59,7 @@ export const DEMO_REPORTS: Report[] = [
     category_confidence: 0.82,
     category_uncertain: false,
     reported_severity: 3,
-    address: 'Near Gulberg Model Town School',
+    address: 'Near Park Street School gate',
     latitude: DEMO_CITY_LAT + 0.0018,
     longitude: DEMO_CITY_LNG - 0.0012,
     observed_at: '2026-10-20T10:00:00+05:30',
@@ -73,12 +73,12 @@ export const DEMO_REPORTS: Report[] = [
   {
     id: 'demo-004',
     original_description:
-      'Water is entering the ground floor of our building on Canal Road. The entrance step is submerged. We moved items off the floor but the water level is rising slowly.',
+      'Water is entering the ground floor of our building on Central Avenue. The entrance step is submerged. We moved items off the floor but the water level is rising slowly.',
     category: 'water_entering_building',
     category_confidence: 0.94,
     category_uncertain: false,
     reported_severity: 5,
-    address: '14 Canal Road, Defence',
+    address: '14 Central Avenue, BBD Bagh',
     latitude: DEMO_CITY_LAT - 0.015,
     longitude: DEMO_CITY_LNG + 0.022,
     observed_at: '2026-10-20T07:45:00+05:30',
@@ -92,12 +92,12 @@ export const DEMO_REPORTS: Report[] = [
   {
     id: 'demo-005',
     original_description:
-      'Vehicles are stuck in deep water at the Liberty Market underpass. Situation is dangerous. Water level looks like 2 feet.',
+      'Vehicles are stuck in deep water at the College Street underpass. Situation is dangerous. Water level looks like 2 feet.',
     category: 'water_accumulation_on_roads',
     category_confidence: 0.91,
     category_uncertain: false,
     reported_severity: 5,
-    address: 'Liberty Market underpass',
+    address: 'College Street underpass',
     latitude: DEMO_CITY_LAT + 0.008,
     longitude: DEMO_CITY_LNG + 0.003,
     observed_at: '2026-10-20T06:30:00+05:30',
@@ -116,7 +116,7 @@ export const DEMO_REPORTS: Report[] = [
     category_confidence: 0.38,
     category_uncertain: true,
     reported_severity: 1,
-    address: 'Race Course Park entrance',
+    address: 'Maidan Park entrance',
     latitude: DEMO_CITY_LAT + 0.005,
     longitude: DEMO_CITY_LNG - 0.007,
     observed_at: '2026-10-20T11:00:00+05:30',
@@ -135,7 +135,7 @@ export const DEMO_REPORTS: Report[] = [
     category_confidence: 0.75,
     category_uncertain: false,
     reported_severity: 2,
-    address: 'Near school gate, Gulberg',
+    address: 'Near school gate, Park Street',
     latitude: DEMO_CITY_LAT + 0.002,
     longitude: DEMO_CITY_LNG - 0.001,
     observed_at: '2026-10-20T14:00:00+05:30',
@@ -149,12 +149,12 @@ export const DEMO_REPORTS: Report[] = [
   {
     id: 'demo-008',
     original_description:
-      'Broken street light on Mall Road. No waterlogging here, just a safety hazard at night.',
+      'Broken street light on Strand Road. No waterlogging here, just a safety hazard at night.',
     category: 'uncertain',
     category_confidence: 0.12,
     category_uncertain: true,
     reported_severity: null,
-    address: 'Mall Road near Charing Cross',
+    address: 'Strand Road near Howrah Bridge',
     latitude: DEMO_CITY_LAT + 0.011,
     longitude: DEMO_CITY_LNG - 0.014,
     observed_at: null,
@@ -170,7 +170,7 @@ export const DEMO_REPORTS: Report[] = [
 export const DEMO_INCIDENTS: Incident[] = [
   {
     id: 'inc-demo-001',
-    title: 'Suspected drainage blockage — Gulberg School area',
+    title: 'Suspected drainage blockage — Park Street School area',
     centroid_latitude: DEMO_CITY_LAT + 0.002,
     centroid_longitude: DEMO_CITY_LNG - 0.001,
     first_observed_at: '2026-10-20T08:30:00+05:30',
@@ -184,7 +184,7 @@ export const DEMO_INCIDENTS: Incident[] = [
   },
   {
     id: 'inc-demo-002',
-    title: 'Water accumulation — Liberty Market underpass',
+    title: 'Water accumulation — College Street underpass',
     centroid_latitude: DEMO_CITY_LAT + 0.008,
     centroid_longitude: DEMO_CITY_LNG + 0.003,
     first_observed_at: '2026-10-20T06:30:00+05:30',
@@ -198,7 +198,7 @@ export const DEMO_INCIDENTS: Incident[] = [
   },
   {
     id: 'inc-demo-003',
-    title: 'Water entering building — Canal Road',
+    title: 'Water entering building — Central Avenue',
     centroid_latitude: DEMO_CITY_LAT - 0.015,
     centroid_longitude: DEMO_CITY_LNG + 0.022,
     first_observed_at: '2026-10-20T07:45:00+05:30',
