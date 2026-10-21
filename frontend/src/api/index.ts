@@ -7,6 +7,7 @@
  */
 import type { ApiClient } from '../types';
 import { MockApiClient } from './mockClient';
+import { RealApiClient } from './realClient';
 
 // Singleton instance — one client per browser session
 let _client: ApiClient | null = null;
@@ -18,14 +19,7 @@ export function getApiClient(): ApiClient {
   if (useMock) {
     _client = new MockApiClient();
   } else {
-    // Milestone 2: import RealApiClient dynamically when the env var is false
-    // For now, fall back to mock with a console notice
-    console.info(
-      '[SENTINEL] VITE_USE_MOCK_API is false but RealApiClient is not yet ' +
-      'implemented. Falling back to MockApiClient. ' +
-      'Connect the backend in Milestone 2.',
-    );
-    _client = new MockApiClient();
+    _client = new RealApiClient();
   }
 
   return _client;

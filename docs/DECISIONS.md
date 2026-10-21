@@ -177,3 +177,22 @@ The final choice will be recorded here when Milestone 4 is implemented, with jus
    - *Approach C (OSM Raster Fallback):* Preserved as the zero-credential fail-safe when no API key is supplied, accompanied by an informative UI notice.
 3. **Cartographic Boundaries Disclosure:** Global open-data tile providers (OpenStreetMap, MapTiler, CARTO) reflect *de facto* control lines (the Line of Control [LoC] and Line of Actual Control [LAC] in Jammu & Kashmir and Ladakh are rendered as dashed borders). Users must be aware that this differs from the official statutory maps published by the **Survey of India**, which delineate the entire boundary with unbroken sovereign lines.
 
+---
+
+## 2026-10-21 — Milestone 2: FastAPI, SQLite, Pydantic v2, and Secure Media Architecture
+
+**Decision:**
+1. Implement backend service using FastAPI with Uvicorn on port 8000.
+2. Use SQLite via SQLAlchemy 2.0+ ORM with `check_same_thread=False` and declarative mapping.
+3. Validate and serialize all requests/responses using Pydantic v2 (`ConfigDict(from_attributes=True)`).
+4. Implement secure media intake via Pillow: re-encoding images, stripping EXIF tags, rejecting invalid MIME types/extensions, and generating cryptographic UUID filenames.
+5. Enforce report description immutability at the API routing layer (`PATCH /api/reports/{id}`).
+6. Connect the frontend through `RealApiClient` (implementing `ApiClient`), switchable via `VITE_USE_MOCK_API`.
+
+**Reason:**
+1. **Zero External Infrastructure Overhead:** SQLite runs locally within `backend/sentinel.db` with zero database servers to configure, start, or maintain on Windows, making it ideal for beginner development while fully supporting relational constraints and foreign keys.
+2. **Defensive API Design:** Custom exception handlers intercept `RequestValidationError` and unhandled exceptions to return clean, standardized error objects (`{ "detail": "...", "errors": [...] }`) without exposing internal server paths, Python stack traces, or environment variables.
+3. **Privacy and Safety in Media Ingestion:** Citizen photo uploads could inadvertently expose GPS coordinates or camera serial numbers through EXIF metadata. Stripping EXIF metadata and renaming files to random UUIDs eliminates geolocation leakage, prevents directory traversal attacks, and ensures consistent JPEG/PNG/WebP formats.
+4. **Clean Abstraction Boundary:** The frontend `ApiClient` interface guarantees that UI components are completely decoupled from the transport layer. The application seamlessly operates against the mock database (offline localStorage) or the real FastAPI database without changing a single line of React code.
+
+

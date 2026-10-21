@@ -1,8 +1,8 @@
 # SENTINEL — Project Status
 
 **Last Updated:** 2026-10-21
-**Current Milestone:** 1 — Frontend Foundation
-**Status:** ✅ Complete (Ready for user review before Milestone 2)
+**Current Milestone:** 2 — Backend & Database
+**Status:** ✅ Complete (Milestones 1 & 2 verified; ready for Milestone 3 approval)
 
 ---
 
@@ -11,7 +11,7 @@
 | # | Milestone | Status |
 |---|-----------|--------|
 | 1 | Frontend Foundation | ✅ Complete |
-| 2 | Backend & Database | ⬜ Planned |
+| 2 | Backend & Database | ✅ Complete |
 | 3 | Report Analysis | ⬜ Planned |
 | 4 | Geospatial Intelligence | ⬜ Planned |
 | 5 | Prioritisation & Missing-Signal Detector | ⬜ Planned |
@@ -62,14 +62,49 @@
   - Isolated `MapErrorBoundary` wrapping GIS preview and full map views, ensuring map component failures never crash the rest of the intelligence dashboard
 - React Leaflet map preview on Dashboard and full GIS page
 - Accessibility pass (focus states, ARIA labels, form field labels)
-- Automated unit testing with Vitest (45 tests passed):
+- Automated unit testing with Vitest (51 tests passed):
+  - `src/api/__tests__/realClient.test.ts` (4 tests passed)
   - `src/__tests__/smoke.test.tsx` (3 tests passed)
-  - `src/lib/__tests__/mapConfig.test.ts` (7 tests passed)
+  - `src/lib/__tests__/mapConfig.test.ts` (9 tests passed)
   - `src/lib/__tests__/validation.test.ts` (24 tests passed)
   - `src/lib/__tests__/useCountUp.test.ts` (2 tests passed)
   - `src/lib/__tests__/classification.test.ts` (9 tests passed)
 - Production build verified (`npm run build` succeeds cleanly with 0 TypeScript/bundler errors)
 - Dev server verified (`npm run dev` serves HTTP 200 at http://localhost:5173)
+
+### Milestone 2: Backend & Database Features (Tested)
+- FastAPI asynchronous web framework with standard Uvicorn runner
+- SQLite database persistence (`sentinel.db`) via SQLAlchemy 2.0+ ORM models:
+  - `Report` (immutable original_description, coordinates, severity, category, status, anonymous token, synthetic tag)
+  - `Incident` (hypothetical report cluster, verification state, centroid coordinates, priority score)
+  - `IncidentReport` (junction table with match scores, match reasons, independence indicators)
+  - `Evidence` (structured provenance and verification trails)
+  - `VerificationRecord` (audit log for human verification actions)
+  - `PriorityAssessment` & `MissingSignal` (placeholders for Milestone 5 scoring and gap detection)
+- Pydantic v2 validation and serialization schemas (`ReportCreate`, `ReportUpdate`, `ReportResponse`, `DashboardStatsResponse`)
+- Standardized RESTful endpoints under `/api`:
+  - `POST /api/reports` (intake validation, anonymous token assignment, 201 Created)
+  - `GET /api/reports` (searching across text/address, category and status filtering, server pagination)
+  - `GET /api/reports/{id}` (single report lookup with 404 handler)
+  - `PATCH /api/reports/{id}` (mutable field updates with description immutability safeguard)
+  - `GET /api/stats` (real database aggregation counts for dashboard)
+  - `GET /api/health` (database connectivity and service telemetry)
+  - `GET /api/system/info` (milestone capability and threshold metadata)
+  - `GET /api/incidents` & `GET /api/incidents/{id}` (incident cluster listing and lookup)
+- Secure photo upload endpoint (`POST /api/reports/upload-photo`):
+  - Enforces 5 MB file size limit (rejects with HTTP 413)
+  - Validates MIME types (`.jpg`, `.jpeg`, `.png`, `.webp` - rejects with HTTP 415)
+  - Inspects real image byte content via Pillow (rejects corrupted payloads with HTTP 400)
+  - Re-encodes and strips all EXIF metadata for privacy and security
+  - Cryptographic random UUID filenames to prevent collision and path traversal
+- Synthetic demonstration dataset seeder (`seed.py`):
+  - Populates 8 Kolkata waterlogging reports and 3 incident clusters clearly tagged `is_synthetic=True`
+- Automated pytest suite (14 tests passed in `backend/tests/`):
+  - `tests/test_api.py` (9 tests passed)
+  - `tests/test_uploads.py` (5 tests passed)
+- Full frontend client integration via `RealApiClient` in `frontend/src/api/realClient.ts`:
+  - Dynamically activated when `VITE_USE_MOCK_API=false`
+  - Fully tested for query parameters, error unpacking, and offline fallbacks
 
 ## Known Limitations & Bugs (Milestone 1)
 

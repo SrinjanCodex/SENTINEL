@@ -1,7 +1,7 @@
 # SENTINEL — Architecture
 
 **Last Updated:** 2026-10-21
-**Current State:** Milestone 1 — Frontend only, mock data
+**Current State:** Milestone 2 — Full-stack operational (FastAPI + SQLite backend connected)
 
 ---
 
@@ -158,22 +158,23 @@ See `src/types/index.ts` for full field list.
 
 ---
 
-## API Endpoints (Milestone 2+)
+## API Endpoints
 
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/api/reports` | Create a report |
-| GET | `/api/reports` | List (search, filter, paginate) |
-| GET | `/api/reports/{id}` | Get one report |
-| PATCH | `/api/reports/{id}` | Update permitted fields |
-| GET | `/api/reports/{id}/matches` | Ranked similar reports |
-| GET | `/api/incidents` | List incidents |
-| GET | `/api/incidents/{id}` | Full incident detail |
-| PATCH | `/api/incidents/{id}/verification` | Record human verification |
-| POST | `/api/analysis/run` | Trigger analysis |
-| GET | `/api/stats` | Dashboard statistics |
-| GET | `/api/system/info` | Parameters and thresholds |
-| GET | `/api/health` | Health check |
+| Method | Path | Status | Description |
+|--------|------|--------|-------------|
+| GET | `/api/health` | ✅ Operational | Health check and database connectivity |
+| GET | `/api/stats` | ✅ Operational | Real database dashboard statistics |
+| GET | `/api/system/info` | ✅ Operational | Capability matrix and runtime thresholds |
+| POST | `/api/reports` | ✅ Operational | Create a report (with validation) |
+| GET | `/api/reports` | ✅ Operational | List reports (search, filter, paginate) |
+| GET | `/api/reports/{id}` | ✅ Operational | Get single report detail |
+| PATCH | `/api/reports/{id}` | ✅ Operational | Update mutable fields (description is immutable) |
+| POST | `/api/reports/upload-photo` | ✅ Operational | Secure photo upload (EXIF stripped, Pillow verified) |
+| GET | `/api/incidents` | ✅ Operational | List potential incidents |
+| GET | `/api/incidents/{id}` | ✅ Operational | Incident detail with linked report IDs |
+| GET | `/api/reports/{id}/matches` | ⬜ Planned (M3) | Ranked similar reports via semantic matching |
+| POST | `/api/analysis/run` | ⬜ Planned (M4) | Trigger geospatial clustering pipeline |
+| PATCH | `/api/incidents/{id}/verification` | ⬜ Planned (M5) | Record human verification inspection |
 
 ---
 

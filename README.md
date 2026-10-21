@@ -14,13 +14,13 @@ SENTINEL connects community reports, geographic data, historical records, and en
 | Milestone | Status |
 |-----------|--------|
 | 1 — Frontend Foundation | ✅ Complete |
-| 2 — Backend & Database | ⬜ Planned |
+| 2 — Backend & Database | ✅ Complete |
 | 3 — Report Analysis | ⬜ Planned |
 | 4 — Geospatial Intelligence | ⬜ Planned |
 | 5 — Prioritisation & Missing-Signal Detector | ⬜ Planned |
 | 6 — Polish & Validation | ⬜ Planned |
 
-**What works right now:** Full React frontend with demonstration data, report submission (browser-stored), map, search/filter, and a keyword-based classifier. No backend required.
+**What works right now:** Full React frontend + FastAPI backend + SQLite database (`sentinel.db`). Supports creating, retrieving, searching, and filtering waterlogging reports with real SQLite persistence, secure photo upload with EXIF sanitization, dashboard aggregations, synthetic data seeding, and automated test coverage (51 frontend tests + 14 backend tests). Toggle between offline mock and live backend via `VITE_USE_MOCK_API`.
 
 ---
 
@@ -39,9 +39,39 @@ Install these before starting:
 
 ---
 
-## Quick Start (Milestone 1 — Frontend only)
+## Quick Start (Milestone 2 — Full Stack: Frontend + Backend)
 
-Open **VS Code**, then open the **integrated terminal** (`` Ctrl+` ``).
+Open **VS Code**, then open two terminal tabs (`` Ctrl+Shift+` ``).
+
+### Terminal 1: Start the Backend (FastAPI + SQLite)
+
+```powershell
+# 1. Navigate to the backend folder
+cd backend
+
+# 2. Create Python virtual environment (if not already created)
+python -m venv .venv
+
+# 3. Activate virtual environment
+# Note: If PowerShell shows an execution policy error, run:
+# Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\.venv\Scripts\Activate.ps1
+
+# 4. Install backend dependencies
+pip install -r requirements.txt
+
+# 5. Seed synthetic demonstration data (optional, creates initial records)
+python -m app.seed
+
+# 6. Start the FastAPI backend server
+python run.py
+```
+
+The backend API will be available at: **http://127.0.0.1:8000**
+- Interactive Swagger API documentation: **http://127.0.0.1:8000/docs**
+- Health telemetry: **http://127.0.0.1:8000/api/health**
+
+### Terminal 2: Start the Frontend (React + Vite)
 
 ```powershell
 # 1. Navigate to the frontend folder
@@ -50,13 +80,18 @@ cd frontend
 # 2. Install dependencies (only needed once, or after pulling changes)
 npm install
 
-# 3. Start the development server
+# 3. Start the Vite development server
 npm run dev
 ```
 
-The app will be available at: **http://localhost:5173**
+The frontend will be available at: **http://localhost:5173**
 
-Open that URL in your browser. You should see the SENTINEL dashboard with demonstration data.
+> 💡 **To connect the frontend to the live backend:**
+> In your root `.env` file, set:
+> ```env
+> VITE_USE_MOCK_API=false
+> ```
+> And restart the frontend dev server (`Ctrl+C` then `npm run dev`). When set to `false`, all report submissions and statistics are read and written to `backend/sentinel.db`. When set to `true`, it uses browser `localStorage`.
 
 ---
 
@@ -112,20 +147,50 @@ SENTINEL utilizes global OpenStreetMap and MapTiler basemaps. These open basemap
 
 ## Running Tests
 
+### 1. Frontend Tests (Vitest)
+
 ```powershell
 cd frontend
 npm run test
 ```
 
-Expected output (Milestone 1 Enhanced):
+Expected output:
 ```
+✓ src/api/__tests__/realClient.test.ts        (4 tests)
 ✓ src/__tests__/smoke.test.tsx               (3 tests)
 ✓ src/lib/__tests__/mapConfig.test.ts        (9 tests)
 ✓ src/lib/__tests__/validation.test.ts      (24 tests)
 ✓ src/lib/__tests__/useCountUp.test.ts        (2 tests)
 ✓ src/lib/__tests__/classification.test.ts   (9 tests)
-Test Files  5 passed (5)
-Tests       47 passed (47)
+Test Files  6 passed (6)
+Tests       51 passed (51)
+```
+
+### 2. Backend Tests (Pytest)
+
+```powershell
+cd backend
+.\.venv\Scripts\Activate.ps1
+pytest -v
+```
+
+Expected output:
+```
+tests/test_api.py::test_health_check PASSED
+tests/test_api.py::test_dashboard_stats_empty PASSED
+tests/test_api.py::test_dashboard_stats_with_data PASSED
+tests/test_api.py::test_create_report_success PASSED
+tests/test_api.py::test_create_report_validation_errors PASSED
+tests/test_api.py::test_list_reports_pagination PASSED
+tests/test_api.py::test_list_reports_search_and_filter PASSED
+tests/test_api.py::test_get_report_by_id PASSED
+tests/test_api.py::test_update_report_immutability PASSED
+tests/test_uploads.py::test_upload_photo_valid_jpeg PASSED
+tests/test_uploads.py::test_upload_photo_valid_png PASSED
+tests/test_uploads.py::test_upload_photo_oversized_rejected PASSED
+tests/test_uploads.py::test_upload_photo_invalid_extension PASSED
+tests/test_uploads.py::test_upload_photo_corrupted_image PASSED
+======================== 14 passed in 1.52s ========================
 ```
 
 ---
@@ -145,16 +210,16 @@ Output goes to `frontend/dist/`. Check that the build completes with no errors.
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| Dashboard with live stats | ✅ Working | Stats computed from real data |
-| Report submission form | ✅ Working | Full validation, browser-stored |
-| Reports list with search/filter | ✅ Working | Filters by category, status, date |
-| Report detail view | ✅ Working | All fields shown, "Not provided" for missing |
-| Interactive map | ✅ Working | Demo data markers; unknown locations listed separately |
-| Keyword classification | ✅ Working | Transparent, tested |
-| System Information page | ✅ Working | Static placeholder (will be live in M5) |
-| Incident Investigation page | ✅ Stub | Demo data only; full features in M5 |
-| Backend API | ⬜ Planned | Milestone 2 |
-| Photo upload | ⬜ Planned | Milestone 2+ |
+| Dashboard with live stats | ✅ Working | Real database aggregation (or demo fallback) |
+| Report submission form | ✅ Working | Full client/server validation, SQLite persistence |
+| Reports list with search/filter | ✅ Working | Server-side or client-side filtering and pagination |
+| Report detail view | ✅ Working | Complete audit fields, immutable description |
+| Interactive map | ✅ Working | India-centered overview + street-level inspection |
+| Keyword classification | ✅ Working | Baseline heuristic (AI matching in Milestone 3) |
+| System Information page | ✅ Working | Static placeholder & API status telemetry |
+| Incident Investigation page | ✅ Stub | Demo data only; full clustering in Milestone 4 |
+| Backend API & SQLite DB | ✅ Complete | FastAPI + SQLAlchemy 2.0 (`sentinel.db`) |
+| Secure photo upload | ✅ Complete | EXIF sanitization, type/size enforcement via Pillow |
 | Semantic report matching | ⬜ Planned | Milestone 3 |
 | Geographic clustering | ⬜ Planned | Milestone 4 |
 | Prioritisation scoring | ⬜ Planned | Milestone 5 |
