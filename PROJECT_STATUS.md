@@ -41,11 +41,11 @@
   - Skeleton loading placeholders during initial telemetry retrieval
   - Tabular number formatting and refined micro-typography tokens
   - Explicit styling for unmapped coordinates and Missing-Signal alerts
-- Map Language & Tiles (English / Latin Script):
-  - Switched default map tiles to CARTO Voyager raster tiles (`https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png`)
-  - Ensures clean international and regional place names rendered in English/Latin script
-  - Visible dual attribution to OpenStreetMap contributors and CARTO
-  - Configurable via `VITE_MAP_TILE_URL` and `VITE_MAP_ATTRIBUTION` environment variables
+- Map Tile Architecture & Graceful Fallback:
+  - Safe working default: Standard OpenStreetMap raster tiles (100% free, zero credentials required)
+  - Proactive safeguard: Intercepts key-requiring providers (CARTO, MapTiler, Stadia) if configured without an API key, automatically falling back to standard OpenStreetMap to prevent watermarked or broken tiles
+  - Reactive fallback: `SentinelTileLayer` catches tile load errors (`tileerror`), recovers immediately to OpenStreetMap, and presents an accessible, dismissible alert notice
+  - Configurable tile provider and optional API key via `VITE_MAP_TILE_URL`, `VITE_MAP_ATTRIBUTION`, and `VITE_MAP_API_KEY`
 - Fluid Micro-Animations & Interactions:
   - Smooth route transitions via `MainRoutes` fade-in wrapper and automatic top scrolling
   - Animated numeric count-up on dashboard metric counters (`useCountUp` custom hook with quadratic ease-out)
@@ -55,10 +55,11 @@
   - Full adherence to `@media (prefers-reduced-motion: reduce)`
 - React Leaflet map preview on Dashboard and full GIS page
 - Accessibility pass (focus states, ARIA labels, form field labels)
-- Automated unit testing with Vitest (35 tests passed):
-  - `src/lib/__tests__/classification.test.ts` (9 tests passed)
+- Automated unit testing with Vitest (42 tests passed):
+  - `src/lib/__tests__/mapConfig.test.ts` (7 tests passed)
   - `src/lib/__tests__/validation.test.ts` (24 tests passed)
   - `src/lib/__tests__/useCountUp.test.ts` (2 tests passed)
+  - `src/lib/__tests__/classification.test.ts` (9 tests passed)
 - Production build verified (`npm run build` succeeds cleanly with 0 TypeScript/bundler errors)
 - Dev server verified (`npm run dev` serves HTTP 200 at http://localhost:5173)
 

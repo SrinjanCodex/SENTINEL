@@ -74,15 +74,29 @@ Copy-Item .env.example .env
 VITE_API_BASE_URL=http://localhost:8000
 VITE_USE_MOCK_API=true
 
-# English / Latin-script map tiles (CARTO Voyager)
-# Free for development, non-commercial, and open-source civic usage without an API key
-VITE_MAP_TILE_URL=https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png
-VITE_MAP_ATTRIBUTION=&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>
+# ── Map Tile Configuration ──────────────────────────────────────────────────
+# Default: Standard OpenStreetMap raster tiles (100% free, no API key required)
+# Note: OSM standard tiles render local territory languages (e.g. Urdu, Arabic).
+VITE_MAP_TILE_URL=https://tile.openstreetmap.org/{z}/{x}/{y}.png
+VITE_MAP_ATTRIBUTION=&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors
+VITE_MAP_API_KEY=
+
+# Optional: For English / Latin-script labels, configure a free API key:
+# Option A — CARTO Voyager (Free key at https://carto.com/basemaps/apikey/)
+# VITE_MAP_TILE_URL=https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?api_key={apiKey}
+# VITE_MAP_ATTRIBUTION=&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>
+# VITE_MAP_API_KEY=your_free_carto_key
+
+# Option B — MapTiler (Free key at https://www.maptiler.com/ - 100k free/mo)
+# VITE_MAP_TILE_URL=https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key={apiKey}
+# VITE_MAP_ATTRIBUTION=&copy; <a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>
+# VITE_MAP_API_KEY=your_free_maptiler_key
 ```
 
 > ⚠️ **Never commit `.env`** — it is in `.gitignore`. Commit only `.env.example`.
+> If you create or change variables in `.env`, restart the frontend dev server (`Ctrl+C` then `npm run dev`) for changes to take effect.
 
-In Milestone 1, `VITE_USE_MOCK_API=true` is the active mode. The map tiles default to CARTO Voyager for global English/Latin labels without an API key.
+In Milestone 1, `VITE_USE_MOCK_API=true` is the active mode. The map tiles default safely to OpenStreetMap with zero keys needed. If custom tiles fail or are rejected by a provider, the map automatically recovers by displaying standard OpenStreetMap tiles with a gentle notification.
 
 ---
 
@@ -95,11 +109,12 @@ npm run test
 
 Expected output (Milestone 1 Enhanced):
 ```
-✓ src/lib/__tests__/classification.test.ts  (9 tests)
-✓ src/lib/__tests__/validation.test.ts     (24 tests)
-✓ src/lib/__tests__/useCountUp.test.ts       (2 tests)
-Test Files  3 passed (3)
-Tests       35 passed (35)
+✓ src/lib/__tests__/mapConfig.test.ts        (7 tests)
+✓ src/lib/__tests__/validation.test.ts      (24 tests)
+✓ src/lib/__tests__/useCountUp.test.ts        (2 tests)
+✓ src/lib/__tests__/classification.test.ts   (9 tests)
+Test Files  4 passed (4)
+Tests       42 passed (42)
 ```
 
 ---

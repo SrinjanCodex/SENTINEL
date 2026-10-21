@@ -5,12 +5,12 @@
 import { useEffect, useState } from 'react';
 import {
   MapContainer,
-  TileLayer,
   CircleMarker,
   Popup,
   useMap,
 } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import { SentinelTileLayer } from '../components/SentinelTileLayer';
 import { Link } from 'react-router-dom';
 import { getApiClient } from '../api';
 import type { Report, ReportCategory } from '../types';
@@ -65,11 +65,6 @@ const FILTER_CATEGORIES: { value: ReportCategory | ''; label: string }[] = [
   { value: 'other_waterlogging',          label: 'Other waterlogging' },
   { value: 'uncertain',                   label: 'Uncertain' },
 ];
-
-const DEFAULT_TILE_URL =
-  'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png';
-const DEFAULT_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>';
 
 export default function MapPage() {
   const [reports, setReports] = useState<Report[]>([]);
@@ -165,12 +160,7 @@ export default function MapPage() {
                   zoom={13}
                   style={{ height: '100%', width: '100%' }}
                 >
-                  <TileLayer
-                    url={import.meta.env.VITE_MAP_TILE_URL || DEFAULT_TILE_URL}
-                    attribution={import.meta.env.VITE_MAP_ATTRIBUTION || DEFAULT_ATTRIBUTION}
-                    subdomains="abcd"
-                    maxZoom={19}
-                  />
+                  <SentinelTileLayer />
                   <MapFitter reports={filtered} />
                   {mappable.map((r) => (
                     <CircleMarker

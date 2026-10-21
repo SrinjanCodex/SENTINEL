@@ -4,8 +4,9 @@
  */
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
+import { MapContainer, CircleMarker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import { SentinelTileLayer } from '../components/SentinelTileLayer';
 
 import { getApiClient } from '../api';
 import type { DashboardStats, Report, Incident } from '../types';
@@ -32,11 +33,6 @@ import {
   Activity,
   Flame,
 } from 'lucide-react';
-
-const DEFAULT_TILE_URL =
-  'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png';
-const DEFAULT_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>';
 
 export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -306,7 +302,7 @@ export default function Dashboard() {
               <div>
                 <h2 className="font-semibold text-slate-900 text-sm tracking-tight">GIS Spatial Overview</h2>
                 <p className="text-[11px] text-slate-500">
-                  Cluster centroids plotted on CARTO Voyager layer (English labels) · Radius indicates priority magnitude
+                  Cluster centroids plotted on OpenStreetMap layer · Radius indicates priority magnitude
                 </p>
               </div>
             </div>
@@ -330,12 +326,7 @@ export default function Dashboard() {
                 style={{ height: '100%', width: '100%' }}
                 aria-label="Map of potential incident locations"
               >
-                <TileLayer
-                  url={import.meta.env.VITE_MAP_TILE_URL || DEFAULT_TILE_URL}
-                  attribution={import.meta.env.VITE_MAP_ATTRIBUTION || DEFAULT_ATTRIBUTION}
-                  subdomains="abcd"
-                  maxZoom={19}
-                />
+                <SentinelTileLayer />
                 {mappableIncidents.map((inc) => {
                   const score = inc.priority_score ?? 0;
                   const colour =

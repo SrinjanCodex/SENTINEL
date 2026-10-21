@@ -122,17 +122,19 @@ The final choice will be recorded here when Milestone 4 is implemented, with jus
 
 ---
 
-## 2026-10-21 — English Map Tiles via CARTO Voyager
+## 2026-10-21 — Revert to Standard OpenStreetMap Tiles as Working Default with Graceful Provider Fallback
 
-**Decision:** Switch default map tiles from standard OpenStreetMap to CARTO Voyager (`https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png`) with dual OpenStreetMap + CARTO attribution.
+**Decision:** Set standard OpenStreetMap (`https://tile.openstreetmap.org/{z}/{x}/{y}.png`) as the default tile provider, while providing support for optional English-label providers (CARTO, MapTiler, Stadia) via environment variables (`VITE_MAP_TILE_URL`, `VITE_MAP_ATTRIBUTION`, `VITE_MAP_API_KEY`) and automated fallback.
 
-**Reason:** Standard OpenStreetMap raster tiles (`tile.openstreetmap.org`) render labels strictly in local scripts (e.g. Urdu in Lahore, Arabic in the Middle East). CARTO Voyager provides clean, high-contrast cartography with global place names rendered in English / Latin script. It is free for non-commercial, educational, and evaluation use without requiring an API key, signup, or paid subscription. The tile URL and attribution are also fully configurable via `VITE_MAP_TILE_URL` and `VITE_MAP_ATTRIBUTION` in `.env`.
+**Reason:** CARTO updated its basemap access terms to require an API key on all raster and vector endpoints (`basemaps.cartocdn.com`); unauthenticated anonymous requests return HTTP 200 containing an "API KEY REQUIRED · carto.com/basemaps/apikey" watermark. Standard OpenStreetMap is completely open, 100% free, and requires zero registration or API keys. To provide the best experience:
+1. **Zero-Setup Default:** OSM standard tiles work out of the box with zero configuration and zero keys.
+2. **Proactive Safeguard:** If a user configures a key-requiring provider (such as CARTO, MapTiler, or Stadia) without setting `VITE_MAP_API_KEY`, `resolveTileConfig` automatically diverts to OSM to prevent watermarked tiles.
+3. **Reactive Graceful Fallback:** If custom tiles fail to load (e.g. rate limit, bad key, network failure), `SentinelTileLayer` catches the error, switches the active layer to OSM, and presents an informative, dismissible notice.
 
 **Alternatives considered:**
-- Standard OSM tiles: Impossible to display English labels on raster tiles without client-side rendering.
-- Mapbox / MapTiler: Excellent English labelling, but requires an API key, account creation, or paid plan, violating the zero-secret frontend rule.
-- Wikimedia `osm-intl`: Free English tile endpoint, but blocks third-party website referrers with `403 Forbidden`.
-- MapLibre GL JS vector tiles: Vector rendering supports client-side font switching, but adds ~250 KB bundle overhead and requires vector styling pipelines. CARTO Voyager raster tiles drop in directly with zero bundle overhead.
+- Mandatory API key for all users: Increases onboarding friction for a beginner developer; violates the zero-credential requirement for out-of-the-box local development.
+- Paid tile services (Mapbox, Google Maps): Excluded by project scope ("no paid APIs in v1").
+- Static map replacement / screenshot: Violates the requirement for interactive GIS visualization.
 
 ---
 
