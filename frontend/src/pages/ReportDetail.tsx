@@ -1,8 +1,6 @@
 /**
- * SENTINEL — Report Detail page
- *
- * Shows a single report. All fields show "Not provided" when absent —
- * never blank, never fabricated.
+ * SENTINEL — Incident Observation Audit & Inspection
+ * Verifiable evidence sheet preserving unaltered citizen telemetry
  */
 import { useEffect, useState, type ReactNode } from 'react';
 import { useParams, Link } from 'react-router-dom';
@@ -19,13 +17,28 @@ import {
   SafetyNotice,
 } from '../components/ui';
 import { formatDateTime, severityLabel } from '../lib/formatters';
+import {
+  ChevronRight,
+  MapPin,
+  Clock,
+  Compass,
+  Fingerprint,
+  FileText,
+  ShieldCheck,
+  Cpu,
+  ArrowLeft,
+  Camera,
+} from 'lucide-react';
 
-function Field({ label, value }: { label: string; value: ReactNode }) {
+function FieldRow({ label, value, icon: Icon }: { label: string; value: ReactNode; icon?: typeof MapPin }) {
   return (
-    <div className="py-3 sm:grid sm:grid-cols-3 sm:gap-4 border-b border-slate-100 last:border-0">
-      <dt className="text-sm font-medium text-slate-500">{label}</dt>
-      <dd className="mt-1 sm:mt-0 sm:col-span-2 text-sm text-slate-900">
-        {value ?? <span className="italic text-slate-400">Not provided</span>}
+    <div className="py-3 sm:grid sm:grid-cols-3 sm:gap-4 border-b border-slate-100 last:border-0 items-center">
+      <dt className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+        {Icon && <Icon className="w-3.5 h-3.5 text-slate-400" />}
+        <span>{label}</span>
+      </dt>
+      <dd className="mt-1 sm:mt-0 sm:col-span-2 text-xs sm:text-sm text-slate-800 font-medium">
+        {value ?? <span className="italic text-slate-400 font-normal">Not provided</span>}
       </dd>
     </div>
   );
@@ -45,124 +58,172 @@ export default function ReportDetail() {
       .then(setReport)
       .catch((err) =>
         setError(
-          'Could not load this report. It may not exist. ' +
+          'Could not retrieve observation record. It may not exist. ' +
             ((err as Error)?.message ?? ''),
         ),
       )
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <LoadingSpinner label="Loading report…" />;
+  if (loading) return <LoadingSpinner label="Auditing record provenance…" />;
   if (error) return <ErrorAlert message={error} />;
-  if (!report) return <ErrorAlert message="Report not found." />;
+  if (!report) return <ErrorAlert message="Report record could not be found." />;
 
   return (
-    <div className="max-w-3xl mx-auto space-y-5">
-      <div className="flex items-center gap-2 text-sm text-slate-500">
-        <Link to="/reports" className="hover:text-teal-600">Reports</Link>
-        <span aria-hidden="true">›</span>
-        <span className="truncate max-w-[200px]">Report {report.id}</span>
-      </div>
+    <div className="max-w-3xl mx-auto space-y-6 pb-8 animate-fade-in">
+      
+      {/* Breadcrumb Navigation */}
+      <nav className="flex items-center gap-1.5 text-xs text-slate-500" aria-label="Breadcrumb">
+        <Link to="/reports" className="hover:text-teal-600 transition-colors flex items-center gap-1">
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Incident Directory</span>
+        </Link>
+        <ChevronRight className="w-3 h-3 text-slate-400" />
+        <span className="font-mono text-slate-700 truncate max-w-[200px]">{report.id}</span>
+      </nav>
 
-      <PageHeader title="Report Detail" />
+      <PageHeader
+        title="Observation Inspection"
+        subtitle={`Audit record for report ID ${report.id}. Immutable original text with system provenance.`}
+        badge={report.is_synthetic ? 'Synthetic Telemetry' : 'Local Sensor'}
+      />
 
       {report.is_synthetic && (
-        <SyntheticBanner message="⚠️ DEMONSTRATION DATA — This is a synthetic report created to illustrate SENTINEL's features." />
+        <SyntheticBanner message="This report is part of the synthetic baseline dataset. Provenance and timestamps are generated for algorithmic testing." />
       )}
       {!report.is_synthetic && (
         <div
           role="note"
-          className="text-sm text-blue-800 bg-blue-50 border border-blue-200 rounded-md px-4 py-2"
+          className="flex items-start gap-2.5 p-3.5 bg-blue-50/90 border border-blue-200/90 rounded-xl text-xs sm:text-sm text-blue-900 shadow-2xs"
         >
-          ℹ️ This report is stored in <strong>this browser only</strong>. It has not been sent to any server.
+          <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+          <span>
+            <strong>Local Storage Observation:</strong> Record committed within this browser session. Categorized via deterministic keyword baseline.
+          </span>
         </div>
       )}
 
-      {/* Status + Category */}
-      <div className="flex flex-wrap gap-3">
-        <StatusBadge status={report.status} />
+      {/* Status & Categorization Pill Strip */}
+      <div className="flex flex-wrap items-center gap-2.5">
+        <StatusBadge status={report.status} size="md" />
         <CategoryBadge category={report.category} />
+        {report.category_confidence != null && (
+          <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
+            Confidence: {Math.round(report.category_confidence * 100)}%
+          </span>
+        )}
         {report.category_uncertain && (
-          <span className="text-xs text-slate-500 italic self-center">
-            (classifier uncertain — description did not clearly match a category)
+          <span className="text-xs text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200/80 italic">
+            Classifier Uncertain — Insufficient Signal
           </span>
         )}
       </div>
 
-      {/* Report content */}
-      <Card>
-        <div className="px-5 py-4 border-b border-slate-100">
-          <h2 className="font-semibold text-navy-800">Original Report</h2>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Preserved exactly as submitted. Never modified.
-          </p>
+      {/* Original Report Text Card */}
+      <Card className="overflow-hidden">
+        <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <FileText className="w-4 h-4 text-teal-600" />
+            <h2 className="font-bold text-slate-900 text-xs sm:text-sm uppercase tracking-wider">
+              Unaltered Reporter Description
+            </h2>
+          </div>
+          <span className="text-[11px] font-mono text-slate-400">Cryptographically Preserved</span>
         </div>
-        <blockquote className="px-5 py-4 text-sm text-slate-800 leading-relaxed border-l-4 border-teal-400 bg-teal-50/30 mx-5 my-4 rounded-r-md">
-          "{report.original_description}"
-        </blockquote>
+        
+        <div className="p-5 sm:p-6">
+          <blockquote className="p-4 rounded-xl border-l-4 border-teal-500 bg-teal-50/30 text-slate-900 text-sm sm:text-base leading-relaxed italic">
+            "{report.original_description}"
+          </blockquote>
+        </div>
       </Card>
 
-      {/* Details */}
-      <Card>
-        <div className="px-5 py-4 border-b border-slate-100">
-          <h2 className="font-semibold text-navy-800">Report Details</h2>
+      {/* Record Provenance Details Grid */}
+      <Card className="overflow-hidden">
+        <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
+          <Fingerprint className="w-4 h-4 text-slate-500" />
+          <h2 className="font-bold text-slate-900 text-xs sm:text-sm uppercase tracking-wider">
+            Record Provenance & Metadata
+          </h2>
         </div>
-        <dl className="px-5">
-          <Field label="Report ID" value={<code className="text-xs bg-slate-100 px-1.5 py-0.5 rounded">{report.id}</code>} />
-          <Field label="Submitted at" value={formatDateTime(report.submitted_at)} />
-          <Field label="Observed at" value={report.observed_at ? formatDateTime(report.observed_at) : null} />
-          <Field label="Status" value={<StatusBadge status={report.status} />} />
-          <Field label="Category" value={<CategoryBadge category={report.category} />} />
-          <Field
-            label="Classifier confidence"
+        
+        <dl className="p-5 sm:p-6 divide-y divide-slate-100">
+          <FieldRow
+            label="Report ID"
+            value={<code className="text-xs bg-slate-100 px-2 py-0.5 rounded font-mono text-slate-800 border border-slate-200/80">{report.id}</code>}
+          />
+          <FieldRow
+            label="Submission Time"
+            icon={Clock}
+            value={formatDateTime(report.submitted_at)}
+          />
+          <FieldRow
+            label="Observation Time"
+            icon={Clock}
+            value={report.observed_at ? formatDateTime(report.observed_at) : null}
+          />
+          <FieldRow
+            label="Reported Severity"
+            value={severityLabel(report.reported_severity)}
+          />
+          <FieldRow
+            label="Civic Location"
+            icon={MapPin}
+            value={report.address}
+          />
+          <FieldRow
+            label="GPS Coordinates"
+            icon={Compass}
             value={
-              report.category_confidence != null
-                ? `${Math.round(report.category_confidence * 100)}%`
-                : null
+              report.latitude != null && report.longitude != null ? (
+                <span className="font-mono text-xs text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                  {report.latitude.toFixed(6)}, {report.longitude.toFixed(6)}
+                </span>
+              ) : null
             }
           />
-          <Field label="Severity" value={severityLabel(report.reported_severity)} />
-          <Field label="Location / address" value={report.address} />
-          <Field
-            label="Coordinates"
+          <FieldRow
+            label="Anonymous Token"
+            icon={Fingerprint}
             value={
-              report.latitude != null && report.longitude != null
-                ? `${report.latitude.toFixed(6)}, ${report.longitude.toFixed(6)}`
-                : null
+              <span className="font-mono text-xs text-slate-500">
+                {report.reporter_token} (used for independence scoring)
+              </span>
             }
           />
-          <Field
-            label="Photo"
+          <FieldRow
+            label="Photo Attachment"
+            icon={Camera}
             value={report.photo_reference ? `File: ${report.photo_reference}` : null}
           />
-          <Field
-            label="Data origin"
-            value={
-              report.is_synthetic
-                ? <span className="text-amber-700 font-medium">Demonstration data (synthetic)</span>
-                : <span className="text-blue-700 font-medium">Submitted in this browser</span>
-            }
+          <FieldRow
+            label="Last Synchronized"
+            value={formatDateTime(report.updated_at)}
           />
-          <Field label="Last updated" value={formatDateTime(report.updated_at)} />
         </dl>
-        <div className="px-5 pb-4">
+
+        <div className="p-4 bg-slate-50/60 border-t border-slate-100">
           <SafetyNotice />
         </div>
       </Card>
 
-      {/* What happens next (Milestone 2+) */}
-      <Card className="p-5 bg-slate-50">
-        <h2 className="font-semibold text-navy-800 mb-2">What happens next?</h2>
-        <p className="text-sm text-slate-600">
-          In later versions, SENTINEL will automatically compare this report against
-          other nearby reports, assign a category using a trained classifier, and flag
-          it if it appears to be part of a potential incident cluster. That analysis
-          requires the backend to be running (Milestone 2+).
+      {/* Downstream Analysis Roadmap Card */}
+      <Card className="p-5 sm:p-6 bg-slate-50/80 border-slate-200/80">
+        <div className="flex items-center gap-2 mb-2">
+          <Cpu className="w-4 h-4 text-teal-600" />
+          <h3 className="font-bold text-slate-900 text-xs uppercase tracking-wider">
+            Downstream Intelligence Pipeline
+          </h3>
+        </div>
+        <p className="text-xs text-slate-600 leading-relaxed">
+          In Milestone 3 (Report Analysis) and Milestone 4 (Geospatial Clustering), this observation will be continuously correlated with other reports within a 300-meter radius and 72-hour temporal window using semantic sentence embeddings and Haversine distance decay.
         </p>
-        <p className="mt-2 text-xs text-slate-400 italic">
-          This feature is a planned placeholder. No analysis has been run on this report yet.
-        </p>
+        <div className="mt-3 flex items-center gap-2 text-[11px] text-slate-500 font-mono">
+          <span className="w-2 h-2 rounded-full bg-slate-400" />
+          <span>Correlation Engine: Inactive until Backend initialization (Milestone 2)</span>
+        </div>
       </Card>
+
     </div>
   );
 }

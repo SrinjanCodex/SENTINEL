@@ -1,9 +1,6 @@
 /**
- * SENTINEL — Incident Reports list page
- *
- * Searchable, filterable list of all reports.
- * Reports without coordinates are shown normally — never plotted at fake locations.
- * Demonstration data is clearly labelled.
+ * SENTINEL — Incident Reports Directory
+ * Civic intelligence directory with live search, multi-factor filtering, and telemetry metadata
  */
 import { useEffect, useState, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -14,12 +11,23 @@ import {
   StatusBadge,
   CategoryBadge,
   SyntheticBanner,
-  LoadingSpinner,
   ErrorAlert,
   EmptyState,
   PageHeader,
 } from '../components/ui';
 import { formatDateTime, relativeTime, severityLabel } from '../lib/formatters';
+import {
+  Search,
+  MapPin,
+  Clock,
+  ArrowRight,
+  PlusCircle,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  FileQuestion,
+  Compass,
+} from 'lucide-react';
 
 const STATUSES: { value: ReportStatus | ''; label: string }[] = [
   { value: '', label: 'All statuses' },
@@ -63,6 +71,10 @@ export default function Reports() {
     });
   };
 
+  const clearAllFilters = () => {
+    setSearchParams({});
+  };
+
   const fetchReports = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -80,59 +92,68 @@ export default function Reports() {
       setReports(result.items);
       setTotal(result.total);
     } catch (err) {
-      setError('Could not load reports. ' + ((err as Error)?.message ?? ''));
+      setError('Could not load reports database. ' + ((err as Error)?.message ?? ''));
     } finally {
       setLoading(false);
     }
   }, [search, category, status, dateFrom, dateTo, page]);
 
-  useEffect(() => { fetchReports(); }, [fetchReports]);
+  useEffect(() => {
+    fetchReports();
+  }, [fetchReports]);
 
   const hasDemo = reports.some((r) => r.is_synthetic);
+  const hasActiveFilters = Boolean(search || category || status || dateFrom || dateTo);
 
   const inputClass =
-    'rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-700 ' +
-    'focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500 bg-white';
+    'rounded-lg border border-slate-300/80 px-3 py-1.5 text-xs text-slate-800 bg-white ' +
+    'placeholder:text-slate-400 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500 transition-all';
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5 pb-6 animate-fade-in">
       <PageHeader
-        title="Incident Reports"
-        subtitle={`${total} report${total !== 1 ? 's' : ''} found`}
+        title="Incident Directory"
+        subtitle={`System record contains ${total} community report${total !== 1 ? 's' : ''}. Preserved unaltered with provenance timestamps.`}
         action={
           <Link
             to="/report"
-            className="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold px-4 py-2 rounded-lg text-sm transition-colors"
+            className="inline-flex items-center gap-1.5 bg-teal-600 hover:bg-teal-500 active:bg-teal-700 text-white font-semibold px-3.5 py-2 rounded-lg text-xs shadow-xs transition-all"
           >
-            + Submit Report
+            <PlusCircle className="w-4 h-4" />
+            <span>Submit Report</span>
           </Link>
         }
       />
 
       {hasDemo && <SyntheticBanner />}
 
-      {/* Filters */}
-      <Card className="p-4">
+      {/* Advanced Filter Command Bar */}
+      <Card className="p-4 bg-slate-50/50">
         <fieldset>
-          <legend className="sr-only">Filter reports</legend>
+          <legend className="sr-only">Filter incident reports</legend>
           <div className="flex flex-wrap gap-3 items-end">
-            {/* Search */}
-            <div className="flex-1 min-w-[200px]">
-              <label htmlFor="search-input" className="block text-xs font-medium text-slate-500 mb-1">
-                Search
+            
+            {/* Search Input */}
+            <div className="flex-1 min-w-[220px]">
+              <label htmlFor="search-input" className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                Keyword Query
               </label>
-              <input
-                id="search-input"
-                type="search"
-                placeholder="Search descriptions or locations…"
-                value={search}
-                onChange={(e) => updateParam('search', e.target.value)}
-                className={`w-full ${inputClass}`}
-              />
+              <div className="relative">
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5 pointer-events-none" />
+                <input
+                  id="search-input"
+                  type="search"
+                  placeholder="Query street, location, drain description…"
+                  value={search}
+                  onChange={(e) => updateParam('search', e.target.value)}
+                  className={`w-full pl-8 ${inputClass}`}
+                />
+              </div>
             </div>
-            {/* Category */}
+
+            {/* Category Filter */}
             <div>
-              <label htmlFor="category-filter" className="block text-xs font-medium text-slate-500 mb-1">
+              <label htmlFor="category-filter" className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
                 Category
               </label>
               <select
@@ -146,9 +167,10 @@ export default function Reports() {
                 ))}
               </select>
             </div>
-            {/* Status */}
+
+            {/* Status Filter */}
             <div>
-              <label htmlFor="status-filter" className="block text-xs font-medium text-slate-500 mb-1">
+              <label htmlFor="status-filter" className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
                 Status
               </label>
               <select
@@ -162,10 +184,11 @@ export default function Reports() {
                 ))}
               </select>
             </div>
-            {/* Date from */}
+
+            {/* Date From */}
             <div>
-              <label htmlFor="date-from" className="block text-xs font-medium text-slate-500 mb-1">
-                From date
+              <label htmlFor="date-from" className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                From Date
               </label>
               <input
                 id="date-from"
@@ -175,10 +198,11 @@ export default function Reports() {
                 className={inputClass}
               />
             </div>
-            {/* Date to */}
+
+            {/* Date To */}
             <div>
-              <label htmlFor="date-to" className="block text-xs font-medium text-slate-500 mb-1">
-                To date
+              <label htmlFor="date-to" className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                To Date
               </label>
               <input
                 id="date-to"
@@ -188,120 +212,171 @@ export default function Reports() {
                 className={inputClass}
               />
             </div>
-            {/* Clear */}
-            {(search || category || status || dateFrom || dateTo) && (
+
+            {/* Clear Filters Action */}
+            {hasActiveFilters && (
               <button
-                onClick={() => setSearchParams({})}
-                className="text-sm text-slate-500 hover:text-slate-700 underline pb-1.5"
+                onClick={clearAllFilters}
+                className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-800 bg-white border border-slate-200/80 px-2.5 py-1.5 rounded-lg shadow-2xs hover:shadow-xs transition-all"
               >
-                Clear filters
+                <X className="w-3.5 h-3.5 text-slate-400" />
+                <span>Reset Filters</span>
               </button>
             )}
+
           </div>
         </fieldset>
       </Card>
 
-      {/* Results */}
+      {/* Directory Content Stream */}
       {loading ? (
-        <LoadingSpinner label="Loading reports…" />
+        <div className="space-y-3" aria-busy="true">
+          {[1, 2, 3, 4].map((n) => (
+            <Card key={n} className="p-5 animate-pulse">
+              <div className="flex gap-3 mb-2">
+                <div className="h-5 bg-slate-200 rounded w-28" />
+                <div className="h-5 bg-slate-200 rounded w-20" />
+              </div>
+              <div className="h-4 bg-slate-200 rounded w-5/6 mb-2" />
+              <div className="h-3 bg-slate-200 rounded w-1/3" />
+            </Card>
+          ))}
+        </div>
       ) : error ? (
         <ErrorAlert message={error} />
       ) : reports.length === 0 ? (
         <EmptyState
-          icon="📋"
-          title="No reports found"
-          description="Try adjusting your filters, or submit the first report."
+          icon={FileQuestion}
+          title="No incident records match active filters"
+          description="Try modifying search keywords or clearing date range constraints to widen the query."
           action={
-            <Link
-              to="/report"
-              className="inline-flex items-center gap-2 bg-teal-600 text-white font-semibold px-4 py-2 rounded-lg text-sm hover:bg-teal-700 transition-colors"
-            >
-              Submit a Report
-            </Link>
+            hasActiveFilters ? (
+              <button
+                onClick={clearAllFilters}
+                className="inline-flex items-center gap-1.5 bg-teal-600 text-white font-semibold px-4 py-2 rounded-lg text-xs hover:bg-teal-500 transition-colors"
+              >
+                <span>Clear Active Filters</span>
+              </button>
+            ) : (
+              <Link
+                to="/report"
+                className="inline-flex items-center gap-1.5 bg-teal-600 text-white font-semibold px-4 py-2 rounded-lg text-xs hover:bg-teal-500 transition-colors"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span>Submit Initial Observation</span>
+              </Link>
+            )
           }
         />
       ) : (
         <div className="space-y-3">
           {reports.map((r) => (
-            <Card key={r.id} as="article">
+            <Card key={r.id} as="article" hoverEffect={true}>
               <Link
                 to={`/reports/${r.id}`}
-                className="block p-5 hover:bg-slate-50 rounded-xl transition-colors"
+                className="block p-4 sm:p-5 group"
               >
-                <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
+                    
+                    {/* Badge Row */}
                     <div className="flex flex-wrap items-center gap-2 mb-2">
-                      <StatusBadge status={r.status} />
                       <CategoryBadge category={r.category} />
-                      {r.category_uncertain && (
-                        <span className="text-xs text-slate-400 italic">
-                          (classifier uncertain)
+                      <StatusBadge status={r.status} size="sm" />
+                      
+                      {r.reported_severity != null && (
+                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                          {severityLabel(r.reported_severity)}
                         </span>
                       )}
-                      {r.is_synthetic && (
-                        <span className="text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded border border-amber-200 font-medium">
+
+                      {r.category_uncertain && (
+                        <span className="text-[10px] text-amber-700 bg-amber-50/70 border border-amber-200/50 px-1.5 py-0.5 rounded italic">
+                          Heuristic Uncertain
+                        </span>
+                      )}
+
+                      {r.is_synthetic ? (
+                        <span className="text-[10px] font-mono text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 font-semibold">
                           DEMO
                         </span>
-                      )}
-                      {!r.is_synthetic && (
-                        <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-200 font-medium">
-                          Browser-stored
+                      ) : (
+                        <span className="text-[10px] font-mono text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200 font-semibold">
+                          BROWSER STORAGE
                         </span>
                       )}
                     </div>
 
-                    <p className="text-sm text-slate-700 line-clamp-3">
-                      {r.original_description}
+                    {/* Report Text */}
+                    <p className="text-xs sm:text-sm text-slate-800 line-clamp-2 leading-relaxed group-hover:text-slate-950 font-normal">
+                      "{r.original_description}"
                     </p>
 
-                    <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-400">
-                      <span>Submitted {relativeTime(r.submitted_at)}</span>
-                      {r.address && <span>📍 {r.address}</span>}
+                    {/* Telemetry Metadata Pills */}
+                    <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-slate-500">
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Submitted {relativeTime(r.submitted_at)}</span>
+                      </span>
+
+                      {r.address ? (
+                        <span className="flex items-center gap-1 truncate max-w-[260px]">
+                          <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span className="truncate">{r.address}</span>
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 italic">Location unstated</span>
+                      )}
+
                       {r.latitude != null && r.longitude != null ? (
-                        <span>🌐 {r.latitude.toFixed(4)}, {r.longitude.toFixed(4)}</span>
+                        <span className="flex items-center gap-1 font-mono text-[10px] text-slate-500">
+                          <Compass className="w-3 h-3 text-slate-400" />
+                          <span>{r.latitude.toFixed(4)}, {r.longitude.toFixed(4)}</span>
+                        </span>
                       ) : (
-                        <span className="italic">No coordinates</span>
+                        <span className="text-slate-400 italic text-[10px]">Unmapped Coordinates</span>
                       )}
-                      {r.observed_at ? (
-                        <span>Observed: {formatDateTime(r.observed_at)}</span>
-                      ) : (
-                        <span className="italic">Observation time: not provided</span>
-                      )}
-                      {r.reported_severity != null && (
-                        <span>Severity: {severityLabel(r.reported_severity)}</span>
+
+                      {r.observed_at && (
+                        <span className="text-slate-500">
+                          Observed: {formatDateTime(r.observed_at)}
+                        </span>
                       )}
                     </div>
                   </div>
 
-                  <span className="text-teal-600 text-sm font-medium shrink-0">
-                    View →
-                  </span>
+                  <div className="shrink-0 flex items-center gap-1 text-xs font-semibold text-teal-600 group-hover:text-teal-700 group-hover:translate-x-0.5 transition-all self-end sm:self-center">
+                    <span>Inspect Record</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </div>
                 </div>
               </Link>
             </Card>
           ))}
 
-          {/* Pagination */}
+          {/* Pagination Controls */}
           {total > 20 && (
-            <div className="flex items-center justify-between pt-2">
-              <span className="text-sm text-slate-500">
-                Page {page} · {total} total
+            <div className="flex items-center justify-between pt-4 border-t border-slate-200/60">
+              <span className="text-xs text-slate-500">
+                Displaying page {page} · {total} matching observations
               </span>
               <div className="flex gap-2">
                 {page > 1 && (
                   <button
                     onClick={() => updateParam('page', String(page - 1))}
-                    className="px-3 py-1.5 text-sm border border-slate-300 rounded-md hover:bg-slate-50 transition-colors"
+                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium border border-slate-300 rounded-lg bg-white hover:bg-slate-50 transition-colors shadow-2xs"
                   >
-                    ← Previous
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                    <span>Previous</span>
                   </button>
                 )}
                 {page * 20 < total && (
                   <button
                     onClick={() => updateParam('page', String(page + 1))}
-                    className="px-3 py-1.5 text-sm border border-slate-300 rounded-md hover:bg-slate-50 transition-colors"
+                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium border border-slate-300 rounded-lg bg-white hover:bg-slate-50 transition-colors shadow-2xs"
                   >
-                    Next →
+                    <span>Next</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                 )}
               </div>

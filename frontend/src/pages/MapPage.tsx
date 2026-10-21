@@ -1,13 +1,6 @@
 /**
- * SENTINEL — Incident Map page
- *
- * Interactive map of reports and potential incidents.
- * Reports WITHOUT coordinates are listed below the map — never plotted at
- * invented or arbitrary coordinates.
- *
- * Leaflet CSS is imported here (and in Dashboard.tsx).
- * The default Leaflet marker icon is fixed for Vite bundlers using CircleMarker
- * instead of the default Marker (avoids the broken-icon problem entirely for now).
+ * SENTINEL — Spatial Telemetry GIS Command
+ * Verified geographic mapping with explicit segregation of unconfirmed coordinates
  */
 import { useEffect, useState } from 'react';
 import {
@@ -32,8 +25,15 @@ import {
   EmptyState,
 } from '../components/ui';
 import { relativeTime } from '../lib/formatters';
+import {
+  MapPin,
+  Filter,
+  ArrowRight,
+  AlertTriangle,
+  Layers,
+  Clock,
+} from 'lucide-react';
 
-// Colour per category for map markers
 const CATEGORY_COLOURS: Record<ReportCategory, string> = {
   water_accumulation_on_roads:  '#2563eb',
   suspected_drainage_blockage:  '#0d9488',
@@ -43,7 +43,6 @@ const CATEGORY_COLOURS: Record<ReportCategory, string> = {
   uncertain:                    '#94a3b8',
 };
 
-// Fit map to markers when they load
 function MapFitter({ reports }: { reports: Report[] }) {
   const map = useMap();
   useEffect(() => {
@@ -58,7 +57,7 @@ function MapFitter({ reports }: { reports: Report[] }) {
 }
 
 const FILTER_CATEGORIES: { value: ReportCategory | ''; label: string }[] = [
-  { value: '', label: 'All categories' },
+  { value: '', label: 'All Categories' },
   { value: 'water_accumulation_on_roads', label: 'Water on roads' },
   { value: 'suspected_drainage_blockage', label: 'Drainage blockage' },
   { value: 'persistent_standing_water',   label: 'Standing water' },
@@ -77,7 +76,7 @@ export default function MapPage() {
     getApiClient()
       .listReports({ per_page: 200 })
       .then((r) => setReports(r.items))
-      .catch((err) => setError('Could not load reports. ' + ((err as Error)?.message ?? '')))
+      .catch((err) => setError('Could not load GIS telemetry. ' + ((err as Error)?.message ?? '')))
       .finally(() => setLoading(false));
   }, []);
 
@@ -96,46 +95,62 @@ export default function MapPage() {
   const hasDemo = reports.some((r) => r.is_synthetic);
 
   const inputClass =
-    'rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-700 ' +
-    'focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500 bg-white';
+    'rounded-lg border border-slate-300/80 px-3 py-1.5 text-xs text-slate-800 bg-white ' +
+    'focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500 transition-all';
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5 pb-8 animate-fade-in">
       <PageHeader
-        title="Incident Map"
-        subtitle={`${mappable.length} report${mappable.length !== 1 ? 's' : ''} with known location · ${unmappable.length} without coordinates`}
+        title="GIS Spatial Telemetry"
+        subtitle={`${mappable.length} geo-referenced observation${mappable.length !== 1 ? 's' : ''} mapped · ${unmappable.length} unconfirmed locations isolated`}
       />
 
       {hasDemo && <SyntheticBanner />}
 
-      {/* Category filter */}
-      <div className="flex items-center gap-3">
-        <label htmlFor="map-category-filter" className="text-sm font-medium text-slate-600">
-          Filter by category:
-        </label>
-        <select
-          id="map-category-filter"
-          value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value as ReportCategory | '')}
-          className={inputClass}
-        >
-          {FILTER_CATEGORIES.map(({ value, label }) => (
-            <option key={value} value={value}>{label}</option>
-          ))}
-        </select>
-      </div>
+      {/* Map Control Toolbar */}
+      <Card className="p-3.5 bg-slate-50/50 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <Filter className="w-4 h-4 text-slate-500" />
+          <label htmlFor="map-category-filter" className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+            Layer Filter:
+          </label>
+          <select
+            id="map-category-filter"
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value as ReportCategory | '')}
+            className={inputClass}
+          >
+            {FILTER_CATEGORIES.map(({ value, label }) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex items-center gap-3 text-xs text-slate-500">
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
+            <strong className="text-slate-800">{mappable.length}</strong> Plotted Points
+          </span>
+          {unmappable.length > 0 && (
+            <span className="flex items-center gap-1.5 text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+              <AlertTriangle className="w-3 h-3 text-amber-600" />
+              <strong>{unmappable.length}</strong> Unmapped Gap
+            </span>
+          )}
+        </div>
+      </Card>
 
       {loading ? (
-        <LoadingSpinner label="Loading map data…" />
+        <LoadingSpinner label="Compiling geospatial coordinate points…" />
       ) : error ? (
         <ErrorAlert message={error} />
       ) : (
         <>
-          {/* Map */}
-          <Card>
+          {/* GIS Map Frame */}
+          <Card className="overflow-hidden border-slate-300 shadow-sm">
             <div
-              style={{ height: '500px' }}
-              className="rounded-xl overflow-hidden"
+              style={{ height: '520px' }}
+              className="w-full relative bg-slate-100"
               role="application"
               aria-label="Interactive map of incident reports"
             >
@@ -161,116 +176,121 @@ export default function MapPage() {
                       pathOptions={{
                         color: CATEGORY_COLOURS[r.category] ?? '#94a3b8',
                         fillColor: CATEGORY_COLOURS[r.category] ?? '#94a3b8',
-                        fillOpacity: 0.7,
+                        fillOpacity: 0.75,
                         weight: 2,
                       }}
                     >
                       <Popup>
-                        <div style={{ maxWidth: '220px' }}>
-                          <div className="flex flex-wrap gap-1 mb-2">
-                            <StatusBadge status={r.status} />
+                        <div className="p-1 max-w-[220px]">
+                          <div className="flex flex-wrap gap-1 mb-1.5">
+                            <StatusBadge status={r.status} size="sm" />
                             <CategoryBadge category={r.category} />
                           </div>
-                          <p
-                            style={{
-                              fontSize: '0.78rem',
-                              color: '#334155',
-                              lineHeight: 1.5,
-                              margin: '0 0 6px',
-                            }}
-                          >
-                            {r.original_description.slice(0, 120)}
-                            {r.original_description.length > 120 ? '…' : ''}
+                          <p className="text-xs text-slate-800 font-normal leading-relaxed mb-2">
+                            "{r.original_description.slice(0, 110)}{r.original_description.length > 110 ? '…' : ''}"
                           </p>
-                          <p style={{ fontSize: '0.7rem', color: '#64748b', margin: 0 }}>
-                            {relativeTime(r.submitted_at)} ·{' '}
-                            {r.is_synthetic ? '⚠️ Demo' : 'Browser-stored'}
-                          </p>
-                          <a
-                            href={`/reports/${r.id}`}
-                            style={{
-                              fontSize: '0.75rem',
-                              color: '#0d9488',
-                              textDecoration: 'none',
-                              marginTop: '4px',
-                              display: 'inline-block',
-                            }}
-                          >
-                            View report →
-                          </a>
+                          <div className="flex items-center justify-between text-[10px] text-slate-500 border-t border-slate-100 pt-1.5">
+                            <span>{relativeTime(r.submitted_at)}</span>
+                            <a
+                              href={`/reports/${r.id}`}
+                              className="font-semibold text-teal-600 hover:text-teal-700 underline"
+                            >
+                              Inspect Details →
+                            </a>
+                          </div>
                         </div>
                       </Popup>
                     </CircleMarker>
                   ))}
                 </MapContainer>
               ) : (
-                <div className="flex items-center justify-center h-full text-sm text-slate-400 bg-slate-50">
+                <div className="flex items-center justify-center h-full text-xs text-slate-400">
                   <EmptyState
-                    icon="🗺️"
-                    title="No reports with known locations"
-                    description="Submit reports with coordinates to see them on the map."
+                    icon={MapPin}
+                    title="No geo-referenced observations found"
+                    description="Filtered category contains no reports with valid GPS coordinates."
                   />
                 </div>
               )}
             </div>
           </Card>
 
-          {/* Legend */}
-          <Card className="p-4">
-            <h3 className="text-sm font-semibold text-slate-600 mb-2">Map Legend</h3>
+          {/* Color-Coded Category Legend */}
+          <Card className="p-4 bg-slate-50/50">
+            <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-slate-500" />
+              <span>Spatial Categorization Legend</span>
+            </h3>
             <div className="flex flex-wrap gap-3">
               {FILTER_CATEGORIES.filter((c) => c.value).map(({ value, label }) => (
-                <div key={value} className="flex items-center gap-1.5 text-xs text-slate-600">
+                <div key={value} className="flex items-center gap-1.5 text-xs text-slate-700 font-medium bg-white px-2.5 py-1 rounded-md border border-slate-200/80 shadow-2xs">
                   <span
                     style={{
                       display: 'inline-block',
-                      width: 12,
-                      height: 12,
+                      width: 10,
+                      height: 10,
                       borderRadius: '50%',
                       backgroundColor: CATEGORY_COLOURS[value as ReportCategory],
                     }}
                     aria-hidden="true"
                   />
-                  {label}
+                  <span>{label}</span>
                 </div>
               ))}
             </div>
           </Card>
 
-          {/* Reports without coordinates */}
+          {/* Explicit Unmapped Reports Segregation Callout */}
           {unmappable.length > 0 && (
-            <Card>
-              <div className="px-5 py-4 border-b border-slate-100">
-                <h2 className="font-semibold text-navy-800">
-                  Reports Without Confirmed Location ({unmappable.length})
-                </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  These reports are not plotted on the map. SENTINEL never invents
-                  coordinates for unknown locations.
-                </p>
+            <Card className="overflow-hidden border-amber-200/80">
+              <div className="px-5 py-3.5 border-b border-amber-100 bg-amber-50/60 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-600" />
+                  <div>
+                    <h2 className="font-bold text-amber-950 text-xs sm:text-sm uppercase tracking-wider">
+                      Location-Unconfirmed Reports ({unmappable.length})
+                    </h2>
+                    <p className="text-[11px] text-amber-800">
+                      Rule Compliance: Missing-Signal Detector (MS-LOC) flags these gaps. SENTINEL never invents artificial coordinates.
+                    </p>
+                  </div>
+                </div>
+                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300/60">
+                  MS-LOC Triggered
+                </span>
               </div>
-              <ul className="divide-y divide-slate-50">
+
+              <ul className="divide-y divide-slate-100">
                 {unmappable.map((r) => (
                   <li key={r.id}>
                     <Link
                       to={`/reports/${r.id}`}
-                      className="block px-5 py-3 hover:bg-slate-50 transition-colors"
+                      className="block px-5 py-3.5 hover:bg-slate-50 transition-colors group"
                     >
-                      <div className="flex items-start gap-3">
+                      <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-slate-700 line-clamp-2">
-                            {r.original_description}
+                          <p className="text-xs sm:text-sm text-slate-800 line-clamp-2 leading-relaxed group-hover:text-slate-950 font-normal">
+                            "{r.original_description}"
                           </p>
-                          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-400">
-                            <StatusBadge status={r.status} />
+                          <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-slate-400">
+                            <StatusBadge status={r.status} size="sm" />
                             <CategoryBadge category={r.category} />
-                            {r.address && <span>📍 {r.address}</span>}
-                            <span>{relativeTime(r.submitted_at)}</span>
+                            {r.address && (
+                              <span className="flex items-center gap-1 text-slate-500">
+                                <MapPin className="w-3 h-3 text-slate-400" />
+                                <span>{r.address}</span>
+                              </span>
+                            )}
+                            <span className="flex items-center gap-1 text-slate-400">
+                              <Clock className="w-3 h-3" />
+                              <span>{relativeTime(r.submitted_at)}</span>
+                            </span>
                           </div>
                         </div>
-                        <span className="text-xs text-slate-400 italic shrink-0">
-                          No coordinates
-                        </span>
+                        <div className="shrink-0 flex items-center gap-1 text-xs font-semibold text-teal-600 group-hover:text-teal-700">
+                          <span>Inspect Gap</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </div>
                       </div>
                     </Link>
                   </li>

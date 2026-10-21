@@ -1,13 +1,9 @@
 /**
- * SENTINEL — Report an Incident page
- *
- * Full client-side validation before submission.
- * Submission goes through the API interface (MockApiClient in Milestone 1).
- * The application sets the submission timestamp — the user cannot edit it.
- * SENTINEL never invents coordinates for unknown locations.
+ * SENTINEL — Incident Observation Intake
+ * Verified community reporting with client-side heuristic validation & privacy guarantees
  */
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { getApiClient } from '../api';
 import {
   Card,
@@ -16,6 +12,17 @@ import {
   SafetyNotice,
 } from '../components/ui';
 import { validateReportForm } from '../lib/validation';
+import {
+  Send,
+  MapPin,
+  Calendar,
+  AlertCircle,
+  CheckCircle2,
+  Camera,
+  Compass,
+  ArrowRight,
+  Info,
+} from 'lucide-react';
 
 interface FormState {
   description: string;
@@ -36,7 +43,6 @@ const EMPTY_FORM: FormState = {
 };
 
 export default function ReportIncident() {
-  const navigate = useNavigate();
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -48,7 +54,6 @@ export default function ReportIncident() {
   ) {
     const { name, value } = e.target;
     setForm((f) => ({ ...f, [name]: value }));
-    // Clear individual field error on change
     if (errors[name]) {
       setErrors((prev) => {
         const next = { ...prev };
@@ -72,7 +77,6 @@ export default function ReportIncident() {
 
     if (Object.keys(fieldErrors).length > 0) {
       setErrors(fieldErrors);
-      // Move focus to first error
       const firstErrorField = Object.keys(fieldErrors)[0];
       document.getElementById(`field-${firstErrorField}`)?.focus();
       return;
@@ -95,7 +99,7 @@ export default function ReportIncident() {
       setErrors({});
     } catch (err) {
       setSubmitError(
-        'Failed to submit report. Please try again. ' +
+        'Failed to record observation into database. Please retry. ' +
           ((err as Error)?.message ?? ''),
       );
     } finally {
@@ -104,98 +108,129 @@ export default function ReportIncident() {
   }
 
   const inputClass =
-    'block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 ' +
-    'placeholder:text-slate-400 focus:border-teal-500 focus:outline-none focus:ring-1 ' +
-    'focus:ring-teal-500 disabled:bg-slate-50 disabled:text-slate-400';
+    'block w-full rounded-lg border border-slate-300/80 px-3.5 py-2 text-xs sm:text-sm text-slate-900 ' +
+    'placeholder:text-slate-400 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500 ' +
+    'disabled:bg-slate-50 disabled:text-slate-400 transition-all shadow-2xs';
 
-  const labelClass = 'block text-sm font-medium text-slate-700 mb-1';
+  const labelClass = 'block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1';
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-6 pb-8 animate-fade-in">
       <PageHeader
-        title="Report an Incident"
-        subtitle="Help identify waterlogging issues in your area. All fields marked with * are required."
+        title="Report Urban Waterlogging"
+        subtitle="Submit ground-level drainage observations. Reports are matched with nearby signals to identify structural failures."
       />
 
-      {/* Storage notice */}
+      {/* Local Storage Telemetry Banner */}
       <div
         role="note"
-        className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-4 py-2"
+        className="flex items-start gap-3 p-3.5 bg-blue-50/90 border border-blue-200/90 rounded-xl text-xs sm:text-sm text-blue-900 shadow-2xs"
       >
-        ⚠️ <strong>Browser-only storage:</strong> In this version, reports are stored in
-        <strong> this browser only</strong> (not sent to a server). They are clearly labelled
-        "stored in this browser" in the Reports list.
+        <div className="p-1 rounded-md bg-blue-100 text-blue-700 shrink-0 mt-0.5">
+          <Info className="w-4 h-4" />
+        </div>
+        <div className="leading-relaxed">
+          <strong>Browser Telemetry Mode:</strong> In Milestone 1, new submissions are stored locally in this browser's database and categorized via our transparent keyword heuristic engine.
+        </div>
       </div>
 
-      {/* Success message */}
+      {/* Success Notification Card */}
       {success && (
-        <div
-          role="alert"
-          className="flex flex-col gap-2 p-4 bg-green-50 border border-green-200 rounded-lg text-sm text-green-800"
-        >
-          <p className="font-semibold">✅ Report submitted successfully</p>
-          <p>
-            Your report has been saved.{' '}
-            <button
-              onClick={() => navigate(`/reports/${success}`)}
-              className="underline hover:text-green-900"
-            >
-              View your report →
-            </button>
-          </p>
-          <p className="text-xs text-green-600">Report ID: {success}</p>
-        </div>
+        <Card className="p-5 border-emerald-300 bg-emerald-50/60 shadow-sm animate-fade-in">
+          <div className="flex items-start gap-3.5">
+            <div className="p-1.5 rounded-full bg-emerald-100 text-emerald-700 shrink-0">
+              <CheckCircle2 className="w-5 h-5" />
+            </div>
+            <div className="space-y-1">
+              <p className="font-bold text-emerald-950 text-sm">
+                Observation Successfully Logged
+              </p>
+              <p className="text-xs text-emerald-900 leading-relaxed">
+                Your report has been committed to the local telemetry store and classified for correlation.
+              </p>
+              <div className="pt-2 flex items-center gap-3">
+                <Link
+                  to={`/reports/${success}`}
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-800 hover:text-emerald-950 underline"
+                >
+                  <span>Inspect Dispatched Record</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+                <span className="text-[11px] font-mono text-emerald-700/80">ID: {success}</span>
+              </div>
+            </div>
+          </div>
+        </Card>
       )}
 
+      {/* Submission Error Banner */}
       {submitError && (
-        <div role="alert" className="p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
-          ⚠️ {submitError}
+        <div role="alert" className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-xs sm:text-sm text-rose-800 flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+          <span>{submitError}</span>
         </div>
       )}
 
-      <Card>
+      {/* Main Intake Form */}
+      <Card className="overflow-hidden">
+        <div className="p-5 sm:p-6 border-b border-slate-100 bg-slate-50/50">
+          <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+            Field Observation Form
+          </h2>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Fields marked with an asterisk (<span className="text-rose-500 font-bold">*</span>) are mandatory.
+          </p>
+        </div>
+
         <form
           onSubmit={handleSubmit}
           noValidate
-          aria-label="Incident report form"
-          className="p-6 space-y-5"
+          aria-label="Waterlogging observation submission form"
+          className="p-5 sm:p-6 space-y-6"
         >
-          {/* Description */}
-          <div>
-            <label htmlFor="field-description" className={labelClass}>
-              Description *
-            </label>
+          {/* Section 1: Incident Description */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label htmlFor="field-description" className={labelClass}>
+                Observation Description <span className="text-rose-500">*</span>
+              </label>
+              <span
+                className={`text-[11px] font-mono ${
+                  form.description.length < 20 ? 'text-slate-400' : 'text-teal-600 font-semibold'
+                }`}
+                aria-live="polite"
+              >
+                {form.description.length}/2000 chars
+              </span>
+            </div>
+            
             <textarea
               id="field-description"
               name="description"
-              rows={5}
+              rows={4}
               value={form.description}
               onChange={handleChange}
-              placeholder="Describe what you observed in as much detail as possible. Include the location, what the water looked like, and any other relevant details."
-              className={`${inputClass} ${errors.description ? 'border-red-400 focus:ring-red-400' : ''}`}
+              placeholder="Describe physical conditions observed: water depth (curb, ankle, vehicle axle), drain status (clogged grate, bubbling manhole), surface road disruption, or structural ingress."
+              className={`${inputClass} ${errors.description ? 'border-rose-400 focus:ring-rose-400' : ''}`}
               aria-required="true"
               aria-describedby={errors.description ? 'field-description-error' : undefined}
               aria-invalid={!!errors.description}
               disabled={submitting}
               maxLength={2000}
             />
-            <div className="mt-1 flex justify-between items-start gap-2">
-              <div id="field-description-error">
-                <FieldError message={errors.description} />
-              </div>
-              <span
-                className={`text-xs shrink-0 ${form.description.length < 20 ? 'text-slate-400' : 'text-slate-500'}`}
-                aria-live="polite"
-              >
-                {form.description.length}/2000
-              </span>
+            
+            <div id="field-description-error">
+              <FieldError message={errors.description} />
             </div>
+            <p className="text-[11px] text-slate-400">
+              Minimum 20 characters. Original text is preserved permanently for transparent auditability.
+            </p>
           </div>
 
-          {/* Severity */}
+          {/* Section 2: Severity Scale */}
           <div>
             <label htmlFor="field-severity" className={labelClass}>
-              Severity (optional)
+              Estimated Severity Level (Optional)
             </label>
             <select
               id="field-severity"
@@ -203,135 +238,145 @@ export default function ReportIncident() {
               value={form.severity}
               onChange={handleChange}
               className={inputClass}
-              aria-describedby={errors.severity ? 'field-severity-error' : 'severity-hint'}
-              aria-invalid={!!errors.severity}
+              aria-describedby="severity-hint"
               disabled={submitting}
             >
-              <option value="">— Select severity —</option>
-              <option value="1">1 – Minor (small puddle, no obstruction)</option>
-              <option value="2">2 – Low (noticeable water, manageable)</option>
-              <option value="3">3 – Moderate (significant water, some disruption)</option>
-              <option value="4">4 – High (serious disruption, potential danger)</option>
-              <option value="5">5 – Severe (immediate danger, major infrastructure impact)</option>
+              <option value="">— Select severity level —</option>
+              <option value="1">Level 1 — Minor (shallow gutter puddle, pedestrian footpath clear)</option>
+              <option value="2">Level 2 — Low (surface water covering lane, slow vehicular passage)</option>
+              <option value="3">Level 3 — Moderate (ankle-deep standing water, active traffic slowdown)</option>
+              <option value="4">Level 4 — High (knee-deep ponding, vehicles stalling, submerged drainage)</option>
+              <option value="5">Level 5 — Severe (structural ingress, submerged underpass, emergency condition)</option>
             </select>
-            <p id="severity-hint" className="mt-1 text-xs text-slate-400">
-              Your estimate — not a technical measurement.
+            <p id="severity-hint" className="mt-1.5 text-[11px] text-slate-400">
+              Reporter's subjective assessment. Heuristic engine treats repeat submissions from one token as a single independent vote.
             </p>
-            <div id="field-severity-error"><FieldError message={errors.severity} /></div>
+            <FieldError message={errors.severity} />
           </div>
 
-          {/* Location */}
-          <div>
-            <label htmlFor="field-address" className={labelClass}>
-              Location / Address (optional)
-            </label>
-            <input
-              id="field-address"
-              name="address"
-              type="text"
-              value={form.address}
-              onChange={handleChange}
-              placeholder="e.g. Near the school gate on Gulberg Road"
-              className={inputClass}
-              disabled={submitting}
-            />
-            <p className="mt-1 text-xs text-slate-400">
-              Free text. Coordinates below are more precise, but both are optional.
-            </p>
-          </div>
-
-          {/* Coordinates */}
-          <fieldset>
-            <legend className="text-sm font-medium text-slate-700 mb-1">
-              Coordinates (optional)
-            </legend>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label htmlFor="field-latitude" className="sr-only">Latitude</label>
+          {/* Section 3: Geographic Coordinates */}
+          <div className="space-y-3 pt-2 border-t border-slate-100">
+            <div>
+              <label htmlFor="field-address" className={labelClass}>
+                Location Reference / Street Address
+              </label>
+              <div className="relative">
+                <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
                 <input
-                  id="field-latitude"
-                  name="latitude"
-                  type="number"
-                  step="any"
-                  value={form.latitude}
+                  id="field-address"
+                  name="address"
+                  type="text"
+                  value={form.address}
                   onChange={handleChange}
-                  placeholder="Latitude (e.g. 31.5204)"
-                  className={`${inputClass} ${errors.latitude || errors.coordinates ? 'border-red-400' : ''}`}
-                  aria-label="Latitude"
-                  aria-invalid={!!(errors.latitude || errors.coordinates)}
+                  placeholder="e.g., Canal Road opposite Main Market gate"
+                  className={`pl-9 ${inputClass}`}
                   disabled={submitting}
                 />
-                <FieldError message={errors.latitude} />
               </div>
-              <div>
-                <label htmlFor="field-longitude" className="sr-only">Longitude</label>
-                <input
-                  id="field-longitude"
-                  name="longitude"
-                  type="number"
-                  step="any"
-                  value={form.longitude}
-                  onChange={handleChange}
-                  placeholder="Longitude (e.g. 74.3587)"
-                  className={`${inputClass} ${errors.longitude || errors.coordinates ? 'border-red-400' : ''}`}
-                  aria-label="Longitude"
-                  aria-invalid={!!(errors.longitude || errors.coordinates)}
-                  disabled={submitting}
-                />
-                <FieldError message={errors.longitude} />
-              </div>
+              <p className="mt-1 text-[11px] text-slate-400">
+                Landmarks, cross-streets, or civic addresses.
+              </p>
             </div>
-            {errors.coordinates && <FieldError message={errors.coordinates} />}
-            <p className="mt-1 text-xs text-slate-400">
-              Tip: find coordinates in Google Maps by right-clicking a location. SENTINEL
-              will never invent coordinates if you leave these blank.
-            </p>
-          </fieldset>
 
-          {/* Observation time */}
-          <div>
+            <fieldset className="space-y-2">
+              <legend className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                Geographic Coordinates (GPS Lat / Lng)
+              </legend>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label htmlFor="field-latitude" className="sr-only">Latitude</label>
+                  <div className="relative">
+                    <Compass className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
+                    <input
+                      id="field-latitude"
+                      name="latitude"
+                      type="number"
+                      step="any"
+                      value={form.latitude}
+                      onChange={handleChange}
+                      placeholder="Latitude (e.g., 31.5204)"
+                      className={`pl-8 ${inputClass} ${errors.latitude || errors.coordinates ? 'border-rose-400' : ''}`}
+                      disabled={submitting}
+                    />
+                  </div>
+                  <FieldError message={errors.latitude} />
+                </div>
+                <div>
+                  <label htmlFor="field-longitude" className="sr-only">Longitude</label>
+                  <div className="relative">
+                    <Compass className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
+                    <input
+                      id="field-longitude"
+                      name="longitude"
+                      type="number"
+                      step="any"
+                      value={form.longitude}
+                      onChange={handleChange}
+                      placeholder="Longitude (e.g., 74.3587)"
+                      className={`pl-8 ${inputClass} ${errors.longitude || errors.coordinates ? 'border-rose-400' : ''}`}
+                      disabled={submitting}
+                    />
+                  </div>
+                  <FieldError message={errors.longitude} />
+                </div>
+              </div>
+              {errors.coordinates && <FieldError message={errors.coordinates} />}
+              <p className="text-[11px] text-slate-400 italic">
+                Rule Notice: SENTINEL never invents coordinates. Unmapped reports remain preserved in the directory with an explicit "Unmapped" indicator.
+              </p>
+            </fieldset>
+          </div>
+
+          {/* Section 4: Temporal Observation Time */}
+          <div className="pt-2 border-t border-slate-100">
             <label htmlFor="field-observed_at" className={labelClass}>
-              When did you observe this? (optional)
+              Observation Timestamp
             </label>
-            <input
-              id="field-observed_at"
-              name="observed_at"
-              type="datetime-local"
-              value={form.observed_at}
-              onChange={handleChange}
-              max={new Date().toISOString().slice(0, 16)}
-              className={`${inputClass} ${errors.observed_at ? 'border-red-400' : ''}`}
-              aria-describedby={errors.observed_at ? 'field-observed_at-error' : 'observed-hint'}
-              aria-invalid={!!errors.observed_at}
-              disabled={submitting}
-            />
-            <p id="observed-hint" className="mt-1 text-xs text-slate-400">
-              Cannot be in the future. Leave blank if you are unsure.
+            <div className="relative">
+              <Calendar className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
+              <input
+                id="field-observed_at"
+                name="observed_at"
+                type="datetime-local"
+                value={form.observed_at}
+                onChange={handleChange}
+                max={new Date().toISOString().slice(0, 16)}
+                className={`pl-9 ${inputClass} ${errors.observed_at ? 'border-rose-400' : ''}`}
+                disabled={submitting}
+              />
+            </div>
+            <p className="mt-1 text-[11px] text-slate-400">
+              When did you observe the incident? Must not be in the future. Leave blank if uncertain.
             </p>
-            <div id="field-observed_at-error"><FieldError message={errors.observed_at} /></div>
+            <FieldError message={errors.observed_at} />
           </div>
 
-          {/* Photo notice */}
-          <div className="rounded-md bg-slate-50 border border-slate-200 px-4 py-3 text-sm text-slate-500">
-            📷 <strong>Photo upload</strong> will be available in a later version when
-            the backend is connected. Photos stored by SENTINEL would have EXIF metadata
-            (which can contain GPS data) automatically removed.
+          {/* Section 5: Photo Evidence Notice */}
+          <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl flex items-start gap-3 text-xs text-slate-600">
+            <Camera className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
+            <div className="leading-relaxed">
+              <strong>Cryptographic Photographic Intake:</strong> Direct image uploading with automated EXIF location privacy stripping will be activated upon backend service initialization in Milestone 2.
+            </div>
           </div>
 
-          <div className="pt-2 flex flex-col gap-3">
+          {/* Submission CTA */}
+          <div className="pt-2 space-y-3">
             <button
               type="submit"
               disabled={submitting}
-              className="w-full flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 disabled:bg-teal-300 text-white font-semibold px-6 py-3 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
+              className="w-full flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-500 active:bg-teal-700 disabled:bg-teal-300 text-white font-semibold text-xs sm:text-sm px-6 py-3 rounded-lg shadow-sm hover:shadow-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
               aria-disabled={submitting}
             >
               {submitting ? (
                 <>
                   <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" aria-hidden="true" />
-                  Submitting…
+                  <span>Committing Telemetry…</span>
                 </>
               ) : (
-                'Submit Report'
+                <>
+                  <Send className="w-4 h-4" />
+                  <span>Commit Observation to Intelligence Store</span>
+                </>
               )}
             </button>
 

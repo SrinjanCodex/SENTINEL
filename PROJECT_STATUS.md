@@ -33,7 +33,14 @@
 - Report Detail view
 - System Information page (static, labelled as such)
 - Mock API layer (`src/api/`) — demonstration data + localStorage persistence
-- Responsive Tailwind CSS styling
+- Production SaaS Visual Design Upgrade:
+  - Replaced emoji glyphs with consistent Lucide SVG telemetry icons
+  - Elevated navigation bar with live status indicator pill and quick intake CTA
+  - Card elevation with subtle borders, ambient shadows, and hover elevation
+  - Animated status pulse indicators on unverified/suspected items
+  - Skeleton loading placeholders during initial telemetry retrieval
+  - Tabular number formatting and refined micro-typography tokens
+  - Explicit styling for unmapped coordinates and Missing-Signal alerts
 - React Leaflet map preview on Dashboard
 - Accessibility pass (focus states, ARIA labels, form field labels)
 - Automated unit testing with Vitest (33 tests passed):

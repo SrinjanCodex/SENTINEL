@@ -1,76 +1,165 @@
 /* ──────────────────────────────────────────────────────────────────────────
-   SENTINEL — Global styles (Tailwind CSS v4)
-   Tailwind v4 uses @import instead of @tailwind directives.
+   SENTINEL — Production Civic Intelligence Design System
+   Tailwind CSS v4 with modern SaaS tokens, antialiasing & fluid transitions
 ────────────────────────────────────────────────────────────────────────── */
 @import "tailwindcss";
 
-/* Design tokens — single source of truth for colours and spacing */
 @theme {
+  --color-navy-950: #090d16;
   --color-navy-900: #0f172a;
   --color-navy-800: #1e293b;
   --color-navy-700: #334155;
   --color-navy-600: #475569;
+
   --color-teal-600: #0d9488;
   --color-teal-500: #14b8a6;
+  --color-teal-400: #2dd4bf;
   --color-teal-100: #ccfbf1;
+  --color-teal-50:  #f0fdfa;
+
   --color-blue-600: #2563eb;
+  --color-blue-500: #3b82f6;
   --color-blue-100: #dbeafe;
+  --color-blue-50:  #eff6ff;
+
   --color-amber-500: #f59e0b;
+  --color-amber-600: #d97706;
   --color-amber-100: #fef3c7;
+  --color-amber-50:  #fffbeb;
+
   --color-red-600: #dc2626;
+  --color-red-500: #ef4444;
   --color-red-100: #fee2e2;
-  --color-green-600: #16a34a;
-  --color-green-100: #dcfce7;
+  --color-red-50:  #fef2f2;
+
+  --color-emerald-600: #059669;
+  --color-emerald-500: #10b981;
+  --color-emerald-100: #d1fae5;
+  --color-emerald-50:  #ecfdf5;
+
   --color-slate-50: #f8fafc;
   --color-slate-100: #f1f5f9;
   --color-slate-200: #e2e8f0;
   --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
   --color-slate-500: #64748b;
+  --color-slate-600: #475569;
   --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
 }
 
-/* Base resets and typography */
+/* Base resets & typography refinement */
 *, *::before, *::after {
   box-sizing: border-box;
+}
+
+html {
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
   background-color: #f8fafc;
   color: #1e293b;
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-               "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  line-height: 1.6;
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
   margin: 0;
+  overflow-x: hidden;
 }
 
-/* Leaflet container fix — must have explicit height */
+/* Numbers & counters */
+.tabular-numbers {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Leaflet container fix */
 .leaflet-container {
   height: 100%;
   width: 100%;
+  border-radius: inherit;
+  z-index: 10;
 }
 
 /* Accessible focus ring */
 :focus-visible {
-  outline: 3px solid #0d9488;
+  outline: 2px solid #0d9488;
   outline-offset: 2px;
-  border-radius: 3px;
+  border-radius: 4px;
 }
 
-/* Skip-to-content link (screen reader / keyboard nav) */
+/* Skip-to-content link */
 .skip-link {
   position: absolute;
   top: -40px;
-  left: 0;
+  left: 12px;
   background: #0f172a;
   color: white;
   padding: 8px 16px;
   z-index: 9999;
-  border-radius: 0 0 4px 0;
+  border-radius: 0 0 6px 6px;
   text-decoration: none;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
-  transition: top 0.2s;
+  transition: top 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
 }
 .skip-link:focus {
   top: 0;
+}
+
+/* Subtle animation keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

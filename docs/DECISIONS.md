@@ -106,3 +106,16 @@ The final choice will be recorded here when Milestone 4 is implemented, with jus
 ## 2026-10-21 — Python 3.14 compatibility note
 
 **Status:** Python 3.14 is installed. For Milestone 2 (FastAPI + SQLAlchemy), 3.14 is likely fine. For Milestone 3 (Sentence Transformers / PyTorch), 3.14 may not yet have compatible binary wheels. This will be verified before Milestone 3 begins; if needed, Python 3.12 will be installed alongside 3.14 and used for the virtual environment.
+
+---
+
+## 2026-10-21 — Production SaaS Visual Design & Lucide Icons
+
+**Decision:** Upgrade visual styling to civic SaaS dashboard standards using `lucide-react` SVG icons, subtle surface elevation, tabular numeric typography, and skeleton loaders.
+
+**Reason:** Replaces raw emoji glyphs with consistent, professional vector symbols. Implements fluid card hover transitions and pulsating status dots for unverified/suspected items, elevating the civic intelligence aesthetic while respecting accessibility and `prefers-reduced-motion`.
+
+**Alternatives considered:**
+- Raw inline SVGs: functional but leads to code duplication across components.
+- Heroicons: suitable, but Lucide provides a broader set of telemetry and GIS icons (`Compass`, `Waves`, `Flame`, `Radio`).
+- Framer Motion: adds bundle overhead; CSS keyframe animations and Tailwind transitions were used instead.

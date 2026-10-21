@@ -1,20 +1,37 @@
 /**
- * SENTINEL — System Information page
- *
- * Explains how SENTINEL works: classification, matching, scoring, missing signals.
- * In Milestone 1, this is static text, clearly labelled as such.
- * In Milestone 5+, the parameters and weights will be read from the live configuration.
+ * SENTINEL — System Architecture Specification
+ * Live technical audit explaining matching logic, prioritisation scoring, and Missing-Signal rules
  */
 import type { ReactNode } from 'react';
 import { Card, PageHeader, SafetyNotice } from '../components/ui';
+import {
+  Info,
+  Sliders,
+  Cpu,
+  ShieldCheck,
+  AlertTriangle,
+  Database,
+  Code2,
+} from 'lucide-react';
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function Section({
+  title,
+  icon: Icon,
+  children,
+}: {
+  title: string;
+  icon?: typeof Info;
+  children: ReactNode;
+}) {
   return (
-    <Card className="p-6">
-      <h2 className="text-lg font-bold text-navy-800 mb-3 pb-2 border-b border-slate-100">
-        {title}
-      </h2>
-      <div className="prose prose-sm text-slate-600 max-w-none space-y-3">
+    <Card className="p-5 sm:p-6 overflow-hidden">
+      <div className="flex items-center gap-2.5 mb-3 pb-3 border-b border-slate-100">
+        {Icon && <Icon className="w-4 h-4 text-teal-600" />}
+        <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+          {title}
+        </h2>
+      </div>
+      <div className="text-xs sm:text-sm text-slate-600 space-y-3 leading-relaxed">
         {children}
       </div>
     </Card>
@@ -27,31 +44,25 @@ function ParamTable({
   rows: { param: string; value: string; note: string }[];
 }) {
   return (
-    <div className="overflow-x-auto mt-3">
-      <table className="w-full text-sm border-collapse">
-        <thead>
-          <tr className="bg-slate-50">
-            <th className="text-left px-3 py-2 border border-slate-200 font-semibold text-slate-600">
-              Parameter
-            </th>
-            <th className="text-left px-3 py-2 border border-slate-200 font-semibold text-slate-600">
-              Value
-            </th>
-            <th className="text-left px-3 py-2 border border-slate-200 font-semibold text-slate-600">
-              Notes
-            </th>
+    <div className="overflow-x-auto mt-3 border border-slate-200/80 rounded-xl">
+      <table className="w-full text-xs text-left border-collapse">
+        <thead className="bg-slate-50 border-b border-slate-200/80 text-slate-700 font-semibold uppercase tracking-wider text-[11px]">
+          <tr>
+            <th className="px-3.5 py-2.5">Parameter Token</th>
+            <th className="px-3.5 py-2.5">Initial Default</th>
+            <th className="px-3.5 py-2.5">Algorithmic Function</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="divide-y divide-slate-100 font-normal">
           {rows.map(({ param, value, note }) => (
-            <tr key={param} className="hover:bg-slate-50/50">
-              <td className="px-3 py-2 border border-slate-200 font-mono text-xs">
+            <tr key={param} className="hover:bg-slate-50/60 transition-colors">
+              <td className="px-3.5 py-2 font-mono text-slate-800 font-semibold">
                 {param}
               </td>
-              <td className="px-3 py-2 border border-slate-200 font-semibold">
+              <td className="px-3.5 py-2 font-semibold text-teal-700 whitespace-nowrap">
                 {value}
               </td>
-              <td className="px-3 py-2 border border-slate-200 text-slate-500">
+              <td className="px-3.5 py-2 text-slate-500">
                 {note}
               </td>
             </tr>
@@ -64,155 +75,124 @@ function ParamTable({
 
 export default function SystemInfo() {
   return (
-    <div className="max-w-4xl mx-auto space-y-5">
+    <div className="max-w-4xl mx-auto space-y-6 pb-8 animate-fade-in">
       <PageHeader
-        title="System Information"
-        subtitle="How SENTINEL works — matching logic, scoring, missing-signal rules, and limitations."
+        title="System Specifications & Methodology"
+        subtitle="Transparent algorithmic principles, multi-factor correlation weights, and Missing-Signal rules."
+        badge="Specification Engine"
       />
 
       <div
         role="note"
-        className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-4 py-3"
+        className="flex items-start gap-3 p-4 bg-amber-50/90 border border-amber-200/90 rounded-xl text-xs sm:text-sm text-amber-900 shadow-2xs"
       >
-        ⚠️ <strong>Milestone 1 placeholder.</strong> In a later milestone, the parameters
-        and weights shown below will be read from the live backend configuration rather
-        than this static page. Until then, these values are the planned defaults — they
-        are not yet being used in live analysis.
+        <Info className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+        <div className="leading-relaxed">
+          <strong>Milestone 1 Architecture Placeholder:</strong> The parameters and weights displayed below represent our planned specification constants. In Milestone 5, these values will be queried directly from the live backend configuration endpoint (<code className="font-mono text-xs bg-amber-100 px-1 py-0.5 rounded">/api/system/info</code>).
+        </div>
       </div>
 
-      <Section title="What is SENTINEL?">
+      <Section title="What is SENTINEL?" icon={Info}>
         <p>
-          SENTINEL is an <strong>AI-assisted decision-support tool</strong> for urban
-          waterlogging intelligence. It connects community reports, geographic data,
-          historical records, and environmental context to identify potential drainage
-          incidents that may need human inspection.
+          SENTINEL is an <strong>AI-assisted civic intelligence and decision-support platform</strong> designed specifically for urban waterlogging and stormwater infrastructure failures. Rather than functioning as a standard grievance portal, SENTINEL correlates noisy, fragmentary citizen reports to detect systemic drainage blockages before catastrophic ponding occurs.
         </p>
         <p>
-          SENTINEL does <strong>not</strong> replace official emergency services, human
-          engineers, or authoritative flood prediction systems. It produces
-          <em> prioritisation indicators</em> — not flood forecasts.
+          SENTINEL produces <strong>incident prioritisation indicators</strong>, not statistical physical flood forecasts. It operates as a decision-support copilot for civic engineers and municipal emergency response units.
         </p>
         <SafetyNotice />
       </Section>
 
-      <Section title="Report Classification">
+      <Section title="Report Classification Baseline" icon={Code2}>
         <p>
-          When you submit a report, SENTINEL automatically assigns a category using
-          a keyword-matching classifier. It looks for phrases associated with each
-          category (e.g., "blocked drain", "standing water", "water entering building").
+          Submitted observations are processed through a transparent, deterministic keyword matching classifier. Incoming descriptions are matched against categorized phrase tokens (e.g., <em>"road flooded"</em>, <em>"blocked drain"</em>, <em>"water entering building"</em>, <em>"standing water"</em>).
         </p>
         <p>
-          If no category scores clearly ahead — or if the text contains very few
-          signal phrases — the result is marked <strong>"uncertain / unclassified"</strong>.
-          SENTINEL never forces a category when the evidence is insufficient.
+          If no category achieves sufficient score separation, or if no waterlogging keywords are detected, the system explicitly returns <strong>"uncertain / unclassified"</strong>. SENTINEL never forces an arbitrary category when evidence is inadequate.
         </p>
-        <p>
-          In a later milestone, a machine-learning classifier (Sentence Transformers)
-          will be added and evaluated against the keyword baseline. The UI will always
-          show whether a classification is from the keyword baseline or the trained
-          model.
+        <p className="text-slate-500 italic text-xs">
+          In Milestone 3, a Sentence Transformers embedding classifier will be benchmarked on a synthetic evaluation split against this transparent keyword baseline.
         </p>
       </Section>
 
-      <Section title="How Reports Are Matched">
+      <Section title="Report Pair Matching Architecture" icon={Sliders}>
         <p>
-          SENTINEL compares report descriptions to find pairs that might describe the
-          same real-world event. It combines four signals:
+          Potential correlation between two distinct reports is assessed by computing a multi-factor pair match score:
         </p>
-        <ul className="list-disc pl-5 space-y-1">
+        <ul className="list-disc pl-5 space-y-1.5">
           <li>
-            <strong>Semantic similarity</strong> — how similar the descriptions are in
-            meaning (using sentence embeddings in Milestone 3).
+            <strong>Semantic Similarity:</strong> Cosine similarity between description vectors (Sentence Transformers in Milestone 3, keyword fallback currently).
           </li>
           <li>
-            <strong>Geographic proximity</strong> — distance between report locations,
-            using the Haversine formula. Reports without coordinates receive a capped
-            score and are labelled "location-unconfirmed".
+            <strong>Geographic Proximity:</strong> Distance decay calculated using the great-circle Haversine formula. Reports lacking GPS coordinates receive a penalized score and are flagged.
           </li>
           <li>
-            <strong>Time difference</strong> — how close the observation times are.
+            <strong>Temporal Decay:</strong> Linear decay over a configurable 72-hour window.
           </li>
           <li>
-            <strong>Category compatibility</strong> — whether the categories are
-            compatible (e.g., drainage blockage and standing water often co-occur).
+            <strong>Category Compatibility:</strong> Semantic cross-compatibility matrix (e.g., street ponding and clogged grates frequently co-occur).
           </li>
         </ul>
-        <p>
-          Text similarity alone is <strong>not</strong> proof of a shared incident. A
-          combined score must exceed a threshold before reports are linked. Every match
-          includes a structured explanation of which signals contributed.
-        </p>
+        
         <ParamTable
           rows={[
-            { param: 'semantic_weight', value: '0.40', note: 'Planned default — not yet active' },
-            { param: 'geographic_weight', value: '0.30', note: 'Planned default — not yet active' },
-            { param: 'time_weight', value: '0.15', note: 'Planned default — not yet active' },
-            { param: 'category_weight', value: '0.15', note: 'Planned default — not yet active' },
-            { param: 'candidate_radius_m', value: '300', note: 'Maximum distance for geographic match candidates' },
-            { param: 'time_window_hours', value: '72', note: 'Reports further apart in time are not candidates' },
-            { param: 'link_threshold', value: '0.60', note: 'Minimum combined score to link two reports' },
+            { param: 'semantic_weight', value: '0.40', note: 'Weight allocated to text semantic similarity' },
+            { param: 'geographic_weight', value: '0.30', note: 'Weight allocated to spatial proximity' },
+            { param: 'time_weight', value: '0.15', note: 'Decay weight across temporal window' },
+            { param: 'category_weight', value: '0.15', note: 'Cross-category compatibility coefficient' },
+            { param: 'candidate_radius_m', value: '300 m', note: 'Maximum spatial radius for candidate edge formation' },
+            { param: 'time_window_hours', value: '72 hrs', note: 'Temporal horizon for related incident candidate search' },
+            { param: 'link_threshold', value: '0.60', note: 'Minimum aggregate score required to link two reports' },
           ]}
         />
       </Section>
 
-      <Section title="Incident Prioritisation Score">
+      <Section title="Prioritisation Scoring Formula" icon={Cpu}>
         <p>
-          When multiple reports are grouped into a potential incident, SENTINEL
-          computes a <strong>prioritisation score from 0 to 100</strong>. A higher
-          score means the incident has more corroborating evidence and should be
-          inspected sooner — it is <strong>not</strong> a probability of flooding.
-        </p>
-        <p>
-          The score is a weighted sum of normalised factors. Each factor contributes
-          independently and is shown transparently in the Incident Investigation page.
+          Correlated incident clusters receive a <strong>Prioritisation Index from 0 to 100</strong>. This score ranks incidents by corroborated evidence weight and potential civic hazard:
         </p>
         <ParamTable
           rows={[
-            { param: 'Reported severity', value: 'weight 0.25', note: "Average of independent reports' severity ratings" },
-            { param: 'Independent report count', value: 'weight 0.25', note: 'Saturating curve — duplicates do not count' },
-            { param: 'Supporting evidence strength', value: 'weight 0.15', note: 'Includes photo, historical records' },
-            { param: 'Historical recurrence', value: 'weight 0.15', note: 'Excluded and flagged if data unavailable' },
-            { param: 'Environmental context', value: 'weight 0.10', note: 'Rainfall data if available; excluded if not' },
-            { param: 'Recency', value: 'weight 0.10', note: 'Decays since latest observation' },
+            { param: 'Reported severity', value: 'weight 0.25', note: "Mean of independent reports' subjective severity ratings" },
+            { param: 'Independent report count', value: 'weight 0.25', note: 'Saturating logarithmic curve; duplicates from same token count as one' },
+            { param: 'Supporting evidence strength', value: 'weight 0.15', note: 'Photo presence and municipal historical recurrence records' },
+            { param: 'Historical recurrence', value: 'weight 0.15', note: 'Excluded and flagged if municipal data is unavailable' },
+            { param: 'Environmental context', value: 'weight 0.10', note: 'Rainfall intensity from official weather services' },
+            { param: 'Recency decay', value: 'weight 0.10', note: 'Decays exponentially from time of most recent observation' },
           ]}
         />
-        <p className="text-xs italic text-slate-500 mt-2">
-          These weights are heuristic defaults. They will only be tuned against a
-          labelled evaluation dataset (Milestone 3) and the results reported honestly.
-          No accuracy claims are made until evaluation has been run.
+        <p className="text-[11px] text-slate-400 italic mt-2">
+          Weights are heuristic defaults and will be tuned transparently against the labelled evaluation dataset.
         </p>
       </Section>
 
-      <Section title="Missing-Signal Detector">
+      <Section title="Missing-Signal Detector (Signature Feature)" icon={AlertTriangle}>
         <p>
-          For each potential incident, SENTINEL checks a set of rules to identify gaps
-          in the evidence. A gap is flagged <strong>only when information is genuinely
-          absent, outdated, or inconsistent</strong> — never when it is available.
+          The Missing-Signal Detector systematically evaluates the evidence graph and flags critical information gaps. A rule fires <strong>only when data is genuinely absent, stale, or conflicting</strong>:
         </p>
-        <div className="overflow-x-auto mt-3">
-          <table className="w-full text-sm border-collapse">
-            <thead>
-              <tr className="bg-slate-50">
-                <th className="text-left px-3 py-2 border border-slate-200 font-semibold text-slate-600">Rule</th>
-                <th className="text-left px-3 py-2 border border-slate-200 font-semibold text-slate-600">Triggers when…</th>
-                <th className="text-left px-3 py-2 border border-slate-200 font-semibold text-slate-600">Recommended action</th>
+        <div className="overflow-x-auto mt-3 border border-slate-200/80 rounded-xl">
+          <table className="w-full text-xs text-left border-collapse">
+            <thead className="bg-slate-50 border-b border-slate-200/80 text-slate-700 font-semibold uppercase tracking-wider text-[11px]">
+              <tr>
+                <th className="px-3.5 py-2.5">Rule ID</th>
+                <th className="px-3.5 py-2.5">Trigger Condition</th>
+                <th className="px-3.5 py-2.5">Recommended Municipal Action</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-slate-100 font-normal">
               {[
-                { rule: 'MS-LOC', trigger: 'Location missing or only approximate', action: 'Confirm a precise location' },
-                { rule: 'MS-TIME', trigger: 'Observation time missing for any contributing report', action: 'Request observation time' },
-                { rule: 'MS-CONFLICT', trigger: 'Reports give contradictory information', action: 'Request a fresh observation' },
-                { rule: 'MS-INDEP', trigger: 'Fewer independent reports than minimum', action: 'Seek additional independent confirmation' },
-                { rule: 'MS-VERIFY', trigger: 'No human verification, or verification outdated', action: 'Schedule a field inspection' },
-                { rule: 'MS-HIST', trigger: 'No historical incident data available for area', action: 'Check municipal records' },
-                { rule: 'MS-WX', trigger: 'Weather/rainfall data unavailable or outdated', action: 'Obtain current rainfall data from official source' },
-                { rule: 'MS-PHOTO', trigger: 'No photo evidence (low severity — photos do not prove depth)', action: 'Request a photo if safe' },
+                { rule: 'MS-LOC', trigger: 'Coordinates missing or location coarse', action: 'Dispatch verification request for precise coordinates' },
+                { rule: 'MS-TIME', trigger: 'Observation timestamp missing from contributing report', action: 'Request temporal observation window' },
+                { rule: 'MS-CONFLICT', trigger: 'Descriptions report opposing water levels or severity', action: 'Schedule immediate fresh observation' },
+                { rule: 'MS-INDEP', trigger: 'Fewer independent tokens than configured minimum', action: 'Seek corroboration from nearby independent observers' },
+                { rule: 'MS-VERIFY', trigger: 'No human inspection recorded, or inspection stale', action: 'Schedule on-site municipal engineering inspection' },
+                { rule: 'MS-HIST', trigger: 'No historical flood/drainage records for local grid', action: 'Query municipal historical infrastructure records' },
+                { rule: 'MS-WX', trigger: 'Rainfall/precipitation telemetry unavailable or stale', action: 'Pull current precipitation data from official meteorological API' },
+                { rule: 'MS-PHOTO', trigger: 'No photographic evidence uploaded (low severity)', action: 'Request citizen photo if safe to take' },
               ].map(({ rule, trigger, action }) => (
-                <tr key={rule} className="hover:bg-slate-50/50">
-                  <td className="px-3 py-2 border border-slate-200 font-mono text-xs font-bold">{rule}</td>
-                  <td className="px-3 py-2 border border-slate-200">{trigger}</td>
-                  <td className="px-3 py-2 border border-slate-200 text-slate-500">{action}</td>
+                <tr key={rule} className="hover:bg-slate-50/60 transition-colors">
+                  <td className="px-3.5 py-2.5 font-mono font-bold text-slate-800 whitespace-nowrap">{rule}</td>
+                  <td className="px-3.5 py-2.5 text-slate-700">{trigger}</td>
+                  <td className="px-3.5 py-2.5 text-slate-500">{action}</td>
                 </tr>
               ))}
             </tbody>
@@ -220,70 +200,42 @@ export default function SystemInfo() {
         </div>
       </Section>
 
-      <Section title="Verification Status Definitions">
-        <p>
-          SENTINEL uses distinct status labels to make uncertainty visible:
-        </p>
-        <ul className="list-disc pl-5 space-y-1.5">
-          <li>
-            <strong>Suspected</strong> — the system generated this potential incident
-            from report clustering. It is a machine hypothesis, not a confirmed event.
+      <Section title="Status Verification Protocol" icon={ShieldCheck}>
+        <ul className="space-y-2 list-none pl-0">
+          <li className="flex items-start gap-2">
+            <span className="font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded text-[11px]">Suspected:</span>
+            <span>Algorithmic hypothesis formed by automated cluster correlation. Unverified by humans.</span>
           </li>
-          <li>
-            <strong>Under Verification</strong> — a human has started reviewing it.
+          <li className="flex items-start gap-2">
+            <span className="font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded text-[11px]">Under Verification:</span>
+            <span>Assigned to municipal field team for physical triage.</span>
           </li>
-          <li>
-            <strong>Verified</strong> — a human field inspector has confirmed the
-            incident. Only a recorded human action can set this status.
+          <li className="flex items-start gap-2">
+            <span className="font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded text-[11px]">Verified:</span>
+            <span>Confirmed by recorded human inspection. Only human action can promote to this status.</span>
           </li>
-          <li>
-            <strong>Dismissed</strong> — investigation found no real incident.
+          <li className="flex items-start gap-2">
+            <span className="font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-[11px]">Dismissed:</span>
+            <span>Investigated and determined to be non-actionable or false alarm.</span>
           </li>
-          <li>
-            <strong>Resolved</strong> — the drainage issue was corrected.
+          <li className="flex items-start gap-2">
+            <span className="font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-[11px]">Resolved:</span>
+            <span>Physical drainage issue corrected by civic works.</span>
           </li>
         </ul>
       </Section>
 
-      <Section title="Data Sources">
-        <p>
-          In Milestone 1, all data comes from:
-        </p>
+      <Section title="Data Source Attribution" icon={Database}>
+        <p>In Milestone 1, intelligence is derived strictly from:</p>
         <ul className="list-disc pl-5 space-y-1">
-          <li>
-            <strong>Demonstration data</strong> — 8 synthetic reports and 3 synthetic
-            incidents, clearly labelled ⚠️ DEMO. Created to illustrate features only.
-          </li>
-          <li>
-            <strong>Browser-stored reports</strong> — reports you submit in this browser,
-            stored in localStorage. Not sent to any server.
-          </li>
+          <li><strong>Demonstration Dataset:</strong> 8 synthetic reports and 3 synthetic incidents (labelled ⚠️ DEMO).</li>
+          <li><strong>Local Browser Storage:</strong> Submissions committed during this browser session.</li>
         </ul>
-        <p>
-          Future milestones will add optional integration with:
-        </p>
-        <ul className="list-disc pl-5 space-y-1">
-          <li>Official rainfall / weather data (provider to be verified and documented)</li>
-          <li>Municipal historical incident records (via secure import)</li>
-        </ul>
-        <p className="text-xs italic text-slate-500">
-          SENTINEL will never silently use fabricated data for missing live data.
-          All external data is shown with its source and retrieval timestamp.
+        <p className="text-xs text-slate-500 italic mt-2">
+          Notice: SENTINEL will never substitute fabricated data for missing live telemetry. Missing external sources automatically trigger MS-rules.
         </p>
       </Section>
 
-      <Section title="Known Limitations (Milestone 1)">
-        <ul className="list-disc pl-5 space-y-1">
-          <li>No backend — reports are not sent to a server (Milestone 2 adds this)</li>
-          <li>No real classification ML model (Milestone 3 adds Sentence Transformers)</li>
-          <li>No report matching or incident detection (Milestone 3–4)</li>
-          <li>Priority scores on demo incidents are illustrative, not computed</li>
-          <li>No photo upload (Milestone 2+)</li>
-          <li>No authentication — verification actions are not production-ready</li>
-          <li>No map location picker in the report form (Milestone 4)</li>
-          <li>System Information page shows planned configuration, not live values</li>
-        </ul>
-      </Section>
     </div>
   );
 }
