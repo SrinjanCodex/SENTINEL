@@ -1,0 +1,5 @@
+# Windows line endings for Windows-specific files; LF everywhere else
+* text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
