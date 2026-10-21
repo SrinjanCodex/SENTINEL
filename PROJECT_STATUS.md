@@ -53,9 +53,13 @@
   - Interactive press feedback (`.btn-press`) on interactive buttons and intake CTAs
   - Native accordion expand/collapse transitions and mobile menu slide-in
   - Full adherence to `@media (prefers-reduced-motion: reduce)`
+- React Error Boundaries & Failure Isolation:
+  - Application-level `ErrorBoundary` wrapping core routes, preventing full-page white screens and offering a friendly recovery view with reload action
+  - Isolated `MapErrorBoundary` wrapping GIS preview and full map views, ensuring map component failures never crash the rest of the intelligence dashboard
 - React Leaflet map preview on Dashboard and full GIS page
 - Accessibility pass (focus states, ARIA labels, form field labels)
-- Automated unit testing with Vitest (42 tests passed):
+- Automated unit testing with Vitest (45 tests passed):
+  - `src/__tests__/smoke.test.tsx` (3 tests passed)
   - `src/lib/__tests__/mapConfig.test.ts` (7 tests passed)
   - `src/lib/__tests__/validation.test.ts` (24 tests passed)
   - `src/lib/__tests__/useCountUp.test.ts` (2 tests passed)

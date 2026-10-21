@@ -5,6 +5,7 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { Navigation } from './components/Navigation';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import Dashboard from './pages/Dashboard';
 import ReportIncident from './pages/ReportIncident';
 import Reports from './pages/Reports';
@@ -17,7 +18,9 @@ import { ShieldAlert, Compass, ArrowLeft } from 'lucide-react';
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {
-    window.scrollTo(0, 0);
+    if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
+      window.scrollTo(0, 0);
+    }
   }, [pathname]);
   return null;
 }
@@ -79,7 +82,9 @@ export default function App() {
           id="main-content"
           className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8"
         >
-          <MainRoutes />
+          <ErrorBoundary>
+            <MainRoutes />
+          </ErrorBoundary>
         </main>
 
         <footer className="bg-slate-900 border-t border-slate-800 text-slate-400 text-xs py-6 px-4 sm:px-8 mt-auto">

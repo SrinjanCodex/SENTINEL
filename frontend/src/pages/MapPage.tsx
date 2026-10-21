@@ -11,6 +11,7 @@ import {
 } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { SentinelTileLayer } from '../components/SentinelTileLayer';
+import { MapErrorBoundary } from '../components/ErrorBoundary';
 import { Link } from 'react-router-dom';
 import { getApiClient } from '../api';
 import type { Report, ReportCategory } from '../types';
@@ -154,58 +155,60 @@ export default function MapPage() {
               role="application"
               aria-label="Interactive map of incident reports"
             >
-              {mappable.length > 0 ? (
-                <MapContainer
-                  center={[mappable[0].latitude!, mappable[0].longitude!]}
-                  zoom={13}
-                  style={{ height: '100%', width: '100%' }}
-                >
-                  <SentinelTileLayer />
-                  <MapFitter reports={filtered} />
-                  {mappable.map((r) => (
-                    <CircleMarker
-                      key={r.id}
-                      center={[r.latitude!, r.longitude!]}
-                      radius={8}
-                      pathOptions={{
-                        color: CATEGORY_COLOURS[r.category] ?? '#94a3b8',
-                        fillColor: CATEGORY_COLOURS[r.category] ?? '#94a3b8',
-                        fillOpacity: 0.75,
-                        weight: 2,
-                      }}
-                    >
-                      <Popup>
-                        <div className="p-1 max-w-[220px]">
-                          <div className="flex flex-wrap gap-1 mb-1.5">
-                            <StatusBadge status={r.status} size="sm" />
-                            <CategoryBadge category={r.category} />
+              <MapErrorBoundary height="520px">
+                {mappable.length > 0 ? (
+                  <MapContainer
+                    center={[mappable[0].latitude!, mappable[0].longitude!]}
+                    zoom={13}
+                    style={{ height: '100%', width: '100%' }}
+                  >
+                    <SentinelTileLayer />
+                    <MapFitter reports={filtered} />
+                    {mappable.map((r) => (
+                      <CircleMarker
+                        key={r.id}
+                        center={[r.latitude!, r.longitude!]}
+                        radius={8}
+                        pathOptions={{
+                          color: CATEGORY_COLOURS[r.category] ?? '#94a3b8',
+                          fillColor: CATEGORY_COLOURS[r.category] ?? '#94a3b8',
+                          fillOpacity: 0.75,
+                          weight: 2,
+                        }}
+                      >
+                        <Popup>
+                          <div className="p-1 max-w-[220px]">
+                            <div className="flex flex-wrap gap-1 mb-1.5">
+                              <StatusBadge status={r.status} size="sm" />
+                              <CategoryBadge category={r.category} />
+                            </div>
+                            <p className="text-xs text-slate-800 font-normal leading-relaxed mb-2">
+                              "{r.original_description.slice(0, 110)}{r.original_description.length > 110 ? '…' : ''}"
+                            </p>
+                            <div className="flex items-center justify-between text-[10px] text-slate-500 border-t border-slate-100 pt-1.5">
+                              <span>{relativeTime(r.submitted_at)}</span>
+                              <a
+                                href={`/reports/${r.id}`}
+                                className="font-semibold text-teal-600 hover:text-teal-700 underline"
+                              >
+                                Inspect Details →
+                              </a>
+                            </div>
                           </div>
-                          <p className="text-xs text-slate-800 font-normal leading-relaxed mb-2">
-                            "{r.original_description.slice(0, 110)}{r.original_description.length > 110 ? '…' : ''}"
-                          </p>
-                          <div className="flex items-center justify-between text-[10px] text-slate-500 border-t border-slate-100 pt-1.5">
-                            <span>{relativeTime(r.submitted_at)}</span>
-                            <a
-                              href={`/reports/${r.id}`}
-                              className="font-semibold text-teal-600 hover:text-teal-700 underline"
-                            >
-                              Inspect Details →
-                            </a>
-                          </div>
-                        </div>
-                      </Popup>
-                    </CircleMarker>
-                  ))}
-                </MapContainer>
-              ) : (
-                <div className="flex items-center justify-center h-full text-xs text-slate-400">
-                  <EmptyState
-                    icon={MapPin}
-                    title="No geo-referenced observations found"
-                    description="Filtered category contains no reports with valid GPS coordinates."
-                  />
-                </div>
-              )}
+                        </Popup>
+                      </CircleMarker>
+                    ))}
+                  </MapContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-xs text-slate-400">
+                    <EmptyState
+                      icon={MapPin}
+                      title="No geo-referenced observations found"
+                      description="Filtered category contains no reports with valid GPS coordinates."
+                    />
+                  </div>
+                )}
+              </MapErrorBoundary>
             </div>
           </Card>
 

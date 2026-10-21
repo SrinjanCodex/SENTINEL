@@ -13,7 +13,7 @@ export function SentinelTileLayer() {
 
   const [currentUrl, setCurrentUrl] = useState(initialConfig.tileUrl);
   const [currentAttr, setCurrentAttr] = useState(initialConfig.attribution);
-  const [currentSubdomains, setCurrentSubdomains] = useState(initialConfig.subdomains);
+  const [currentSubdomains, setCurrentSubdomains] = useState(initialConfig.subdomains || 'abc');
   const [hasFallenBack, setHasFallenBack] = useState(initialConfig.isFallback);
   const [notice, setNotice] = useState<string | null>(
     initialConfig.isFallback ? (initialConfig.fallbackReason ?? null) : null,
@@ -26,7 +26,7 @@ export function SentinelTileLayer() {
       );
       setCurrentUrl(OSM_TILE_URL);
       setCurrentAttr(OSM_ATTRIBUTION);
-      setCurrentSubdomains(undefined);
+      setCurrentSubdomains('abc');
       setHasFallenBack(true);
       setNotice(
         'Configured map tiles could not be loaded. Displaying standard OpenStreetMap layer.',
@@ -42,7 +42,7 @@ export function SentinelTileLayer() {
         key={currentUrl}
         url={currentUrl}
         attribution={currentAttr}
-        subdomains={currentSubdomains}
+        subdomains={currentSubdomains || 'abc'}
         maxZoom={19}
         eventHandlers={{
           tileerror: handleTileError,

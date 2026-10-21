@@ -6,6 +6,7 @@ describe('mapConfig - resolveTileConfig', () => {
     const config = resolveTileConfig('', '', '');
     expect(config.tileUrl).toBe(OSM_TILE_URL);
     expect(config.attribution).toBe(OSM_ATTRIBUTION);
+    expect(config.subdomains).toBe('abc');
     expect(config.isCustom).toBe(false);
     expect(config.isFallback).toBe(false);
   });

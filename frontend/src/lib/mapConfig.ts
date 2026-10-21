@@ -10,7 +10,7 @@ export const OSM_ATTRIBUTION =
 export interface ResolvedTileConfig {
   tileUrl: string;
   attribution: string;
-  subdomains?: string;
+  subdomains: string;
   maxZoom: number;
   isCustom: boolean;
   isFallback: boolean;
@@ -36,6 +36,7 @@ export function resolveTileConfig(
     return {
       tileUrl: OSM_TILE_URL,
       attribution: rawAttr || OSM_ATTRIBUTION,
+      subdomains: 'abc',
       maxZoom: 19,
       isCustom: false,
       isFallback: false,
@@ -52,6 +53,7 @@ export function resolveTileConfig(
     return {
       tileUrl: OSM_TILE_URL,
       attribution: OSM_ATTRIBUTION,
+      subdomains: 'abc',
       maxZoom: 19,
       isCustom: false,
       isFallback: true,
@@ -80,7 +82,7 @@ export function resolveTileConfig(
   return {
     tileUrl: resolvedUrl,
     attribution: rawAttr || OSM_ATTRIBUTION,
-    subdomains: isCarto ? 'abcd' : undefined,
+    subdomains: isCarto ? 'abcd' : 'abc',
     maxZoom: 19,
     isCustom: true,
     isFallback: false,

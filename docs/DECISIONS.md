@@ -147,3 +147,14 @@ The final choice will be recorded here when Milestone 4 is implemented, with jus
 **Alternatives considered:**
 - Framer Motion: Adds ~35 KB+ gzipped and runtime overhead for simple fade/scale transitions.
 - React Spring: Powerful physics engine, but excessive for dashboard counters and card entrances.
+
+---
+
+## 2026-10-21 — React Error Boundaries & Leaflet Subdomains Safeguard
+
+**Decision:** Add top-level `ErrorBoundary` around main application routes, isolated `MapErrorBoundary` around map views, and ensure `subdomains` option in Leaflet's `TileLayer` always defaults to a valid string (`'abc'`).
+
+**Reason:** 
+1. When `SentinelTileLayer` previously set `subdomains: undefined` for standard OpenStreetMap, Leaflet merged `options.subdomains = undefined`. Upon computing tile URLs, Leaflet executed `this._getSubdomain(coords)` which attempted to read `this.options.subdomains.length`, throwing an uncaught `TypeError: Cannot read properties of undefined (reading 'length')`. Without an Error Boundary, this unhandled exception crashed the React component tree and resulted in a blank white screen.
+2. An application-level `ErrorBoundary` prevents any unhandled component crash from wiping out the screen, presenting a friendly recovery card with diagnostic details and a "Reload Application" action.
+3. A component-level `MapErrorBoundary` isolates spatial/GIS failures specifically to the map frame, ensuring the rest of the dashboard (metrics, intelligence feed, filters, navigation) remains completely interactive and accessible even if a map tile service or canvas error occurs.

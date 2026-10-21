@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { MapContainer, CircleMarker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { SentinelTileLayer } from '../components/SentinelTileLayer';
+import { MapErrorBoundary } from '../components/ErrorBoundary';
 
 import { getApiClient } from '../api';
 import type { DashboardStats, Report, Incident } from '../types';
@@ -316,51 +317,53 @@ export default function Dashboard() {
           </div>
 
           <div style={{ height: '340px' }} className="w-full relative bg-slate-100">
-            {mappableIncidents.length > 0 ? (
-              <MapContainer
-                center={[
-                  mappableIncidents[0].centroid_latitude!,
-                  mappableIncidents[0].centroid_longitude!,
-                ]}
-                zoom={13}
-                style={{ height: '100%', width: '100%' }}
-                aria-label="Map of potential incident locations"
-              >
-                <SentinelTileLayer />
-                {mappableIncidents.map((inc) => {
-                  const score = inc.priority_score ?? 0;
-                  const colour =
-                    score >= 75 ? '#dc2626' : score >= 50 ? '#f59e0b' : '#0d9488';
-                  return (
-                    <CircleMarker
-                      key={inc.id}
-                      center={[inc.centroid_latitude!, inc.centroid_longitude!]}
-                      radius={10 + score / 10}
-                      pathOptions={{ color: colour, fillColor: colour, fillOpacity: 0.65, weight: 2 }}
-                    >
-                      <Popup>
-                        <div className="p-1 max-w-[200px]">
-                          <p className="font-bold text-xs text-slate-900 mb-1">{inc.title}</p>
-                          <div className="mb-2">
-                            <PriorityMeter score={score} />
+            <MapErrorBoundary height="340px">
+              {mappableIncidents.length > 0 ? (
+                <MapContainer
+                  center={[
+                    mappableIncidents[0].centroid_latitude!,
+                    mappableIncidents[0].centroid_longitude!,
+                  ]}
+                  zoom={13}
+                  style={{ height: '100%', width: '100%' }}
+                  aria-label="Map of potential incident locations"
+                >
+                  <SentinelTileLayer />
+                  {mappableIncidents.map((inc) => {
+                    const score = inc.priority_score ?? 0;
+                    const colour =
+                      score >= 75 ? '#dc2626' : score >= 50 ? '#f59e0b' : '#0d9488';
+                    return (
+                      <CircleMarker
+                        key={inc.id}
+                        center={[inc.centroid_latitude!, inc.centroid_longitude!]}
+                        radius={10 + score / 10}
+                        pathOptions={{ color: colour, fillColor: colour, fillOpacity: 0.65, weight: 2 }}
+                      >
+                        <Popup>
+                          <div className="p-1 max-w-[200px]">
+                            <p className="font-bold text-xs text-slate-900 mb-1">{inc.title}</p>
+                            <div className="mb-2">
+                              <PriorityMeter score={score} />
+                            </div>
+                            <div className="flex items-center justify-between text-[11px]">
+                              <StatusBadge status={inc.verification_status} size="sm" />
+                              <Link to={`/incidents/${inc.id}`} className="text-teal-600 font-semibold underline">
+                                View
+                              </Link>
+                            </div>
                           </div>
-                          <div className="flex items-center justify-between text-[11px]">
-                            <StatusBadge status={inc.verification_status} size="sm" />
-                            <Link to={`/incidents/${inc.id}`} className="text-teal-600 font-semibold underline">
-                              View
-                            </Link>
-                          </div>
-                        </div>
-                      </Popup>
-                    </CircleMarker>
-                  );
-                })}
-              </MapContainer>
-            ) : (
-              <div className="flex items-center justify-center h-full text-xs text-slate-400">
-                No incidents with validated geographic coordinates available.
-              </div>
-            )}
+                        </Popup>
+                      </CircleMarker>
+                    );
+                  })}
+                </MapContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full text-xs text-slate-400">
+                  No incidents with validated geographic coordinates available.
+                </div>
+              )}
+            </MapErrorBoundary>
           </div>
         </Card>
       </section>

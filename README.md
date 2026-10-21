@@ -109,12 +109,13 @@ npm run test
 
 Expected output (Milestone 1 Enhanced):
 ```
+✓ src/__tests__/smoke.test.tsx               (3 tests)
 ✓ src/lib/__tests__/mapConfig.test.ts        (7 tests)
 ✓ src/lib/__tests__/validation.test.ts      (24 tests)
 ✓ src/lib/__tests__/useCountUp.test.ts        (2 tests)
 ✓ src/lib/__tests__/classification.test.ts   (9 tests)
-Test Files  4 passed (4)
-Tests       42 passed (42)
+Test Files  5 passed (5)
+Tests       45 passed (45)
 ```
 
 ---

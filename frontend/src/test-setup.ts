@@ -15,3 +15,6 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: () => false,
   }),
 });
+
+// Mock window.scrollTo for jsdom
+window.scrollTo = () => {};
