@@ -5,6 +5,7 @@
 import type { ReactNode } from 'react';
 import type { ReportStatus, IncidentStatus, ReportCategory } from '../types';
 import { categoryLabel } from '../lib/classification';
+import { useCountUp } from '../lib/useCountUp';
 import {
   AlertTriangle,
   ShieldAlert,
@@ -150,7 +151,7 @@ interface CardProps {
 
 export function Card({ className = '', children, as: Tag = 'div', hoverEffect = false }: CardProps) {
   const hoverClass = hoverEffect
-    ? 'hover:border-slate-300 hover:shadow-md transition-all duration-200'
+    ? 'card-interactive hover:border-slate-300 hover:shadow-md'
     : 'transition-shadow duration-200';
 
   return (
@@ -193,16 +194,17 @@ export function StatCard({
   badge,
 }: StatCardProps) {
   const style = ACCENT_STYLES[accent];
+  const animatedValue = useCountUp(value, 750);
 
   return (
-    <Card className="p-4 sm:p-5 relative overflow-hidden group">
+    <Card className="p-4 sm:p-5 relative overflow-hidden group hover:border-slate-300 card-interactive">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
             {label}
           </p>
           <p className={`mt-2 text-2xl sm:text-3xl font-bold tracking-tight tabular-numbers ${style.text}`}>
-            {value}
+            {animatedValue}
           </p>
         </div>
         <div className={`p-2.5 rounded-lg shrink-0 ${style.bgIcon} ${style.iconColor} transition-transform group-hover:scale-105 duration-200`}>

@@ -33,6 +33,11 @@ import {
   Flame,
 } from 'lucide-react';
 
+const DEFAULT_TILE_URL =
+  'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png';
+const DEFAULT_ATTRIBUTION =
+  '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>';
+
 export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recent, setRecent] = useState<Report[]>([]);
@@ -109,7 +114,7 @@ export default function Dashboard() {
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <Link
             to="/report"
-            className="inline-flex items-center gap-1.5 bg-teal-600 hover:bg-teal-500 active:bg-teal-700 text-white font-semibold text-xs px-3.5 py-2 rounded-lg transition-all shadow-xs hover:shadow-teal-900/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+            className="inline-flex items-center gap-1.5 bg-teal-600 hover:bg-teal-500 active:bg-teal-700 text-white font-semibold text-xs px-3.5 py-2 rounded-lg transition-all shadow-xs hover:shadow-teal-900/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 btn-press"
           >
             <PlusCircle className="w-4 h-4" />
             <span>Submit Observation</span>
@@ -192,8 +197,8 @@ export default function Dashboard() {
               </div>
             ) : (
               <ul className="divide-y divide-slate-100/90 flex-1" role="list">
-                {recent.map((r) => (
-                  <li key={r.id} role="listitem">
+                {recent.map((r, idx) => (
+                  <li key={r.id} role="listitem" className={`animate-fade-in stagger-${Math.min(idx + 1, 5)}`}>
                     <Link
                       to={`/reports/${r.id}`}
                       className="block px-5 py-3.5 hover:bg-slate-50/80 transition-all duration-150 group"
@@ -258,8 +263,8 @@ export default function Dashboard() {
             </div>
 
             <ul className="divide-y divide-slate-100/90 flex-1" role="list">
-              {incidents.slice(0, 4).map((inc) => (
-                <li key={inc.id} role="listitem" className="p-4 hover:bg-slate-50/60 transition-colors">
+              {incidents.slice(0, 4).map((inc, idx) => (
+                <li key={inc.id} role="listitem" className={`p-4 hover:bg-slate-50/60 transition-colors animate-fade-in stagger-${Math.min(idx + 1, 5)}`}>
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <p className="text-xs font-semibold text-slate-800 line-clamp-1 leading-snug">
                       {inc.title}
@@ -301,7 +306,7 @@ export default function Dashboard() {
               <div>
                 <h2 className="font-semibold text-slate-900 text-sm tracking-tight">GIS Spatial Overview</h2>
                 <p className="text-[11px] text-slate-500">
-                  Cluster centroids plotted on OpenStreetMap layer · Radius indicates priority magnitude
+                  Cluster centroids plotted on CARTO Voyager layer (English labels) · Radius indicates priority magnitude
                 </p>
               </div>
             </div>
@@ -326,11 +331,10 @@ export default function Dashboard() {
                 aria-label="Map of potential incident locations"
               >
                 <TileLayer
-                  url={
-                    import.meta.env.VITE_MAP_TILE_URL ||
-                    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-                  }
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url={import.meta.env.VITE_MAP_TILE_URL || DEFAULT_TILE_URL}
+                  attribution={import.meta.env.VITE_MAP_ATTRIBUTION || DEFAULT_ATTRIBUTION}
+                  subdomains="abcd"
+                  maxZoom={19}
                 />
                 {mappableIncidents.map((inc) => {
                   const score = inc.priority_score ?? 0;
@@ -386,7 +390,7 @@ export default function Dashboard() {
           </div>
           <Link
             to="/report"
-            className="shrink-0 inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-500 active:bg-teal-700 text-white font-semibold text-xs px-4 py-2.5 rounded-lg shadow-sm hover:shadow-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+            className="shrink-0 inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-500 active:bg-teal-700 text-white font-semibold text-xs px-4 py-2.5 rounded-lg shadow-sm hover:shadow-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 btn-press"
           >
             <PlusCircle className="w-4 h-4" />
             <span>File New Observation</span>

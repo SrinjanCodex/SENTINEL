@@ -70,15 +70,19 @@ Copy-Item .env.example .env
 ```
 
 `.env.example` contents:
-```
+```env
 VITE_API_BASE_URL=http://localhost:8000
-VITE_MAP_TILE_URL=https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
 VITE_USE_MOCK_API=true
+
+# English / Latin-script map tiles (CARTO Voyager)
+# Free for development, non-commercial, and open-source civic usage without an API key
+VITE_MAP_TILE_URL=https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png
+VITE_MAP_ATTRIBUTION=&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>
 ```
 
 > ⚠️ **Never commit `.env`** — it is in `.gitignore`. Commit only `.env.example`.
 
-In Milestone 1, `VITE_USE_MOCK_API=true` is the only setting that matters. The backend URL is not used yet.
+In Milestone 1, `VITE_USE_MOCK_API=true` is the active mode. The map tiles default to CARTO Voyager for global English/Latin labels without an API key.
 
 ---
 
@@ -89,12 +93,13 @@ cd frontend
 npm run test
 ```
 
-Expected output (Milestone 1):
+Expected output (Milestone 1 Enhanced):
 ```
 ✓ src/lib/__tests__/classification.test.ts  (9 tests)
-✓ src/lib/__tests__/validation.test.ts     (15 tests)
-Test Files  2 passed (2)
-Tests       24 passed (24)
+✓ src/lib/__tests__/validation.test.ts     (24 tests)
+✓ src/lib/__tests__/useCountUp.test.ts       (2 tests)
+Test Files  3 passed (3)
+Tests       35 passed (35)
 ```
 
 ---

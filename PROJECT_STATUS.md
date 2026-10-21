@@ -41,11 +41,24 @@
   - Skeleton loading placeholders during initial telemetry retrieval
   - Tabular number formatting and refined micro-typography tokens
   - Explicit styling for unmapped coordinates and Missing-Signal alerts
-- React Leaflet map preview on Dashboard
+- Map Language & Tiles (English / Latin Script):
+  - Switched default map tiles to CARTO Voyager raster tiles (`https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png`)
+  - Ensures clean international and regional place names rendered in English/Latin script
+  - Visible dual attribution to OpenStreetMap contributors and CARTO
+  - Configurable via `VITE_MAP_TILE_URL` and `VITE_MAP_ATTRIBUTION` environment variables
+- Fluid Micro-Animations & Interactions:
+  - Smooth route transitions via `MainRoutes` fade-in wrapper and automatic top scrolling
+  - Animated numeric count-up on dashboard metric counters (`useCountUp` custom hook with quadratic ease-out)
+  - Staggered entrance animations for dashboard and reports list items (`.stagger-1` to `.stagger-5`)
+  - Interactive press feedback (`.btn-press`) on interactive buttons and intake CTAs
+  - Native accordion expand/collapse transitions and mobile menu slide-in
+  - Full adherence to `@media (prefers-reduced-motion: reduce)`
+- React Leaflet map preview on Dashboard and full GIS page
 - Accessibility pass (focus states, ARIA labels, form field labels)
-- Automated unit testing with Vitest (33 tests passed):
+- Automated unit testing with Vitest (35 tests passed):
   - `src/lib/__tests__/classification.test.ts` (9 tests passed)
   - `src/lib/__tests__/validation.test.ts` (24 tests passed)
+  - `src/lib/__tests__/useCountUp.test.ts` (2 tests passed)
 - Production build verified (`npm run build` succeeds cleanly with 0 TypeScript/bundler errors)
 - Dev server verified (`npm run dev` serves HTTP 200 at http://localhost:5173)
 

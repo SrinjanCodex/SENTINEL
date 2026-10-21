@@ -2,7 +2,8 @@
  * SENTINEL — Root Application
  * Top-level routing, accessible skip-link, and unified telemetry shell
  */
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { Navigation } from './components/Navigation';
 import Dashboard from './pages/Dashboard';
 import ReportIncident from './pages/ReportIncident';
@@ -13,9 +14,59 @@ import SystemInfo from './pages/SystemInfo';
 import IncidentDetail from './pages/IncidentDetail';
 import { ShieldAlert, Compass, ArrowLeft } from 'lucide-react';
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
+function MainRoutes() {
+  const location = useLocation();
+
+  return (
+    <div key={location.pathname} className="animate-fade-in">
+      <Routes location={location}>
+        <Route path="/"                 element={<Dashboard />} />
+        <Route path="/report"           element={<ReportIncident />} />
+        <Route path="/reports"          element={<Reports />} />
+        <Route path="/reports/:id"      element={<ReportDetail />} />
+        <Route path="/map"              element={<MapPage />} />
+        <Route path="/system-info"      element={<SystemInfo />} />
+        <Route path="/incidents/:id"    element={<IncidentDetail />} />
+        
+        {/* 404 Fallback */}
+        <Route
+          path="*"
+          element={
+            <div className="text-center py-24 max-w-md mx-auto">
+              <div className="w-16 h-16 mx-auto rounded-2xl bg-slate-100 flex items-center justify-center text-slate-500 mb-4 shadow-inner">
+                <Compass className="w-8 h-8 text-teal-600" />
+              </div>
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">Endpoint Unresolved</h1>
+              <p className="text-xs sm:text-sm text-slate-500 mb-6 leading-relaxed">
+                The requested route does not correspond to an active intelligence view or incident record.
+              </p>
+              <Link
+                to="/"
+                className="inline-flex items-center gap-2 bg-teal-600 text-white font-semibold text-xs px-4 py-2.5 rounded-lg hover:bg-teal-500 transition-colors shadow-sm btn-press"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Return to Overview Dashboard</span>
+              </Link>
+            </div>
+          }
+        />
+      </Routes>
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       {/* Accessible skip-to-content navigation */}
       <a href="#main-content" className="skip-link">
         Skip to main content
@@ -28,38 +79,7 @@ export default function App() {
           id="main-content"
           className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8"
         >
-          <Routes>
-            <Route path="/"                 element={<Dashboard />} />
-            <Route path="/report"           element={<ReportIncident />} />
-            <Route path="/reports"          element={<Reports />} />
-            <Route path="/reports/:id"      element={<ReportDetail />} />
-            <Route path="/map"              element={<MapPage />} />
-            <Route path="/system-info"      element={<SystemInfo />} />
-            <Route path="/incidents/:id"    element={<IncidentDetail />} />
-            
-            {/* 404 Fallback */}
-            <Route
-              path="*"
-              element={
-                <div className="text-center py-24 max-w-md mx-auto">
-                  <div className="w-16 h-16 mx-auto rounded-2xl bg-slate-100 flex items-center justify-center text-slate-500 mb-4 shadow-inner">
-                    <Compass className="w-8 h-8 text-teal-600" />
-                  </div>
-                  <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">Endpoint Unresolved</h1>
-                  <p className="text-xs sm:text-sm text-slate-500 mb-6 leading-relaxed">
-                    The requested route does not correspond to an active intelligence view or incident record.
-                  </p>
-                  <Link
-                    to="/"
-                    className="inline-flex items-center gap-2 bg-teal-600 text-white font-semibold text-xs px-4 py-2.5 rounded-lg hover:bg-teal-500 transition-colors shadow-sm"
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                    <span>Return to Overview Dashboard</span>
-                  </Link>
-                </div>
-              }
-            />
-          </Routes>
+          <MainRoutes />
         </main>
 
         <footer className="bg-slate-900 border-t border-slate-800 text-slate-400 text-xs py-6 px-4 sm:px-8 mt-auto">

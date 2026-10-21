@@ -89,7 +89,7 @@ export function Navigation() {
           <div className="flex items-center gap-2 sm:gap-3">
             <Link
               to="/report"
-              className="inline-flex items-center gap-1.5 bg-teal-600 hover:bg-teal-500 active:bg-teal-700 text-white font-semibold text-xs px-3.5 py-2 rounded-lg transition-all shadow-xs hover:shadow-teal-900/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
+              className="inline-flex items-center gap-1.5 bg-teal-600 hover:bg-teal-500 active:bg-teal-700 text-white font-semibold text-xs px-3.5 py-2 rounded-lg transition-all shadow-xs hover:shadow-teal-900/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 btn-press"
             >
               <PlusCircle className="w-4 h-4" />
               <span>Report Incident</span>

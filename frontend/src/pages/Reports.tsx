@@ -217,7 +217,7 @@ export default function Reports() {
             {hasActiveFilters && (
               <button
                 onClick={clearAllFilters}
-                className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-800 bg-white border border-slate-200/80 px-2.5 py-1.5 rounded-lg shadow-2xs hover:shadow-xs transition-all"
+                className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-800 bg-white border border-slate-200/80 px-2.5 py-1.5 rounded-lg shadow-2xs hover:shadow-xs transition-all btn-press"
               >
                 <X className="w-3.5 h-3.5 text-slate-400" />
                 <span>Reset Filters</span>
@@ -253,14 +253,14 @@ export default function Reports() {
             hasActiveFilters ? (
               <button
                 onClick={clearAllFilters}
-                className="inline-flex items-center gap-1.5 bg-teal-600 text-white font-semibold px-4 py-2 rounded-lg text-xs hover:bg-teal-500 transition-colors"
+                className="inline-flex items-center gap-1.5 bg-teal-600 text-white font-semibold px-4 py-2 rounded-lg text-xs hover:bg-teal-500 transition-colors btn-press"
               >
                 <span>Clear Active Filters</span>
               </button>
             ) : (
               <Link
                 to="/report"
-                className="inline-flex items-center gap-1.5 bg-teal-600 text-white font-semibold px-4 py-2 rounded-lg text-xs hover:bg-teal-500 transition-colors"
+                className="inline-flex items-center gap-1.5 bg-teal-600 text-white font-semibold px-4 py-2 rounded-lg text-xs hover:bg-teal-500 transition-colors btn-press"
               >
                 <PlusCircle className="w-4 h-4" />
                 <span>Submit Initial Observation</span>
@@ -270,8 +270,13 @@ export default function Reports() {
         />
       ) : (
         <div className="space-y-3">
-          {reports.map((r) => (
-            <Card key={r.id} as="article" hoverEffect={true}>
+          {reports.map((r, idx) => (
+            <Card
+              key={r.id}
+              as="article"
+              hoverEffect={true}
+              className={`animate-fade-in stagger-${Math.min(idx + 1, 5)}`}
+            >
               <Link
                 to={`/reports/${r.id}`}
                 className="block p-4 sm:p-5 group"
@@ -364,7 +369,7 @@ export default function Reports() {
                 {page > 1 && (
                   <button
                     onClick={() => updateParam('page', String(page - 1))}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium border border-slate-300 rounded-lg bg-white hover:bg-slate-50 transition-colors shadow-2xs"
+                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium border border-slate-300 rounded-lg bg-white hover:bg-slate-50 transition-colors shadow-2xs btn-press"
                   >
                     <ChevronLeft className="w-3.5 h-3.5" />
                     <span>Previous</span>
@@ -373,7 +378,7 @@ export default function Reports() {
                 {page * 20 < total && (
                   <button
                     onClick={() => updateParam('page', String(page + 1))}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium border border-slate-300 rounded-lg bg-white hover:bg-slate-50 transition-colors shadow-2xs"
+                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium border border-slate-300 rounded-lg bg-white hover:bg-slate-50 transition-colors shadow-2xs btn-press"
                   >
                     <span>Next</span>
                     <ChevronRight className="w-3.5 h-3.5" />

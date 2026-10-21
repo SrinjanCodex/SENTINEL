@@ -66,6 +66,11 @@ const FILTER_CATEGORIES: { value: ReportCategory | ''; label: string }[] = [
   { value: 'uncertain',                   label: 'Uncertain' },
 ];
 
+const DEFAULT_TILE_URL =
+  'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png';
+const DEFAULT_ATTRIBUTION =
+  '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>';
+
 export default function MapPage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
@@ -161,11 +166,10 @@ export default function MapPage() {
                   style={{ height: '100%', width: '100%' }}
                 >
                   <TileLayer
-                    url={
-                      import.meta.env.VITE_MAP_TILE_URL ||
-                      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-                    }
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url={import.meta.env.VITE_MAP_TILE_URL || DEFAULT_TILE_URL}
+                    attribution={import.meta.env.VITE_MAP_ATTRIBUTION || DEFAULT_ATTRIBUTION}
+                    subdomains="abcd"
+                    maxZoom={19}
                   />
                   <MapFitter reports={filtered} />
                   {mappable.map((r) => (
@@ -261,8 +265,8 @@ export default function MapPage() {
               </div>
 
               <ul className="divide-y divide-slate-100">
-                {unmappable.map((r) => (
-                  <li key={r.id}>
+                {unmappable.map((r, idx) => (
+                  <li key={r.id} className={`animate-fade-in stagger-${Math.min(idx + 1, 5)}`}>
                     <Link
                       to={`/reports/${r.id}`}
                       className="block px-5 py-3.5 hover:bg-slate-50 transition-colors group"

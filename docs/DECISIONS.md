@@ -119,3 +119,29 @@ The final choice will be recorded here when Milestone 4 is implemented, with jus
 - Raw inline SVGs: functional but leads to code duplication across components.
 - Heroicons: suitable, but Lucide provides a broader set of telemetry and GIS icons (`Compass`, `Waves`, `Flame`, `Radio`).
 - Framer Motion: adds bundle overhead; CSS keyframe animations and Tailwind transitions were used instead.
+
+---
+
+## 2026-10-21 — English Map Tiles via CARTO Voyager
+
+**Decision:** Switch default map tiles from standard OpenStreetMap to CARTO Voyager (`https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png`) with dual OpenStreetMap + CARTO attribution.
+
+**Reason:** Standard OpenStreetMap raster tiles (`tile.openstreetmap.org`) render labels strictly in local scripts (e.g. Urdu in Lahore, Arabic in the Middle East). CARTO Voyager provides clean, high-contrast cartography with global place names rendered in English / Latin script. It is free for non-commercial, educational, and evaluation use without requiring an API key, signup, or paid subscription. The tile URL and attribution are also fully configurable via `VITE_MAP_TILE_URL` and `VITE_MAP_ATTRIBUTION` in `.env`.
+
+**Alternatives considered:**
+- Standard OSM tiles: Impossible to display English labels on raster tiles without client-side rendering.
+- Mapbox / MapTiler: Excellent English labelling, but requires an API key, account creation, or paid plan, violating the zero-secret frontend rule.
+- Wikimedia `osm-intl`: Free English tile endpoint, but blocks third-party website referrers with `403 Forbidden`.
+- MapLibre GL JS vector tiles: Vector rendering supports client-side font switching, but adds ~250 KB bundle overhead and requires vector styling pipelines. CARTO Voyager raster tiles drop in directly with zero bundle overhead.
+
+---
+
+## 2026-10-21 — Lightweight Animation Architecture (Native CSS + useCountUp)
+
+**Decision:** Implement fluid micro-animations (page transitions, count-up numeric counters, staggered card entrances, and button-press micro-feedback) using native CSS keyframes, utility classes, and a standalone zero-dependency React hook (`useCountUp`), avoiding heavy animation libraries.
+
+**Reason:** Keeps the frontend bundle slim and fast on low-powered mobile devices. Hardware-accelerated CSS animations (`transform`, `opacity`) execute on the compositor thread. Accessibility is guaranteed via `@media (prefers-reduced-motion: reduce)` which zeroes out all animation durations and transitions for sensitive users. The custom `useCountUp` hook uses standard `requestAnimationFrame` with quadratic ease-out.
+
+**Alternatives considered:**
+- Framer Motion: Adds ~35 KB+ gzipped and runtime overhead for simple fade/scale transitions.
+- React Spring: Powerful physics engine, but excessive for dashboard counters and card entrances.
