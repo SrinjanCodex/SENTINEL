@@ -97,12 +97,27 @@ The frontend will be available at: **http://localhost:5173**
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` and edit as needed:
+The project uses a single `.env` file located in the **top-level project root** folder (`SENTINEL/.env`). Vite is configured with `envDir: '../'` in `frontend/vite.config.ts`, so the frontend dev server automatically reads this root `.env` file.
+
+To create your `.env` file:
 
 ```powershell
-# From the SENTINEL root folder:
+# In the SENTINEL top-level root folder:
 Copy-Item .env.example .env
 ```
+
+### Variable Breakdown & Defaults
+
+| Variable | Required to fill in? | Default Value | Description |
+| :--- | :--- | :--- | :--- |
+| `VITE_API_BASE_URL` | No (keep default) | `http://localhost:8000` | The backend API URL for Milestone 2+ |
+| `VITE_USE_MOCK_API` | No (keep default) | `true` | `true` uses browser localStorage; `false` connects to live FastAPI backend |
+| `VITE_MAP_DEFAULT_LAT` | No (keep default) | `22.5` | Center latitude for map overview (India) |
+| `VITE_MAP_DEFAULT_LNG` | No (keep default) | `79.0` | Center longitude for map overview (India) |
+| `VITE_MAP_DEFAULT_ZOOM`| No (keep default) | `5` | Subcontinent-level overview zoom level |
+| `VITE_MAP_TILE_URL` | No (keep default) | `https://tile.openstreetmap.org/{z}/{x}/{y}.png` | Free standard OpenStreetMap tiles |
+| `VITE_MAP_ATTRIBUTION` | No (keep default) | OpenStreetMap attribution | Required legal attribution |
+| `VITE_MAP_API_KEY` | **Optional** | *(blank)* | **No key is needed.** Standard OSM tiles work without an API key. Only needed if you want MapTiler English labels. |
 
 `.env.example` contents:
 ```env
