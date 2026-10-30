@@ -2,8 +2,8 @@
  * SENTINEL — Application Navigation Command Bar
  * Production SaaS header with telemetry indicator, active pill states & mobile drawer
  */
-import { useState } from 'react';
-import { NavLink, Link, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Waves,
   LayoutDashboard,
@@ -13,6 +13,7 @@ import {
   Info,
   Menu,
   X,
+  Search,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -25,6 +26,21 @@ const NAV_ITEMS = [
 export function Navigation() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (
+        e.key === '/' &&
+        !['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)
+      ) {
+        e.preventDefault();
+        navigate('/reports');
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [navigate]);
 
   return (
     <header className="bg-slate-900 border-b border-slate-800/90 sticky top-0 z-50 shadow-sm backdrop-blur-md">
@@ -61,6 +77,19 @@ export function Navigation() {
               <span className="text-slate-500">·</span>
               <span className="text-amber-300 font-normal">Demo Data</span>
             </div>
+
+            {/* Quick Search Shortcut */}
+            <Link
+              to="/reports"
+              className="hidden xl:flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 text-slate-400 hover:text-slate-200 text-xs transition-colors"
+              title="Search records directory (Press /)"
+            >
+              <Search className="w-3.5 h-3.5 text-slate-400" />
+              <span>Query records…</span>
+              <kbd className="font-mono text-[10px] bg-slate-900 px-1.5 py-0.2 rounded border border-slate-700 text-slate-400">
+                /
+              </kbd>
+            </Link>
           </div>
 
           {/* Desktop Nav Items */}

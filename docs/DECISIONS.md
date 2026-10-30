@@ -195,4 +195,27 @@ The final choice will be recorded here when Milestone 4 is implemented, with jus
 3. **Privacy and Safety in Media Ingestion:** Citizen photo uploads could inadvertently expose GPS coordinates or camera serial numbers through EXIF metadata. Stripping EXIF metadata and renaming files to random UUIDs eliminates geolocation leakage, prevents directory traversal attacks, and ensures consistent JPEG/PNG/WebP formats.
 4. **Clean Abstraction Boundary:** The frontend `ApiClient` interface guarantees that UI components are completely decoupled from the transport layer. The application seamlessly operates against the mock database (offline localStorage) or the real FastAPI database without changing a single line of React code.
 
+---
+
+## 2026-10-31 — Layout V3: Bento Command Center, Master-Detail Reports Flow, Ambient Floating Tiles & Quick Action Panel
+
+**Decision:**
+1. Maintain the exact modern slate/navy/teal civic intelligence color palette, system sans typography, and component tokens established on `main` / `master`.
+2. Keep the `design-v2` branch (warm alabaster paper `#F7F5EE`, deep spruce `#215947`, and `Newsreader` editorial serif) isolated without merging, preserving it for future design reference.
+3. Overhaul the page layouts on a dedicated `layout-v3` branch:
+   - **Bento Dashboard:** Replaced the uniform row of cards with an asymmetric Bento grid featuring an interactive GIS spatial preview hero tile (8 cols), active anomaly correlator (4 cols), 4 animated telemetry metric tiles with `useCountUp`, and a live report activity feed.
+   - **Master-Detail Reports Directory:** Implemented a split-pane reading layout on desktop (7 cols report list, 5 cols sticky incident detail inspector) allowing inspection of report details, coordinates, and provenance without losing scroll position, while preserving full-page routing (`/reports/:id`) for mobile and deep links.
+   - **Grouped Incident Intake Form:** Restructured `ReportIncident` into 3 clearly defined visual sections (Observation Narrative & Severity, Spatial Geolocation & Address, Temporal Timestamp) accompanied by a sticky submission dock for seamless one-click submission.
+   - **Command Header & Search Shortcut:** Integrated a directory search shortcut in the top navigation triggered by the `/` keyboard shortcut.
+   - **Ambient Floating Tiles (`FloatingTiles.tsx`):** Added 6 subtle, abstract geometric wireframe tiles in page header backgrounds drifting via hardware-accelerated CSS keyframes, auto-pausing on tab blur (`visibilitychange`), and disabled under `prefers-reduced-motion`.
+   - **Floating Quick-Action Panel (`QuickReportFAB.tsx`):** Added a persistent bottom-right quick-intake button with pulsating telemetry status and full keyboard accessibility (`Tab`/`Enter`), automatically hidden on `/report`.
+
+**Reason:**
+Addresses the user's preference for the clean, high-contrast, production SaaS color scheme and typography while providing superior visual hierarchy, improved reading flow for incident triage, and tasteful micro-animations without adding external animation libraries or altering backend APIs.
+
+**Alternatives considered:**
+- Heavy modal drawer for report inspection: Interrupts navigation context and creates focus-trapping challenges; the sticky split-pane inspector preserves contextual reading flow on desktop.
+- Third-party animation library (Framer Motion / Spring): Evaluated but rejected; CSS hardware-accelerated keyframe transforms and the native `useCountUp` hook achieve identical smoothness with zero bundle overhead.
+
+
 

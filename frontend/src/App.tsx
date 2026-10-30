@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { Navigation } from './components/Navigation';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { QuickReportFAB } from './components/QuickReportFAB';
 import Dashboard from './pages/Dashboard';
 import ReportIncident from './pages/ReportIncident';
 import Reports from './pages/Reports';
@@ -87,6 +88,8 @@ export default function App() {
           </ErrorBoundary>
         </main>
 
+        <QuickReportFAB />
+
         <footer className="bg-slate-900 border-t border-slate-800 text-slate-400 text-xs py-6 px-4 sm:px-8 mt-auto">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
             <div className="space-y-1">
@@ -103,7 +106,7 @@ export default function App() {
                 System Specifications & Methodology
               </Link>
               <span className="text-slate-600">|</span>
-              <span className="text-slate-500 font-mono text-[11px]">Milestone 1 Enhanced</span>
+              <span className="text-slate-500 font-mono text-[11px]">Milestone 2 · Layout v3</span>
             </div>
           </div>
         </footer>

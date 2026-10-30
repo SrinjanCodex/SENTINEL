@@ -71,6 +71,15 @@
   - `src/lib/__tests__/classification.test.ts` (9 tests passed)
 - Production build verified (`npm run build` succeeds cleanly with 0 TypeScript/bundler errors)
 - Dev server verified (`npm run dev` serves HTTP 200 at http://localhost:5173)
+- Layout V3 (Dedicated Branch `layout-v3`):
+  - Retained the production SaaS slate-50/navy/teal design tokens and system sans typography.
+  - Asymmetric Bento Dashboard layout: GIS spatial preview hero tile (8 cols), active anomaly correlator (4 cols), 4 animated telemetry metrics, and a live report activity feed.
+  - Responsive Master-Detail reading flow on Reports page: left scrollable report stream (7 cols) with right sticky incident detail inspector (5 cols) on desktop, preserving scroll position and providing full-page fallback for mobile.
+  - Sectioned 3-part incident intake form with sticky submission action dock.
+  - Hardware-accelerated abstract geometric floating tiles (`FloatingTiles.tsx`), auto-pausing on tab blur and disabled under `prefers-reduced-motion`.
+  - Floating quick-action intake pill (`QuickReportFAB.tsx`) with full keyboard accessibility.
+  - Top command navigation with `/` keyboard shortcut for directory search.
+  - Note: Design Experiment V2 (warm paper `#F7F5EE`, deep spruce `#215947`, and Newsreader serif) preserved in branch `design-v2` for comparison.
 
 ### Milestone 2: Backend & Database Features (Tested)
 - FastAPI asynchronous web framework with standard Uvicorn runner
