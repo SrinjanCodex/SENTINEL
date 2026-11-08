@@ -49,6 +49,27 @@
   --color-slate-900: #0f172a;
 }
 
+/* ──────────────────────────────────────────────────────────────────────────
+   Motion Design Tokens & Coherent Easing Architecture
+   Fast: 150ms | Base: 250ms | Slow: 400ms | Easing: Fluid spring-like ease-out
+────────────────────────────────────────────────────────────────────────── */
+:root {
+  --motion-fast: 150ms;
+  --motion-base: 250ms;
+  --motion-slow: 400ms;
+
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Card 3D Depth Shadows & Top Highlight Edge */
+  --card-shadow-resting: 0 1px 3px rgba(15, 23, 42, 0.04), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
+  --card-shadow-hover: 0 10px 25px -4px rgba(15, 23, 42, 0.08), 0 4px 10px -2px rgba(15, 23, 42, 0.04);
+  --card-shadow-lifted: 0 18px 36px -6px rgba(15, 23, 42, 0.12), 0 6px 14px -3px rgba(15, 23, 42, 0.05);
+  --card-highlight-top: inset 0 1px 0 0 rgba(255, 255, 255, 0.92);
+}
+
 /* Base resets & typography refinement */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -110,6 +131,19 @@ body {
   top: 0;
 }
 
+/* ── View Transitions API Progressive Enhancement ───────────────────────── */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: 160ms var(--ease-spring) both pageFadeOut;
+}
+
+::view-transition-new(root) {
+  animation: 250ms var(--ease-spring) both pageFadeIn;
+}
+
 /* ── Animation Keyframes ─────────────────────────────────────────────────── */
 @keyframes fadeIn {
   from {
@@ -119,6 +153,109 @@ body {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pageFadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes cardRise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes drawerSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes drawerSlideUp {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.99);
+  }
+}
+
+@keyframes errorShake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  20%, 60% {
+    transform: translateX(-3px);
+  }
+  40%, 80% {
+    transform: translateX(3px);
+  }
+}
+
+@keyframes successPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(4px);
+  }
+  50% {
+    transform: scale(1.02) translateY(-1px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 
@@ -164,17 +301,83 @@ body {
   }
 }
 
+/* Floating ambient drift keyframes */
+@keyframes floatDrift1 {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(8px, -12px, 0) rotate(2deg);
+  }
+}
+
+@keyframes floatDrift2 {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(-10px, -8px, 0) rotate(-2.5deg);
+  }
+}
+
+@keyframes floatDrift3 {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(6px, 10px, 0) rotate(1.5deg);
+  }
+}
+
+/* Subtle civic grid texture for headers */
+.civic-grid-pattern {
+  background-image: radial-gradient(rgba(100, 116, 139, 0.12) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
 /* Animation utility classes */
+.animate-page-enter {
+  animation: pageFadeIn var(--motion-base) var(--ease-spring) both;
+}
+
+.animate-card-rise {
+  animation: cardRise var(--motion-base) var(--ease-spring) both;
+}
+
 .animate-fade-in {
-  animation: fadeIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: fadeIn var(--motion-base) var(--ease-spring) both;
 }
 
 .animate-scale-in {
-  animation: scaleIn 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: scaleIn var(--motion-base) var(--ease-spring) both;
 }
 
 .animate-slide-down {
-  animation: slideDown 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: slideDown var(--motion-fast) var(--ease-spring) both;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight var(--motion-base) var(--ease-spring) both;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft var(--motion-base) var(--ease-spring) both;
+}
+
+.animate-drawer-down {
+  animation: drawerSlideDown var(--motion-fast) var(--ease-spring) both;
+}
+
+.animate-drawer-up {
+  animation: drawerSlideUp var(--motion-fast) var(--ease-spring) both;
+}
+
+.animate-error-shake {
+  animation: errorShake 0.35s ease-in-out both;
+}
+
+.animate-success-pop {
+  animation: successPop var(--motion-slow) var(--ease-spring) both;
 }
 
 .animate-pulse-subtle {
@@ -187,26 +390,98 @@ body {
   animation: shimmer 1.5s infinite;
 }
 
-/* Stagger entrance delays */
+/* Stagger entrance delays (40-80ms progression) */
 .stagger-1 { animation-delay: 50ms; }
 .stagger-2 { animation-delay: 100ms; }
 .stagger-3 { animation-delay: 150ms; }
 .stagger-4 { animation-delay: 200ms; }
 .stagger-5 { animation-delay: 250ms; }
+.stagger-6 { animation-delay: 300ms; }
+.stagger-7 { animation-delay: 350ms; }
+.stagger-8 { animation-delay: 400ms; }
 
-/* Interactive micro-motion classes */
-.card-interactive {
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.2s ease;
+/* ── 3D Card Depth & Micro-Motion System ─────────────────────────────────── */
+.card-depth {
+  box-shadow: var(--card-highlight-top), var(--card-shadow-resting);
+  transition: transform var(--motion-base) var(--ease-spring),
+              box-shadow var(--motion-base) var(--ease-spring),
+              border-color var(--motion-fast) ease;
 }
-.card-interactive:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.08);
+
+.card-interactive {
+  box-shadow: var(--card-highlight-top), var(--card-shadow-resting);
+  transition: transform var(--motion-base) var(--ease-spring),
+              box-shadow var(--motion-base) var(--ease-spring),
+              border-color var(--motion-fast) ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card-depth:hover,
+  .card-interactive:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--card-highlight-top), var(--card-shadow-hover);
+  }
+
+  /* 3D Tilt container */
+  .card-3d {
+    position: relative;
+    box-shadow: var(--card-highlight-top), var(--card-shadow-resting);
+    transform: perspective(900px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)) translateY(var(--tilt-lift, 0px));
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    transition: transform var(--motion-base) var(--ease-spring),
+                box-shadow var(--motion-base) var(--ease-spring),
+                border-color var(--motion-fast) ease;
+  }
+
+  .card-3d.is-tilting {
+    /* Fast responsiveness while tracking pointer */
+    transition: transform 70ms linear,
+                box-shadow var(--motion-base) var(--ease-spring),
+                border-color var(--motion-fast) ease;
+  }
+
+  .card-3d:hover {
+    --tilt-lift: -3px;
+    box-shadow: var(--card-highlight-top), var(--card-shadow-hover);
+  }
+
+  /* Subtle spotlight sheen reflection on card surface */
+  .card-3d-sheen {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    z-index: 5;
+    background: radial-gradient(
+      circle 260px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(255, 255, 255, 0.2),
+      rgba(255, 255, 255, 0.04) 45%,
+      transparent 70%
+    );
+    opacity: 0;
+    transition: opacity var(--motion-fast) ease;
+  }
+
+  .card-3d:hover .card-3d-sheen {
+    opacity: 1;
+  }
+}
+
+@media (hover: none) or (pointer: coarse) {
+  .card-3d {
+    position: relative;
+    box-shadow: var(--card-highlight-top), var(--card-shadow-resting);
+    transition: transform var(--motion-fast) var(--ease-spring);
+  }
+  .card-3d:active {
+    transform: scale(0.98);
+  }
 }
 
 .btn-press {
-  transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1),
+  transition: transform 0.12s var(--ease-spring),
               background-color 0.15s ease,
               box-shadow 0.15s ease;
 }
@@ -224,7 +499,7 @@ details > summary::-webkit-details-marker {
   display: none;
 }
 details[open] > div {
-  animation: slideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: slideDown 0.22s var(--ease-spring) both;
 }
 
 /* Respect user's motion preferences strictly */
@@ -234,5 +509,15 @@ details[open] > div {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+  .card-3d, .card-depth, .card-interactive {
+    transform: none !important;
+    transition: none !important;
+  }
+  .card-3d:hover, .card-depth:hover, .card-interactive:hover {
+    transform: none !important;
+  }
+  .card-3d-sheen {
+    display: none !important;
   }
 }

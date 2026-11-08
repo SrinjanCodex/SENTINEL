@@ -70,11 +70,11 @@ export default function ReportDetail() {
   if (!report) return <ErrorAlert message="Report record could not be found." />;
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 pb-8 animate-fade-in">
+    <div className="max-w-3xl mx-auto space-y-6 pb-8 animate-page-enter">
       
       {/* Breadcrumb Navigation */}
-      <nav className="flex items-center gap-1.5 text-xs text-slate-500" aria-label="Breadcrumb">
-        <Link to="/reports" className="hover:text-teal-600 transition-colors flex items-center gap-1">
+      <nav className="flex items-center gap-1.5 text-xs text-slate-500 animate-fade-in stagger-1" aria-label="Breadcrumb">
+        <Link to="/reports" viewTransition className="hover:text-teal-600 transition-colors flex items-center gap-1">
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Incident Directory</span>
         </Link>
@@ -82,19 +82,23 @@ export default function ReportDetail() {
         <span className="font-mono text-slate-700 truncate max-w-[200px]">{report.id}</span>
       </nav>
 
-      <PageHeader
-        title="Observation Inspection"
-        subtitle={`Audit record for report ID ${report.id}. Immutable original text with system provenance.`}
-        badge={report.is_synthetic ? 'Synthetic Telemetry' : 'Local Sensor'}
-      />
+      <div className="animate-card-rise stagger-1">
+        <PageHeader
+          title="Observation Inspection"
+          subtitle={`Audit record for report ID ${report.id}. Immutable original text with system provenance.`}
+          badge={report.is_synthetic ? 'Synthetic Telemetry' : 'Local Sensor'}
+        />
+      </div>
 
       {report.is_synthetic && (
-        <SyntheticBanner message="This report is part of the synthetic baseline dataset. Provenance and timestamps are generated for algorithmic testing." />
+        <div className="animate-fade-in stagger-2">
+          <SyntheticBanner message="This report is part of the synthetic baseline dataset. Provenance and timestamps are generated for algorithmic testing." />
+        </div>
       )}
       {!report.is_synthetic && (
         <div
           role="note"
-          className="flex items-start gap-2.5 p-3.5 bg-blue-50/90 border border-blue-200/90 rounded-xl text-xs sm:text-sm text-blue-900 shadow-2xs"
+          className="flex items-start gap-2.5 p-3.5 bg-blue-50/90 border border-blue-200/90 rounded-xl text-xs sm:text-sm text-blue-900 shadow-2xs animate-fade-in stagger-2"
         >
           <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
           <span>
@@ -104,7 +108,7 @@ export default function ReportDetail() {
       )}
 
       {/* Status & Categorization Pill Strip */}
-      <div className="flex flex-wrap items-center gap-2.5">
+      <div className="flex flex-wrap items-center gap-2.5 animate-card-rise stagger-2">
         <StatusBadge status={report.status} size="md" />
         <CategoryBadge category={report.category} />
         {report.category_confidence != null && (
@@ -120,7 +124,7 @@ export default function ReportDetail() {
       </div>
 
       {/* Original Report Text Card */}
-      <Card className="overflow-hidden">
+      <Card hoverEffect={true} className="overflow-hidden animate-card-rise stagger-3">
         <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <FileText className="w-4 h-4 text-teal-600" />
@@ -139,7 +143,7 @@ export default function ReportDetail() {
       </Card>
 
       {/* Record Provenance Details Grid */}
-      <Card className="overflow-hidden">
+      <Card hoverEffect={true} className="overflow-hidden animate-card-rise stagger-4">
         <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
           <Fingerprint className="w-4 h-4 text-slate-500" />
           <h2 className="font-bold text-slate-900 text-xs sm:text-sm uppercase tracking-wider">
@@ -208,7 +212,7 @@ export default function ReportDetail() {
       </Card>
 
       {/* Downstream Analysis Roadmap Card */}
-      <Card className="p-5 sm:p-6 bg-slate-50/80 border-slate-200/80">
+      <Card hoverEffect={true} className="p-5 sm:p-6 bg-slate-50/80 border-slate-200/80 animate-card-rise stagger-5">
         <div className="flex items-center gap-2 mb-2">
           <Cpu className="w-4 h-4 text-teal-600" />
           <h3 className="font-bold text-slate-900 text-xs uppercase tracking-wider">

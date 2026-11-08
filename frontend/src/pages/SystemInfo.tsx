@@ -17,14 +17,16 @@ import {
 function Section({
   title,
   icon: Icon,
+  stagger = 'stagger-3',
   children,
 }: {
   title: string;
   icon?: typeof Info;
+  stagger?: string;
   children: ReactNode;
 }) {
   return (
-    <Card className="p-5 sm:p-6 overflow-hidden">
+    <Card hoverEffect={true} className={`p-5 sm:p-6 overflow-hidden animate-card-rise ${stagger}`}>
       <div className="flex items-center gap-2.5 mb-3 pb-3 border-b border-slate-100">
         {Icon && <Icon className="w-4 h-4 text-teal-600" />}
         <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
@@ -75,16 +77,18 @@ function ParamTable({
 
 export default function SystemInfo() {
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-8 animate-fade-in">
-      <PageHeader
-        title="System Specifications & Methodology"
-        subtitle="Transparent algorithmic principles, multi-factor correlation weights, and Missing-Signal rules."
-        badge="Specification Engine"
-      />
+    <div className="max-w-4xl mx-auto space-y-6 pb-8 animate-page-enter">
+      <div className="animate-card-rise stagger-1">
+        <PageHeader
+          title="System Specifications & Methodology"
+          subtitle="Transparent algorithmic principles, multi-factor correlation weights, and Missing-Signal rules."
+          badge="Specification Engine"
+        />
+      </div>
 
       <div
         role="note"
-        className="flex items-start gap-3 p-4 bg-amber-50/90 border border-amber-200/90 rounded-xl text-xs sm:text-sm text-amber-900 shadow-2xs"
+        className="flex items-start gap-3 p-4 bg-amber-50/90 border border-amber-200/90 rounded-xl text-xs sm:text-sm text-amber-900 shadow-2xs animate-fade-in stagger-2"
       >
         <Info className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
         <div className="leading-relaxed">
@@ -92,7 +96,7 @@ export default function SystemInfo() {
         </div>
       </div>
 
-      <Section title="What is SENTINEL?" icon={Info}>
+      <Section title="What is SENTINEL?" icon={Info} stagger="stagger-3">
         <p>
           SENTINEL is an <strong>AI-assisted civic intelligence and decision-support platform</strong> designed specifically for urban waterlogging and stormwater infrastructure failures. Rather than functioning as a standard grievance portal, SENTINEL correlates noisy, fragmentary citizen reports to detect systemic drainage blockages before catastrophic ponding occurs.
         </p>
@@ -102,7 +106,7 @@ export default function SystemInfo() {
         <SafetyNotice />
       </Section>
 
-      <Section title="Report Classification Baseline" icon={Code2}>
+      <Section title="Report Classification Baseline" icon={Code2} stagger="stagger-4">
         <p>
           Submitted observations are processed through a transparent, deterministic keyword matching classifier. Incoming descriptions are matched against categorized phrase tokens (e.g., <em>"road flooded"</em>, <em>"blocked drain"</em>, <em>"water entering building"</em>, <em>"standing water"</em>).
         </p>
@@ -114,7 +118,7 @@ export default function SystemInfo() {
         </p>
       </Section>
 
-      <Section title="Report Pair Matching Architecture" icon={Sliders}>
+      <Section title="Report Pair Matching Architecture" icon={Sliders} stagger="stagger-5">
         <p>
           Potential correlation between two distinct reports is assessed by computing a multi-factor pair match score:
         </p>
@@ -146,7 +150,7 @@ export default function SystemInfo() {
         />
       </Section>
 
-      <Section title="Prioritisation Scoring Formula" icon={Cpu}>
+      <Section title="Prioritisation Scoring Formula" icon={Cpu} stagger="stagger-6">
         <p>
           Correlated incident clusters receive a <strong>Prioritisation Index from 0 to 100</strong>. This score ranks incidents by corroborated evidence weight and potential civic hazard:
         </p>
@@ -165,7 +169,7 @@ export default function SystemInfo() {
         </p>
       </Section>
 
-      <Section title="Missing-Signal Detector (Signature Feature)" icon={AlertTriangle}>
+      <Section title="Missing-Signal Detector (Signature Feature)" icon={AlertTriangle} stagger="stagger-7">
         <p>
           The Missing-Signal Detector systematically evaluates the evidence graph and flags critical information gaps. A rule fires <strong>only when data is genuinely absent, stale, or conflicting</strong>:
         </p>
@@ -200,7 +204,7 @@ export default function SystemInfo() {
         </div>
       </Section>
 
-      <Section title="Status Verification Protocol" icon={ShieldCheck}>
+      <Section title="Status Verification Protocol" icon={ShieldCheck} stagger="stagger-8">
         <ul className="space-y-2 list-none pl-0">
           <li className="flex items-start gap-2">
             <span className="font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded text-[11px]">Suspected:</span>
@@ -225,7 +229,7 @@ export default function SystemInfo() {
         </ul>
       </Section>
 
-      <Section title="Data Source Attribution" icon={Database}>
+      <Section title="Data Source Attribution" icon={Database} stagger="stagger-8">
         <p>In Milestone 1, intelligence is derived strictly from:</p>
         <ul className="list-disc pl-5 space-y-1">
           <li><strong>Demonstration Dataset:</strong> 8 synthetic reports and 3 synthetic incidents (labelled ⚠️ DEMO).</li>

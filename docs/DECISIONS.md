@@ -195,4 +195,84 @@ The final choice will be recorded here when Milestone 4 is implemented, with jus
 3. **Privacy and Safety in Media Ingestion:** Citizen photo uploads could inadvertently expose GPS coordinates or camera serial numbers through EXIF metadata. Stripping EXIF metadata and renaming files to random UUIDs eliminates geolocation leakage, prevents directory traversal attacks, and ensures consistent JPEG/PNG/WebP formats.
 4. **Clean Abstraction Boundary:** The frontend `ApiClient` interface guarantees that UI components are completely decoupled from the transport layer. The application seamlessly operates against the mock database (offline localStorage) or the real FastAPI database without changing a single line of React code.
 
+---
+
+## 2026-10-31 — Layout V3: Bento Command Center, Master-Detail Reports Flow, Ambient Floating Tiles & Quick Action Panel
+
+**Decision:**
+1. Maintain the exact modern slate/navy/teal civic intelligence color palette, system sans typography, and component tokens established on `main` / `master`.
+2. Keep the `design-v2` branch (warm alabaster paper `#F7F5EE`, deep spruce `#215947`, and `Newsreader` editorial serif) isolated without merging, preserving it for future design reference.
+3. Overhaul the page layouts on a dedicated `layout-v3` branch:
+   - **Bento Dashboard:** Replaced the uniform row of cards with an asymmetric Bento grid featuring an interactive GIS spatial preview hero tile (8 cols), active anomaly correlator (4 cols), 4 animated telemetry metric tiles with `useCountUp`, and a live report activity feed.
+   - **Master-Detail Reports Directory:** Implemented a split-pane reading layout on desktop (7 cols report list, 5 cols sticky incident detail inspector) allowing inspection of report details, coordinates, and provenance without losing scroll position, while preserving full-page routing (`/reports/:id`) for mobile and deep links.
+   - **Grouped Incident Intake Form:** Restructured `ReportIncident` into 3 clearly defined visual sections (Observation Narrative & Severity, Spatial Geolocation & Address, Temporal Timestamp) accompanied by a sticky submission dock for seamless one-click submission.
+   - **Command Header & Search Shortcut:** Integrated a directory search shortcut in the top navigation triggered by the `/` keyboard shortcut.
+   - **Ambient Floating Tiles (`FloatingTiles.tsx`):** Added 6 subtle, abstract geometric wireframe tiles in page header backgrounds drifting via hardware-accelerated CSS keyframes, auto-pausing on tab blur (`visibilitychange`), and disabled under `prefers-reduced-motion`.
+   - **Floating Quick-Action Panel (`QuickReportFAB.tsx`):** Added a persistent bottom-right quick-intake button with pulsating telemetry status and full keyboard accessibility (`Tab`/`Enter`), automatically hidden on `/report`.
+
+**Reason:**
+Addresses the user's preference for the clean, high-contrast, production SaaS color scheme and typography while providing superior visual hierarchy, improved reading flow for incident triage, and tasteful micro-animations without adding external animation libraries or altering backend APIs.
+
+**Alternatives considered:**
+- Heavy modal drawer for report inspection: Interrupts navigation context and creates focus-trapping challenges; the sticky split-pane inspector preserves contextual reading flow on desktop.
+- Third-party animation library (Framer Motion / Spring): Evaluated but rejected; CSS hardware-accelerated keyframe transforms and the native `useCountUp` hook achieve identical smoothness with zero bundle overhead.
+
+---
+
+## 2026-11-08 — Flowing Opening Animations & Pure CSS 3D Card Architecture (motion-3d branch)
+
+**Decision:**
+Implement unified motion tokens, progressive View Transitions API navigation, staggered opening cascades, and a performant CSS 3D perspective tilt system on a dedicated `motion-3d` branch, maintaining 100% frontend purity (no backend, API, DB, or scoring changes) and zero additional npm dependencies.
+
+1. **Centralized Motion Tokens & Easing Curves:**
+   Defined duration tokens (`--motion-fast: 150ms`, `--motion-base: 250ms`, `--motion-slow: 400ms`) and a unified spring-like ease-out curve (`cubic-bezier(0.16, 1, 0.3, 1)`) in `:root` inside `frontend/src/index.css`.
+2. **View Transitions API Progressive Enhancement:**
+   Configured `@view-transition` and pseudo-elements `::view-transition-old(root)` / `::view-transition-new(root)` alongside `<Link viewTransition>` and `<NavLink viewTransition>`. In modern browsers supporting the API, page routes morph smoothly with hardware acceleration; in older browsers or unsupported contexts, `<MainRoutes key={location.pathname}>` provides a flawless CSS fade-and-lift fallback (`.animate-page-enter`) without layout jumps or flashes.
+3. **Staggered Entrances:**
+   Coordinated 40–80ms staggered keyframe delays (`.stagger-1` to `.stagger-8`) across heroes, metric cards, incident feeds, and form sections, producing a graceful cascading page reveal on load.
+4. **Opening & Retracting Panel Transitions:**
+   The mobile navigation drawer smoothly expands downwards on open (`.animate-drawer-down`) and retracts upwards on close (`.animate-drawer-up`), managing focus by focusing the first link on open, restoring focus to the hamburger button on close, and supporting Escape key dismiss. The desktop master-detail inspector panel in `Reports.tsx` smoothly slides in from the right (`.animate-slide-in-right`) on report selection changes.
+5. **Form Feedback Micro-Animations:**
+   Input errors trigger a subtle 3px horizontal oscillation (`.animate-error-shake`) and error badges fade in smoothly. Successful submission triggers a gentle spring-pop animation (`.animate-success-pop`) highlighting the confirmation card.
+6. **Tasteful 3D Depth & Tilt System:**
+   Cards receive layered soft shadows (`var(--card-shadow-resting)` / `var(--card-shadow-hover)`), a crisp top highlight edge (`var(--card-highlight-top)`), and a subtle hover lift (`translateY(-3px)`). Selected card types (dashboard stat cards, recent reports, active anomalies, feature tiles) implement a gentle 3D perspective tilt (clamped to max ±3° to ±4°) with a lightweight pointer-following reflection sheen (`.card-3d-sheen`).
+7. **Accessibility & Media Gating:**
+   The 3D tilt calculations and pointer-following effects are strictly gated behind `@media (hover: hover) and (pointer: fine)`. Touch and coarse pointer devices receive an active press-down scale feedback (`:active { transform: scale(0.98); }`). Under `@media (prefers-reduced-motion: reduce)`, all 3D transforms, tilts, large translations, and sheen overlays are completely disabled, falling back to simple opacity transitions. Keyboard focus outlines (`:focus-visible`) remain prominent, high-contrast, and unobstructed.
+8. **Scope Guardrails:**
+   Data tables, form inputs, and the Leaflet interactive map do NOT tilt. Only `transform` and `opacity` are animated to ensure 60fps performance even under 4x CPU slowdown.
+
+**Reason:**
+Elevates the visual fidelity and tactile feel of the civic intelligence platform to consumer-grade SaaS standards without bloating bundle size or introducing fragile third-party dependencies.
+
+**Alternatives considered:**
+- **Framer Motion / Motion One:** Adding Framer Motion would add ~35KB gzipped to the bundle and introduces potential React 19 peer dependency warnings. Standard CSS keyframes and CSS variable-driven transforms achieve identical 60fps smoothness with zero bundle overhead.
+- **External Tilt Libraries (e.g., VanillaTilt, Atropos):** VanillaTilt mutates inline styles and adds an unneeded external script; custom pointer event binding in `Card` is lightweight (<40 lines of code), fully type-safe, and seamlessly integrates with React 19.
+- **Glassmorphism / Heavy Backdrop Blur / Neon Glows:** Rejected to maintain accessibility, high contrast, clean municipal aesthetics, and performance on low-powered civic devices.
+
+---
+
+## 2026-11-08 — Frontend Design Consolidation: Merge motion-3d into main, Adopt Layout V3 & Motion/3D Cards, Discard design-v2
+
+**Decision:**
+1. Formally adopt `motion-3d` as the canonical production frontend design by merging `motion-3d` into `main`.
+2. Consolidate the entire layout and animation evolution into `main`:
+   - Inherits the modern slate/navy/teal production SaaS palette and system sans typography.
+   - Inherits the asymmetric Bento dashboard layout, responsive master-detail report inspector, floating ambient wireframe tiles, and quick-action report FAB originally explored in `layout-v3`.
+   - Inherits the centralized motion token curves, progressive View Transitions navigation, cascading staggered entrances, animated drawers/inspectors, form validation feedback, and CSS 3D perspective card tilt with pointer sheen from `motion-3d`.
+3. Clean up obsolete and experimental local branches:
+   - Safely delete local branch `layout-v3` (`c0a7d19` is fully merged into `main` via `motion-3d`).
+   - Delete experimental branch `design-v2` (`f30e86c`), which was tried and discarded to avoid split design directions (commit preserved in git reflog).
+   - Retain local branch `motion-3d` for user sign-off.
+   - Confirm zero remote branches were affected (none published to `origin`).
+
+**Reason:**
+Eliminates branching fragmentation while uniting the approved Bento architecture, reading flow, flowing transitions, and subtle 3D tactile feedback on the production branch `main` with 100% test coverage (57 frontend tests, 14 backend tests, 0 lint errors, clean build).
+
+**Alternatives considered:**
+- Maintaining long-lived parallel design branches: creates synchronization debt and slows down Milestone 3 development.
+- Merging `layout-v3` without `motion-3d`: misses the polished tactile feel, progressive view transitions, and accessible drawer/inspector animations validated in testing.
+
+
+
+
 

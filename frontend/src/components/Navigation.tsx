@@ -2,8 +2,8 @@
  * SENTINEL — Application Navigation Command Bar
  * Production SaaS header with telemetry indicator, active pill states & mobile drawer
  */
-import { useState } from 'react';
-import { NavLink, Link, useLocation } from 'react-router-dom';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Waves,
   LayoutDashboard,
@@ -13,6 +13,7 @@ import {
   Info,
   Menu,
   X,
+  Search,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -24,7 +25,51 @@ const NAV_ITEMS = [
 
 export function Navigation() {
   const [open, setOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const drawerRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleClose = useCallback(() => {
+    if (!open || isClosing) return;
+    setIsClosing(true);
+    setTimeout(() => {
+      setOpen(false);
+      setIsClosing(false);
+      menuButtonRef.current?.focus();
+    }, 150);
+  }, [open, isClosing]);
+
+  const handleToggle = () => {
+    if (open) {
+      handleClose();
+    } else {
+      setOpen(true);
+      // Move focus into the drawer once mounted
+      setTimeout(() => {
+        const firstLink = drawerRef.current?.querySelector('a');
+        firstLink?.focus();
+      }, 50);
+    }
+  };
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (
+        e.key === '/' &&
+        !['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)
+      ) {
+        e.preventDefault();
+        navigate('/reports');
+      } else if (e.key === 'Escape' && open) {
+        e.preventDefault();
+        handleClose();
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [navigate, open, handleClose]);
 
   return (
     <header className="bg-slate-900 border-b border-slate-800/90 sticky top-0 z-50 shadow-sm backdrop-blur-md">
@@ -35,6 +80,7 @@ export function Navigation() {
           <div className="flex items-center gap-4">
             <Link
               to="/"
+              viewTransition
               className="flex items-center gap-2.5 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 rounded-lg p-1"
               aria-label="SENTINEL Home"
             >
@@ -61,6 +107,20 @@ export function Navigation() {
               <span className="text-slate-500">·</span>
               <span className="text-amber-300 font-normal">Demo Data</span>
             </div>
+
+            {/* Quick Search Shortcut */}
+            <Link
+              to="/reports"
+              viewTransition
+              className="hidden xl:flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 text-slate-400 hover:text-slate-200 text-xs transition-colors"
+              title="Search records directory (Press /)"
+            >
+              <Search className="w-3.5 h-3.5 text-slate-400" />
+              <span>Query records…</span>
+              <kbd className="font-mono text-[10px] bg-slate-900 px-1.5 py-0.2 rounded border border-slate-700 text-slate-400">
+                /
+              </kbd>
+            </Link>
           </div>
 
           {/* Desktop Nav Items */}
@@ -72,6 +132,7 @@ export function Navigation() {
                   key={to}
                   to={to}
                   end={to === '/'}
+                  viewTransition
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold tracking-tight transition-all duration-150 ${
                     isActive
                       ? 'bg-slate-800 text-teal-400 border border-slate-700/70 shadow-xs'
@@ -89,6 +150,7 @@ export function Navigation() {
           <div className="flex items-center gap-2 sm:gap-3">
             <Link
               to="/report"
+              viewTransition
               className="inline-flex items-center gap-1.5 bg-teal-600 hover:bg-teal-500 active:bg-teal-700 text-white font-semibold text-xs px-3.5 py-2 rounded-lg transition-all shadow-xs hover:shadow-teal-900/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 btn-press"
             >
               <PlusCircle className="w-4 h-4" />
@@ -96,27 +158,35 @@ export function Navigation() {
             </Link>
 
             <button
+              ref={menuButtonRef}
               className="md:hidden p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
-              onClick={() => setOpen((o) => !o)}
+              onClick={handleToggle}
               aria-expanded={open}
               aria-controls="mobile-navigation"
               aria-label={open ? 'Close navigation menu' : 'Open navigation menu'}
             >
-              {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {open && !isClosing ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
 
         </div>
       </div>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Drawer with smooth opening and closing easing */}
       {open && (
-        <div id="mobile-navigation" className="md:hidden border-t border-slate-800 bg-slate-900/95 px-4 pt-3 pb-4 space-y-1 animate-fade-in">
+        <div
+          ref={drawerRef}
+          id="mobile-navigation"
+          className={`md:hidden border-t border-slate-800 bg-slate-900/95 px-4 pt-3 pb-4 space-y-1 ${
+            isClosing ? 'animate-drawer-up' : 'animate-drawer-down'
+          }`}
+        >
           {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
               end={to === '/'}
+              viewTransition
               className={({ isActive }) =>
                 `flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   isActive
@@ -124,7 +194,7 @@ export function Navigation() {
                     : 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
                 }`
               }
-              onClick={() => setOpen(false)}
+              onClick={handleClose}
             >
               <Icon className="w-4 h-4" />
               {label}

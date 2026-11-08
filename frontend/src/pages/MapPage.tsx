@@ -107,16 +107,22 @@ export default function MapPage() {
     'focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500 transition-all';
 
   return (
-    <div className="space-y-5 pb-8 animate-fade-in">
-      <PageHeader
-        title="GIS Spatial Telemetry"
-        subtitle={`${mappable.length} geo-referenced observation${mappable.length !== 1 ? 's' : ''} mapped · ${unmappable.length} unconfirmed locations isolated`}
-      />
+    <div className="space-y-5 pb-8 animate-page-enter">
+      <div className="animate-card-rise stagger-1">
+        <PageHeader
+          title="GIS Spatial Telemetry"
+          subtitle={`${mappable.length} geo-referenced observation${mappable.length !== 1 ? 's' : ''} mapped · ${unmappable.length} unconfirmed locations isolated`}
+        />
+      </div>
 
-      {hasDemo && <SyntheticBanner />}
+      {hasDemo && (
+        <div className="animate-fade-in stagger-2">
+          <SyntheticBanner />
+        </div>
+      )}
 
       {/* Map Control Toolbar */}
-      <Card className="p-3.5 bg-slate-50/50 flex flex-wrap items-center justify-between gap-3">
+      <Card className="p-3.5 bg-slate-50/50 flex flex-wrap items-center justify-between gap-3 animate-card-rise stagger-2">
         <div className="flex items-center gap-2.5">
           <Filter className="w-4 h-4 text-slate-500" />
           <label htmlFor="map-category-filter" className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
@@ -182,7 +188,7 @@ export default function MapPage() {
       ) : (
         <>
           {/* GIS Map Frame */}
-          <Card className="overflow-hidden border-slate-300 shadow-sm">
+          <Card className="overflow-hidden border-slate-300 shadow-sm animate-card-rise stagger-3">
             <div
               style={{ height: '520px' }}
               className="w-full relative bg-slate-100"
@@ -276,7 +282,7 @@ export default function MapPage() {
 
           {/* Explicit Unmapped Reports Segregation Callout */}
           {unmappable.length > 0 && (
-            <Card className="overflow-hidden border-amber-200/80">
+            <Card className="overflow-hidden border-amber-200/80 animate-card-rise stagger-4">
               <div className="px-5 py-3.5 border-b border-amber-100 bg-amber-50/60 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-amber-600" />
@@ -299,6 +305,7 @@ export default function MapPage() {
                   <li key={r.id} className={`animate-fade-in stagger-${Math.min(idx + 1, 5)}`}>
                     <Link
                       to={`/reports/${r.id}`}
+                      viewTransition
                       className="block px-5 py-3.5 hover:bg-slate-50 transition-colors group"
                     >
                       <div className="flex items-start justify-between gap-3">
