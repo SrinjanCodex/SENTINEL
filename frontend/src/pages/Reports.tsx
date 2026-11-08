@@ -120,27 +120,34 @@ export default function Reports() {
     'placeholder:text-slate-400 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500 transition-all';
 
   return (
-    <div className="space-y-5 pb-6 animate-fade-in">
+    <div className="space-y-5 pb-6 animate-page-enter">
       
       {/* Header */}
-      <PageHeader
-        title="Incident Directory"
-        subtitle={`System records contain ${total} community report${total !== 1 ? 's' : ''}. Preserved unaltered with provenance timestamps.`}
-        action={
-          <Link
-            to="/report"
-            className="inline-flex items-center gap-1.5 bg-teal-600 hover:bg-teal-500 active:bg-teal-700 text-white font-semibold px-3.5 py-2 rounded-lg text-xs shadow-xs transition-all btn-press"
-          >
-            <PlusCircle className="w-4 h-4" />
-            <span>Submit Report</span>
-          </Link>
-        }
-      />
+      <div className="animate-card-rise stagger-1">
+        <PageHeader
+          title="Incident Directory"
+          subtitle={`System records contain ${total} community report${total !== 1 ? 's' : ''}. Preserved unaltered with provenance timestamps.`}
+          action={
+            <Link
+              to="/report"
+              viewTransition
+              className="inline-flex items-center gap-1.5 bg-teal-600 hover:bg-teal-500 active:bg-teal-700 text-white font-semibold px-3.5 py-2 rounded-lg text-xs shadow-xs transition-all btn-press"
+            >
+              <PlusCircle className="w-4 h-4" />
+              <span>Submit Report</span>
+            </Link>
+          }
+        />
+      </div>
 
-      {hasDemo && <SyntheticBanner />}
+      {hasDemo && (
+        <div className="animate-fade-in stagger-2">
+          <SyntheticBanner />
+        </div>
+      )}
 
       {/* Filter Command Bar */}
-      <Card className="p-4 bg-slate-50/70 border-slate-200 shadow-xs">
+      <Card className="p-4 bg-slate-50/70 border-slate-200 shadow-xs animate-card-rise stagger-2">
         <fieldset>
           <legend className="sr-only">Filter incident reports</legend>
           <div className="flex flex-wrap gap-3 items-end">
@@ -300,6 +307,8 @@ export default function Reports() {
                   key={r.id}
                   as="article"
                   hoverEffect={true}
+                  tilt3d={true}
+                  maxTilt={3}
                   className={`animate-fade-in stagger-${Math.min(idx + 1, 5)} transition-all duration-150 ${
                     isSelected ? 'ring-2 ring-teal-500/80 border-teal-500/80 bg-teal-50/10' : ''
                   }`}
@@ -377,6 +386,7 @@ export default function Reports() {
                       <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
                         <Link
                           to={`/reports/${r.id}`}
+                          viewTransition
                           onClick={(e) => e.stopPropagation()}
                           className="p-1.5 rounded-lg text-slate-400 hover:text-teal-600 hover:bg-slate-100 transition-colors"
                           title="Open dedicated report page"
@@ -428,7 +438,10 @@ export default function Reports() {
             className="hidden lg:block lg:col-span-5 sticky top-20"
           >
             {selectedReport ? (
-              <Card className="p-5 border-slate-200 shadow-md space-y-4 animate-scale-in">
+              <Card
+                key={selectedReport.id}
+                className="p-5 border-slate-200 shadow-md space-y-4 animate-slide-in-right"
+              >
                 
                 {/* Panel Header */}
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -443,6 +456,7 @@ export default function Reports() {
 
                   <Link
                     to={`/reports/${selectedReport.id}`}
+                    viewTransition
                     className="inline-flex items-center gap-1 text-xs font-bold text-teal-600 hover:text-teal-700 bg-teal-50 hover:bg-teal-100/80 px-2.5 py-1.5 rounded-lg transition-colors border border-teal-200/60"
                   >
                     <span>Full Audit View</span>

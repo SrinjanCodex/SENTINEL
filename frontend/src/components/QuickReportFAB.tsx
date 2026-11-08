@@ -21,6 +21,7 @@ export function QuickReportFAB() {
     >
       <Link
         to="/report"
+        viewTransition
         className="flex items-center gap-2.5 bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white pl-3.5 pr-4 py-2.5 rounded-full shadow-lg hover:shadow-xl border border-slate-700/80 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2 btn-press"
         aria-label="File a new waterlogging observation (Quick Action)"
       >

@@ -52,11 +52,11 @@ export default function IncidentDetail() {
   if (!incident) return <ErrorAlert message="Incident cluster could not be found." />;
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 pb-8 animate-fade-in">
+    <div className="max-w-3xl mx-auto space-y-6 pb-8 animate-page-enter">
       
       {/* Breadcrumb Navigation */}
-      <nav className="flex items-center gap-1.5 text-xs text-slate-500" aria-label="Breadcrumb">
-        <Link to="/" className="hover:text-teal-600 transition-colors flex items-center gap-1">
+      <nav className="flex items-center gap-1.5 text-xs text-slate-500 animate-fade-in stagger-1" aria-label="Breadcrumb">
+        <Link to="/" viewTransition className="hover:text-teal-600 transition-colors flex items-center gap-1">
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Dashboard</span>
         </Link>
@@ -64,16 +64,20 @@ export default function IncidentDetail() {
         <span className="font-mono text-slate-700 truncate max-w-[240px]">{incident.title}</span>
       </nav>
 
-      <PageHeader
-        title="Incident Correlation Audit"
-        subtitle={`System-detected anomaly cluster ID ${incident.id}. Grouped by temporal and spatial proximity.`}
-        badge="Correlated Anomaly"
-      />
+      <div className="animate-card-rise stagger-1">
+        <PageHeader
+          title="Incident Correlation Audit"
+          subtitle={`System-detected anomaly cluster ID ${incident.id}. Grouped by temporal and spatial proximity.`}
+          badge="Correlated Anomaly"
+        />
+      </div>
 
-      <SyntheticBanner message="This incident was algorithmically synthesized from baseline demonstration data to illustrate multi-report correlation." />
+      <div className="animate-fade-in stagger-2">
+        <SyntheticBanner message="This incident was algorithmically synthesized from baseline demonstration data to illustrate multi-report correlation." />
+      </div>
 
       {/* Primary Header Card */}
-      <Card className="p-5 sm:p-6">
+      <Card hoverEffect={true} className="p-5 sm:p-6 animate-card-rise stagger-2">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
@@ -99,7 +103,7 @@ export default function IncidentDetail() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         
         {/* Priority Score Box */}
-        <Card className="p-4 sm:p-5">
+        <Card tilt3d={true} maxTilt={3} className="p-4 sm:p-5 animate-card-rise stagger-3">
           <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2">
             Prioritisation Index
           </p>
@@ -110,7 +114,7 @@ export default function IncidentDetail() {
         </Card>
 
         {/* Spatial Coordinates Box */}
-        <Card className="p-4 sm:p-5">
+        <Card tilt3d={true} maxTilt={3} className="p-4 sm:p-5 animate-card-rise stagger-4">
           <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
             <MapPin className="w-3.5 h-3.5 text-slate-400" />
             <span>Centroid Coordinate</span>

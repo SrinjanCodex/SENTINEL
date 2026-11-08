@@ -30,7 +30,7 @@ function MainRoutes() {
   const location = useLocation();
 
   return (
-    <div key={location.pathname} className="animate-fade-in">
+    <div key={location.pathname} className="animate-page-enter">
       <Routes location={location}>
         <Route path="/"                 element={<Dashboard />} />
         <Route path="/report"           element={<ReportIncident />} />
@@ -54,6 +54,7 @@ function MainRoutes() {
               </p>
               <Link
                 to="/"
+                viewTransition
                 className="inline-flex items-center gap-2 bg-teal-600 text-white font-semibold text-xs px-4 py-2.5 rounded-lg hover:bg-teal-500 transition-colors shadow-sm btn-press"
               >
                 <ArrowLeft className="w-4 h-4" />

@@ -80,6 +80,20 @@
   - Floating quick-action intake pill (`QuickReportFAB.tsx`) with full keyboard accessibility.
   - Top command navigation with `/` keyboard shortcut for directory search.
   - Note: Design Experiment V2 (warm paper `#F7F5EE`, deep spruce `#215947`, and Newsreader serif) preserved in branch `design-v2` for comparison.
+- Flowing Opening Animations & 3D Card Feel (Dedicated Branch `motion-3d`):
+  - Unified motion tokens in `frontend/src/index.css`: fast (150ms), base (250ms), slow (400ms) with spring-like cubic-bezier(0.16, 1, 0.3, 1) ease-out curve.
+  - View Transitions API progressive enhancement (`@view-transition`, `::view-transition-old`, `::view-transition-new`) on `<Link viewTransition>` and `<NavLink viewTransition>` with fallback page transitions.
+  - Seamless page transitions (`.animate-page-enter`) without layout jumps or white flashes.
+  - Staggered entrances across views (50ms intervals, `.stagger-1` to `.stagger-8`) with small rise (`translateY(8px)`) and fade.
+  - Opening & closing panels: Mobile menu drawer smoothly expands down (`.animate-drawer-down`) and retracts up (`.animate-drawer-up`), with focus trapping/restoration to trigger button and Escape key dismiss.
+  - Smooth list-to-detail interaction: selecting reports in the directory slides the inspector panel in from the right (`.animate-slide-in-right`).
+  - Single-run dashboard KPI counter animations with `useCountUp`.
+  - Form feedback micro-animations: gentle validation error shake (`.animate-error-shake`) and submit success celebration pop (`.animate-success-pop`).
+  - 3D depth and tilt for cards: layered soft shadows (`var(--card-shadow-resting)`, `var(--card-shadow-hover)`), top highlight edge (`var(--card-highlight-top)`), gentle perspective hover tilt (±3° to ±5°) with pointer-following sheen (`.card-3d-sheen`).
+  - Selective 3D scope: applied to dashboard stat tiles, report cards, and featured intake tiles; large map, form fields, and data tables stay flat.
+  - Fine pointer gating: `@media (hover: hover) and (pointer: fine)` with touch press-down fallback (`:active { transform: scale(0.98); }`).
+  - Accessibility: strictly respects `@media (prefers-reduced-motion: reduce)`, preserving visible focus rings (`:focus-visible`), contrast, and crisp text rendering.
+  - 57 automated tests passing across 7 test suites (including new `motionAndCard.test.tsx`), 0 build/type errors.
 
 ### Milestone 2: Backend & Database Features (Tested)
 - FastAPI asynchronous web framework with standard Uvicorn runner

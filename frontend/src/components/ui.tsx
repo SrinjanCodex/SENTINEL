@@ -2,7 +2,7 @@
  * SENTINEL — Production UI Component System
  * Refined civic-tech design with Lucide icons, fluid transitions & accessibility
  */
-import type { ReactNode } from 'react';
+import { useState, useRef, type ReactNode } from 'react';
 import type { ReportStatus, IncidentStatus, ReportCategory } from '../types';
 import { categoryLabel } from '../lib/classification';
 import { useCountUp } from '../lib/useCountUp';
@@ -142,22 +142,94 @@ export function SyntheticBanner({ message }: { message?: string }) {
 
 // ── Card ──────────────────────────────────────────────────────────────────────
 
-interface CardProps {
+interface CardProps extends React.HTMLAttributes<HTMLElement> {
   className?: string;
   children: ReactNode;
   as?: 'div' | 'article' | 'section' | 'aside';
   hoverEffect?: boolean;
+  tilt3d?: boolean;
+  maxTilt?: number;
 }
 
-export function Card({ className = '', children, as: Tag = 'div', hoverEffect = false }: CardProps) {
-  const hoverClass = hoverEffect
-    ? 'card-interactive hover:border-slate-300 hover:shadow-md'
-    : 'transition-shadow duration-200';
+export function Card({
+  className = '',
+  children,
+  as: Tag = 'div',
+  hoverEffect = false,
+  tilt3d = false,
+  maxTilt = 4,
+  ...rest
+}: CardProps) {
+  const cardRef = useRef<HTMLElement | null>(null);
+  const [isTilting, setIsTilting] = useState(false);
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLElement>) => {
+    if (!tilt3d) return;
+    const card = cardRef.current;
+    if (!card) return;
+
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      if (
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+        !window.matchMedia('(hover: hover) and (pointer: fine)').matches
+      ) {
+        return;
+      }
+    }
+
+    const rect = card.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+
+    const rawX = typeof e.clientX === 'number' && !isNaN(e.clientX) ? e.clientX : rect.left + rect.width / 2;
+    const rawY = typeof e.clientY === 'number' && !isNaN(e.clientY) ? e.clientY : rect.top + rect.height / 2;
+
+    const x = (rawX - rect.left) / rect.width;
+    const y = (rawY - rect.top) / rect.height;
+
+    const clampedX = Math.max(0, Math.min(1, x));
+    const clampedY = Math.max(0, Math.min(1, y));
+
+    const tiltX = (0.5 - clampedY) * (maxTilt * 2);
+    const tiltY = (clampedX - 0.5) * (maxTilt * 2);
+
+    card.style.setProperty('--tilt-x', `${tiltX.toFixed(2)}deg`);
+    card.style.setProperty('--tilt-y', `${tiltY.toFixed(2)}deg`);
+    card.style.setProperty('--mouse-x', `${(clampedX * 100).toFixed(1)}%`);
+    card.style.setProperty('--mouse-y', `${(clampedY * 100).toFixed(1)}%`);
+
+    if (!isTilting) {
+      setIsTilting(true);
+    }
+  };
+
+  const handlePointerLeave = () => {
+    if (!tilt3d) return;
+    const card = cardRef.current;
+    if (!card) return;
+
+    setIsTilting(false);
+    card.style.setProperty('--tilt-x', '0deg');
+    card.style.setProperty('--tilt-y', '0deg');
+    card.style.removeProperty('--mouse-x');
+    card.style.removeProperty('--mouse-y');
+  };
+
+  let motionClass = 'card-depth';
+  if (tilt3d) {
+    motionClass = `card-3d ${isTilting ? 'is-tilting' : ''} hover:border-slate-300`;
+  } else if (hoverEffect) {
+    motionClass = 'card-interactive hover:border-slate-300';
+  }
 
   return (
     <Tag
-      className={`bg-white rounded-xl border border-slate-200/80 shadow-[0_1px_3px_rgba(15,23,42,0.04)] ${hoverClass} ${className}`}
+      ref={cardRef as any}
+      onPointerMove={tilt3d ? handlePointerMove : rest.onPointerMove}
+      onPointerLeave={tilt3d ? handlePointerLeave : rest.onPointerLeave}
+      className={`bg-white rounded-xl border border-slate-200/80 ${motionClass} ${className}`}
+      {...rest}
     >
+      {tilt3d && <div className="card-3d-sheen" aria-hidden="true" />}
       {children}
     </Tag>
   );
@@ -172,6 +244,7 @@ interface StatCardProps {
   accent?: 'default' | 'blue' | 'teal' | 'amber' | 'red';
   icon?: LucideIcon;
   badge?: string;
+  tilt3d?: boolean;
 }
 
 const ACCENT_STYLES: Record<
@@ -192,12 +265,13 @@ export function StatCard({
   accent = 'default',
   icon: Icon = TrendingUp,
   badge,
+  tilt3d = true,
 }: StatCardProps) {
   const style = ACCENT_STYLES[accent];
   const animatedValue = useCountUp(value, 750);
 
   return (
-    <Card className="p-4 sm:p-5 relative overflow-hidden group hover:border-slate-300 card-interactive">
+    <Card tilt3d={tilt3d} maxTilt={4} className="p-4 sm:p-5 relative overflow-hidden group">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
@@ -342,7 +416,7 @@ export function EmptyState({ icon: Icon = FileQuestion, title, description, acti
 export function FieldError({ message }: { message?: string }) {
   if (!message) return null;
   return (
-    <div role="alert" className="mt-1.5 flex items-center gap-1.5 text-xs text-red-600 font-medium animate-fade-in">
+    <div role="alert" className="mt-1.5 flex items-center gap-1.5 text-xs text-red-600 font-medium animate-fade-in animate-error-shake">
       <AlertTriangle className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
       <span>{message}</span>
     </div>

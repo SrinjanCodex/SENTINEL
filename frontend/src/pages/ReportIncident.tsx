@@ -110,18 +110,22 @@ export default function ReportIncident() {
     }
   }
 
-  const inputClass =
-    'block w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 ' +
-    'placeholder:text-slate-400 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500 ' +
+  const inputClass = (hasError?: boolean) =>
+    `block w-full rounded-lg border ${
+      hasError
+        ? 'border-red-400 focus:border-red-500 focus:ring-red-500 animate-error-shake'
+        : 'border-slate-300 focus:border-teal-500 focus:ring-teal-500'
+    } px-3.5 py-2.5 text-xs sm:text-sm text-slate-900 ` +
+    'placeholder:text-slate-400 focus:outline-none focus:ring-1 ' +
     'disabled:bg-slate-50 disabled:text-slate-400 transition-all shadow-2xs';
 
   const labelClass = 'block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1';
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 pb-12 animate-fade-in">
+    <div className="max-w-3xl mx-auto space-y-6 pb-12 animate-page-enter">
       
       {/* Header Banner with Survey Texture & Ambient Floating Shapes */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-slate-800 p-6 sm:p-8 text-white shadow-sm">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-slate-800 p-6 sm:p-8 text-white shadow-sm animate-card-rise stagger-1">
         <div className="absolute inset-0 civic-grid-pattern opacity-40 pointer-events-none" />
         <FloatingTiles count={5} />
 
@@ -149,7 +153,7 @@ export default function ReportIncident() {
       {/* Local Storage Telemetry Banner */}
       <div
         role="note"
-        className="flex items-start gap-3 p-3.5 bg-blue-50/90 border border-blue-200/90 rounded-xl text-xs sm:text-sm text-blue-900 shadow-2xs"
+        className="flex items-start gap-3 p-3.5 bg-blue-50/90 border border-blue-200/90 rounded-xl text-xs sm:text-sm text-blue-900 shadow-2xs animate-fade-in stagger-2"
       >
         <div className="p-1 rounded-md bg-blue-100 text-blue-700 shrink-0 mt-0.5">
           <Info className="w-4 h-4" />
@@ -161,7 +165,7 @@ export default function ReportIncident() {
 
       {/* Success Notification Card */}
       {success && (
-        <Card className="p-5 border-emerald-300 bg-emerald-50/70 shadow-sm animate-scale-in">
+        <Card className="p-5 border-emerald-300 bg-emerald-50/70 shadow-sm animate-success-pop">
           <div className="flex items-start gap-3.5">
             <div className="p-1.5 rounded-full bg-emerald-100 text-emerald-700 shrink-0">
               <CheckCircle2 className="w-5 h-5" />
@@ -176,6 +180,7 @@ export default function ReportIncident() {
               <div className="pt-2 flex items-center gap-3">
                 <Link
                   to={`/reports/${success}`}
+                  viewTransition
                   className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-800 hover:text-emerald-950 underline"
                 >
                   <span>Inspect Dispatched Record</span>
@@ -204,7 +209,7 @@ export default function ReportIncident() {
         className="space-y-6"
       >
         {/* Section 1: Observation & Severity */}
-        <Card className="p-5 sm:p-6 shadow-sm space-y-5">
+        <Card className="p-5 sm:p-6 shadow-sm space-y-5 animate-card-rise stagger-2">
           <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
             <div className="p-1.5 rounded-lg bg-teal-50 text-teal-600">
               <FileText className="w-4 h-4" />
@@ -242,7 +247,7 @@ export default function ReportIncident() {
               value={form.description}
               onChange={handleChange}
               placeholder="Describe physical conditions observed: water depth (curb, ankle, vehicle axle), drain status (clogged grate, bubbling manhole), surface road disruption, or structural ingress."
-              className={`${inputClass} ${errors.description ? 'border-rose-400 focus:ring-rose-400' : ''}`}
+              className={inputClass(!!errors.description)}
               aria-required="true"
               aria-describedby={errors.description ? 'field-description-error' : undefined}
               aria-invalid={!!errors.description}
@@ -268,7 +273,7 @@ export default function ReportIncident() {
               name="severity"
               value={form.severity}
               onChange={handleChange}
-              className={inputClass}
+              className={inputClass(!!errors.severity)}
               aria-describedby="severity-hint"
               disabled={submitting}
             >
@@ -287,7 +292,7 @@ export default function ReportIncident() {
         </Card>
 
         {/* Section 2: Spatial Coordinates & Address */}
-        <Card className="p-5 sm:p-6 shadow-sm space-y-5">
+        <Card className="p-5 sm:p-6 shadow-sm space-y-5 animate-card-rise stagger-3">
           <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
             <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
               <Compass className="w-4 h-4" />
@@ -315,7 +320,7 @@ export default function ReportIncident() {
                 value={form.address}
                 onChange={handleChange}
                 placeholder="e.g., Canal Road opposite Main Market gate, Sector 4"
-                className={`pl-9 ${inputClass}`}
+                className={`pl-9 ${inputClass(!!errors.address)}`}
                 disabled={submitting}
               />
             </div>
@@ -341,7 +346,7 @@ export default function ReportIncident() {
                     value={form.latitude}
                     onChange={handleChange}
                     placeholder="Latitude (e.g., 22.5726)"
-                    className={`pl-9 ${inputClass} ${errors.latitude || errors.coordinates ? 'border-rose-400' : ''}`}
+                    className={`pl-9 ${inputClass(!!errors.latitude || !!errors.coordinates)}`}
                     disabled={submitting}
                   />
                 </div>
@@ -359,7 +364,7 @@ export default function ReportIncident() {
                     value={form.longitude}
                     onChange={handleChange}
                     placeholder="Longitude (e.g., 88.3639)"
-                    className={`pl-9 ${inputClass} ${errors.longitude || errors.coordinates ? 'border-rose-400' : ''}`}
+                    className={`pl-9 ${inputClass(!!errors.longitude || !!errors.coordinates)}`}
                     disabled={submitting}
                   />
                 </div>
@@ -374,7 +379,7 @@ export default function ReportIncident() {
         </Card>
 
         {/* Section 3: Observation Time & Photo Notice */}
-        <Card className="p-5 sm:p-6 shadow-sm space-y-5">
+        <Card className="p-5 sm:p-6 shadow-sm space-y-5 animate-card-rise stagger-4">
           <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
             <div className="p-1.5 rounded-lg bg-amber-50 text-amber-600">
               <Calendar className="w-4 h-4" />
@@ -402,7 +407,7 @@ export default function ReportIncident() {
                 value={form.observed_at}
                 onChange={handleChange}
                 max={maxDateTime}
-                className={`pl-9 ${inputClass} ${errors.observed_at ? 'border-rose-400' : ''}`}
+                className={`pl-9 ${inputClass(!!errors.observed_at)}`}
                 disabled={submitting}
               />
             </div>
@@ -421,7 +426,7 @@ export default function ReportIncident() {
         </Card>
 
         {/* Sticky Submit Action Bar */}
-        <div className="sticky bottom-4 z-30 bg-white/95 backdrop-blur-md p-4 rounded-2xl border border-slate-200/90 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="sticky bottom-4 z-30 bg-white/95 backdrop-blur-md p-4 rounded-2xl border border-slate-200/90 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4 animate-card-rise stagger-5">
           <div className="text-xs text-slate-500 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
             <span>Ready to commit observation to civic store</span>

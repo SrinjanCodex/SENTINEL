@@ -217,5 +217,38 @@ Addresses the user's preference for the clean, high-contrast, production SaaS co
 - Heavy modal drawer for report inspection: Interrupts navigation context and creates focus-trapping challenges; the sticky split-pane inspector preserves contextual reading flow on desktop.
 - Third-party animation library (Framer Motion / Spring): Evaluated but rejected; CSS hardware-accelerated keyframe transforms and the native `useCountUp` hook achieve identical smoothness with zero bundle overhead.
 
+---
+
+## 2026-11-08 — Flowing Opening Animations & Pure CSS 3D Card Architecture (motion-3d branch)
+
+**Decision:**
+Implement unified motion tokens, progressive View Transitions API navigation, staggered opening cascades, and a performant CSS 3D perspective tilt system on a dedicated `motion-3d` branch, maintaining 100% frontend purity (no backend, API, DB, or scoring changes) and zero additional npm dependencies.
+
+1. **Centralized Motion Tokens & Easing Curves:**
+   Defined duration tokens (`--motion-fast: 150ms`, `--motion-base: 250ms`, `--motion-slow: 400ms`) and a unified spring-like ease-out curve (`cubic-bezier(0.16, 1, 0.3, 1)`) in `:root` inside `frontend/src/index.css`.
+2. **View Transitions API Progressive Enhancement:**
+   Configured `@view-transition` and pseudo-elements `::view-transition-old(root)` / `::view-transition-new(root)` alongside `<Link viewTransition>` and `<NavLink viewTransition>`. In modern browsers supporting the API, page routes morph smoothly with hardware acceleration; in older browsers or unsupported contexts, `<MainRoutes key={location.pathname}>` provides a flawless CSS fade-and-lift fallback (`.animate-page-enter`) without layout jumps or flashes.
+3. **Staggered Entrances:**
+   Coordinated 40–80ms staggered keyframe delays (`.stagger-1` to `.stagger-8`) across heroes, metric cards, incident feeds, and form sections, producing a graceful cascading page reveal on load.
+4. **Opening & Retracting Panel Transitions:**
+   The mobile navigation drawer smoothly expands downwards on open (`.animate-drawer-down`) and retracts upwards on close (`.animate-drawer-up`), managing focus by focusing the first link on open, restoring focus to the hamburger button on close, and supporting Escape key dismiss. The desktop master-detail inspector panel in `Reports.tsx` smoothly slides in from the right (`.animate-slide-in-right`) on report selection changes.
+5. **Form Feedback Micro-Animations:**
+   Input errors trigger a subtle 3px horizontal oscillation (`.animate-error-shake`) and error badges fade in smoothly. Successful submission triggers a gentle spring-pop animation (`.animate-success-pop`) highlighting the confirmation card.
+6. **Tasteful 3D Depth & Tilt System:**
+   Cards receive layered soft shadows (`var(--card-shadow-resting)` / `var(--card-shadow-hover)`), a crisp top highlight edge (`var(--card-highlight-top)`), and a subtle hover lift (`translateY(-3px)`). Selected card types (dashboard stat cards, recent reports, active anomalies, feature tiles) implement a gentle 3D perspective tilt (clamped to max ±3° to ±4°) with a lightweight pointer-following reflection sheen (`.card-3d-sheen`).
+7. **Accessibility & Media Gating:**
+   The 3D tilt calculations and pointer-following effects are strictly gated behind `@media (hover: hover) and (pointer: fine)`. Touch and coarse pointer devices receive an active press-down scale feedback (`:active { transform: scale(0.98); }`). Under `@media (prefers-reduced-motion: reduce)`, all 3D transforms, tilts, large translations, and sheen overlays are completely disabled, falling back to simple opacity transitions. Keyboard focus outlines (`:focus-visible`) remain prominent, high-contrast, and unobstructed.
+8. **Scope Guardrails:**
+   Data tables, form inputs, and the Leaflet interactive map do NOT tilt. Only `transform` and `opacity` are animated to ensure 60fps performance even under 4x CPU slowdown.
+
+**Reason:**
+Elevates the visual fidelity and tactile feel of the civic intelligence platform to consumer-grade SaaS standards without bloating bundle size or introducing fragile third-party dependencies.
+
+**Alternatives considered:**
+- **Framer Motion / Motion One:** Adding Framer Motion would add ~35KB gzipped to the bundle and introduces potential React 19 peer dependency warnings. Standard CSS keyframes and CSS variable-driven transforms achieve identical 60fps smoothness with zero bundle overhead.
+- **External Tilt Libraries (e.g., VanillaTilt, Atropos):** VanillaTilt mutates inline styles and adds an unneeded external script; custom pointer event binding in `Card` is lightweight (<40 lines of code), fully type-safe, and seamlessly integrates with React 19.
+- **Glassmorphism / Heavy Backdrop Blur / Neon Glows:** Rejected to maintain accessibility, high contrast, clean municipal aesthetics, and performance on low-powered civic devices.
+
+
 
 

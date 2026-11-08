@@ -100,10 +100,10 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="space-y-6 pb-6 animate-fade-in">
+    <div className="space-y-6 pb-6 animate-page-enter">
       
       {/* Bento Header Tile with Ambient Floating Shapes & Grid Texture */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-slate-800 p-6 sm:p-8 text-white shadow-sm">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-slate-800 p-6 sm:p-8 text-white shadow-sm animate-card-rise stagger-1">
         <div className="absolute inset-0 civic-grid-pattern opacity-40 pointer-events-none" />
         <FloatingTiles count={6} />
 
@@ -131,6 +131,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-3 shrink-0 self-start md:self-auto">
             <Link
               to="/report"
+              viewTransition
               className="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-500 active:bg-teal-700 text-white font-semibold text-xs px-4 py-2.5 rounded-xl transition-all shadow-md hover:shadow-teal-900/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 btn-press"
             >
               <PlusCircle className="w-4 h-4" />
@@ -138,6 +139,7 @@ export default function Dashboard() {
             </Link>
             <Link
               to="/map"
+              viewTransition
               className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-xs px-3.5 py-2.5 rounded-xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 btn-press"
             >
               <Map className="w-4 h-4 text-teal-400" />
@@ -149,7 +151,9 @@ export default function Dashboard() {
 
       {/* Demonstration Banner */}
       {stats?.is_demonstration && (
-        <SyntheticBanner message="Dashboard computes indicators from demonstration baseline records plus any reports submitted within this browser session." />
+        <div className="animate-fade-in stagger-2">
+          <SyntheticBanner message="Dashboard computes indicators from demonstration baseline records plus any reports submitted within this browser session." />
+        </div>
       )}
 
       {/* Bento Metric Strip: Asymmetric KPI Layout */}
@@ -157,7 +161,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           
           {/* Card 1: Total Reports */}
-          <Card className="p-4 sm:p-5 relative overflow-hidden group hover:border-slate-300 card-interactive">
+          <Card tilt3d={true} maxTilt={4} className="p-4 sm:p-5 relative overflow-hidden group hover:border-slate-300 animate-card-rise stagger-1">
             <div className="flex items-center justify-between gap-2 mb-2">
               <span className="text-xs font-semibold text-slate-600 tracking-tight">Total Reports</span>
               <div className="p-2 rounded-lg bg-slate-100 text-slate-600 group-hover:scale-105 transition-transform">
@@ -176,7 +180,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Card 2: Potential Clusters */}
-          <Card className="p-4 sm:p-5 relative overflow-hidden group hover:border-slate-300 card-interactive">
+          <Card tilt3d={true} maxTilt={4} className="p-4 sm:p-5 relative overflow-hidden group hover:border-slate-300 animate-card-rise stagger-2">
             <div className="flex items-center justify-between gap-2 mb-2">
               <span className="text-xs font-semibold text-slate-600 tracking-tight">Potential Clusters</span>
               <div className="p-2 rounded-lg bg-blue-50 text-blue-600 group-hover:scale-105 transition-transform">
@@ -195,7 +199,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Card 3: Awaiting Inspection */}
-          <Card className="p-4 sm:p-5 relative overflow-hidden group hover:border-slate-300 card-interactive">
+          <Card tilt3d={true} maxTilt={4} className="p-4 sm:p-5 relative overflow-hidden group hover:border-slate-300 animate-card-rise stagger-3">
             <div className="flex items-center justify-between gap-2 mb-2">
               <span className="text-xs font-semibold text-slate-600 tracking-tight">Awaiting Inspection</span>
               <div className="p-2 rounded-lg bg-amber-50 text-amber-600 group-hover:scale-105 transition-transform">
@@ -214,7 +218,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Card 4: High Priority */}
-          <Card className="p-4 sm:p-5 relative overflow-hidden group hover:border-slate-300 card-interactive">
+          <Card tilt3d={true} maxTilt={4} className="p-4 sm:p-5 relative overflow-hidden group hover:border-slate-300 animate-card-rise stagger-4">
             <div className="flex items-center justify-between gap-2 mb-2">
               <span className="text-xs font-semibold text-slate-600 tracking-tight">High Priority</span>
               <div className="p-2 rounded-lg bg-red-50 text-red-600 group-hover:scale-105 transition-transform">
@@ -241,8 +245,8 @@ export default function Dashboard() {
       {/* Main Bento Feature Tiles: 12-Column Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* Bento Hero Tile: Interactive GIS Spatial Overview (8 Columns) */}
-        <section className="lg:col-span-8" aria-label="Spatial GIS Preview">
+        {/* Bento Hero Tile: Interactive GIS Spatial Overview (8 Columns) - Note: Large Map does not tilt */}
+        <section className="lg:col-span-8 animate-card-rise stagger-3" aria-label="Spatial GIS Preview">
           <Card className="overflow-hidden h-full flex flex-col shadow-sm">
             <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
               <div className="flex items-center gap-2.5">
@@ -264,6 +268,7 @@ export default function Dashboard() {
 
               <Link
                 to="/map"
+                viewTransition
                 className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-600 hover:text-teal-700 bg-white border border-slate-200/80 px-3 py-1.5 rounded-lg shadow-2xs hover:shadow-xs transition-all btn-press"
               >
                 <span>Interactive Map</span>
@@ -337,7 +342,7 @@ export default function Dashboard() {
         </section>
 
         {/* Bento Side Tile: Active Anomalies Correlator (4 Columns) */}
-        <section className="lg:col-span-4" aria-label="Potential Incident Clusters">
+        <section className="lg:col-span-4 animate-card-rise stagger-4" aria-label="Potential Incident Clusters">
           <Card className="h-full flex flex-col shadow-sm">
             <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
               <div className="flex items-center gap-2">
@@ -371,6 +376,7 @@ export default function Dashboard() {
                     <StatusBadge status={inc.verification_status} size="sm" />
                     <Link
                       to={`/incidents/${inc.id}`}
+                      viewTransition
                       className="text-[11px] font-semibold text-teal-600 hover:text-teal-700 flex items-center gap-1 transition-colors"
                     >
                       Audit <ArrowRight className="w-3 h-3" />
@@ -392,7 +398,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* Recent Reports Stream (8 Columns) */}
-        <section className="lg:col-span-8" aria-label="Recent reports stream">
+        <section className="lg:col-span-8 animate-card-rise stagger-5" aria-label="Recent reports stream">
           <Card className="h-full flex flex-col shadow-sm">
             <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70 rounded-t-xl">
               <div className="flex items-center gap-2">
@@ -401,6 +407,7 @@ export default function Dashboard() {
               </div>
               <Link
                 to="/reports"
+                viewTransition
                 className="inline-flex items-center gap-1 text-xs text-teal-600 hover:text-teal-700 font-semibold transition-colors"
               >
                 <span>Full Directory</span>
@@ -411,7 +418,7 @@ export default function Dashboard() {
             {recent.length === 0 ? (
               <div className="p-8 text-center text-xs text-slate-400 flex-1 flex flex-col justify-center items-center">
                 <p>No community reports logged in this session yet.</p>
-                <Link to="/report" className="mt-2 text-teal-600 font-semibold hover:underline">
+                <Link to="/report" viewTransition className="mt-2 text-teal-600 font-semibold hover:underline">
                   Submit the initial observation →
                 </Link>
               </div>
@@ -421,6 +428,7 @@ export default function Dashboard() {
                   <li key={r.id} role="listitem" className={`animate-fade-in stagger-${Math.min(idx + 1, 5)}`}>
                     <Link
                       to={`/reports/${r.id}`}
+                      viewTransition
                       className="block px-5 py-3.5 hover:bg-slate-50/90 transition-all duration-150 group"
                     >
                       <div className="flex items-start justify-between gap-3">
@@ -469,9 +477,9 @@ export default function Dashboard() {
           </Card>
         </section>
 
-        {/* Community Sensor Intake Bento Tile (4 Columns) */}
-        <section className="lg:col-span-4" aria-label="Community Sensor Information">
-          <Card className="p-5 h-full flex flex-col justify-between bg-gradient-to-br from-teal-500/10 via-slate-50 to-white border-teal-200/70 shadow-sm">
+        {/* Community Sensor Intake Bento Tile (4 Columns) - Feature tile with 3D feel */}
+        <section className="lg:col-span-4 animate-card-rise stagger-6" aria-label="Community Sensor Information">
+          <Card tilt3d={true} maxTilt={3} className="p-5 h-full flex flex-col justify-between bg-gradient-to-br from-teal-500/10 via-slate-50 to-white border-teal-200/70 shadow-sm">
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-xl bg-teal-600 text-white shadow-xs">
@@ -510,6 +518,7 @@ export default function Dashboard() {
             <div className="pt-4 border-t border-teal-100/80">
               <Link
                 to="/report"
+                viewTransition
                 className="w-full inline-flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-500 active:bg-teal-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-xs hover:shadow-md transition-all btn-press"
               >
                 <PlusCircle className="w-4 h-4" />
