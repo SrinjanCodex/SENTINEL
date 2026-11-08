@@ -1,8 +1,8 @@
 # SENTINEL — Project Status
 
-**Last Updated:** 2026-10-21
+**Last Updated:** 2026-11-08
 **Current Milestone:** 2 — Backend & Database
-**Status:** ✅ Complete (Milestones 1 & 2 verified; ready for Milestone 3 approval)
+**Status:** ✅ Complete (Milestones 1 & 2 verified; Frontend Design & Motion consolidated on `main`; ready for Milestone 3 approval)
 
 ---
 
@@ -71,29 +71,30 @@
   - `src/lib/__tests__/classification.test.ts` (9 tests passed)
 - Production build verified (`npm run build` succeeds cleanly with 0 TypeScript/bundler errors)
 - Dev server verified (`npm run dev` serves HTTP 200 at http://localhost:5173)
-- Layout V3 (Dedicated Branch `layout-v3`):
-  - Retained the production SaaS slate-50/navy/teal design tokens and system sans typography.
-  - Asymmetric Bento Dashboard layout: GIS spatial preview hero tile (8 cols), active anomaly correlator (4 cols), 4 animated telemetry metrics, and a live report activity feed.
-  - Responsive Master-Detail reading flow on Reports page: left scrollable report stream (7 cols) with right sticky incident detail inspector (5 cols) on desktop, preserving scroll position and providing full-page fallback for mobile.
-  - Sectioned 3-part incident intake form with sticky submission action dock.
-  - Hardware-accelerated abstract geometric floating tiles (`FloatingTiles.tsx`), auto-pausing on tab blur and disabled under `prefers-reduced-motion`.
-  - Floating quick-action intake pill (`QuickReportFAB.tsx`) with full keyboard accessibility.
-  - Top command navigation with `/` keyboard shortcut for directory search.
-  - Note: Design Experiment V2 (warm paper `#F7F5EE`, deep spruce `#215947`, and Newsreader serif) preserved in branch `design-v2` for comparison.
-- Flowing Opening Animations & 3D Card Feel (Dedicated Branch `motion-3d`):
-  - Unified motion tokens in `frontend/src/index.css`: fast (150ms), base (250ms), slow (400ms) with spring-like cubic-bezier(0.16, 1, 0.3, 1) ease-out curve.
-  - View Transitions API progressive enhancement (`@view-transition`, `::view-transition-old`, `::view-transition-new`) on `<Link viewTransition>` and `<NavLink viewTransition>` with fallback page transitions.
-  - Seamless page transitions (`.animate-page-enter`) without layout jumps or white flashes.
-  - Staggered entrances across views (50ms intervals, `.stagger-1` to `.stagger-8`) with small rise (`translateY(8px)`) and fade.
-  - Opening & closing panels: Mobile menu drawer smoothly expands down (`.animate-drawer-down`) and retracts up (`.animate-drawer-up`), with focus trapping/restoration to trigger button and Escape key dismiss.
-  - Smooth list-to-detail interaction: selecting reports in the directory slides the inspector panel in from the right (`.animate-slide-in-right`).
-  - Single-run dashboard KPI counter animations with `useCountUp`.
-  - Form feedback micro-animations: gentle validation error shake (`.animate-error-shake`) and submit success celebration pop (`.animate-success-pop`).
-  - 3D depth and tilt for cards: layered soft shadows (`var(--card-shadow-resting)`, `var(--card-shadow-hover)`), top highlight edge (`var(--card-highlight-top)`), gentle perspective hover tilt (±3° to ±5°) with pointer-following sheen (`.card-3d-sheen`).
-  - Selective 3D scope: applied to dashboard stat tiles, report cards, and featured intake tiles; large map, form fields, and data tables stay flat.
-  - Fine pointer gating: `@media (hover: hover) and (pointer: fine)` with touch press-down fallback (`:active { transform: scale(0.98); }`).
-  - Accessibility: strictly respects `@media (prefers-reduced-motion: reduce)`, preserving visible focus rings (`:focus-visible`), contrast, and crisp text rendering.
-  - 57 automated tests passing across 7 test suites (including new `motionAndCard.test.tsx`), 0 build/type errors.
+- Consolidated Frontend Design & Motion (Merged into `main` via `motion-3d`):
+  - Final design is `motion-3d` merged into `main`. The rejected design experiment `design-v2` (warm paper `#F7F5EE`, deep spruce `#215947`, Newsreader serif) was tried and discarded (local branch deleted, commit `f30e86c` preserved in reflog).
+  - Layout V3 (originally developed on `layout-v3`, merged via `motion-3d`, local branch safely deleted with commit `c0a7d19` integrated into `main`):
+    - Retained the production SaaS slate-50/navy/teal design tokens and clean system sans typography.
+    - Asymmetric Bento Dashboard layout: GIS spatial preview hero tile (8 cols), active anomaly correlator (4 cols), 4 animated telemetry metrics, and a live report activity feed.
+    - Responsive Master-Detail reading flow on Reports page: left scrollable report stream (7 cols) with right sticky incident detail inspector (5 cols) on desktop, preserving scroll position and providing full-page fallback for mobile.
+    - Sectioned 3-part incident intake form with sticky submission action dock.
+    - Hardware-accelerated abstract geometric floating tiles (`FloatingTiles.tsx`), auto-pausing on tab blur and disabled under `prefers-reduced-motion`.
+    - Floating quick-action intake pill (`QuickReportFAB.tsx`) with full keyboard accessibility.
+    - Top command navigation with `/` keyboard shortcut for directory search.
+  - Flowing Opening Animations & 3D Card Depth (merged into `main` via commit `ea2b236`):
+    - Unified motion tokens in `frontend/src/index.css`: fast (150ms), base (250ms), slow (400ms) with spring-like cubic-bezier(0.16, 1, 0.3, 1) ease-out curve.
+    - View Transitions API progressive enhancement (`@view-transition`, `::view-transition-old`, `::view-transition-new`) on `<Link viewTransition>` and `<NavLink viewTransition>` with fallback page transitions.
+    - Seamless page transitions (`.animate-page-enter`) without layout jumps or white flashes.
+    - Staggered entrances across views (50ms intervals, `.stagger-1` to `.stagger-8`) with small rise (`translateY(8px)`) and fade.
+    - Opening & closing panels: Mobile menu drawer smoothly expands down (`.animate-drawer-down`) and retracts up (`.animate-drawer-up`), with focus trapping/restoration to trigger button and Escape key dismiss.
+    - Smooth list-to-detail interaction: selecting reports in the directory slides the inspector panel in from the right (`.animate-slide-in-right`).
+    - Single-run dashboard KPI counter animations with `useCountUp`.
+    - Form feedback micro-animations: gentle validation error shake (`.animate-error-shake`) and submit success celebration pop (`.animate-success-pop`).
+    - 3D depth and tilt for cards: layered soft shadows (`var(--card-shadow-resting)`, `var(--card-shadow-hover)`), top highlight edge (`var(--card-highlight-top)`), gentle perspective hover tilt (±3° to ±5°) with pointer-following sheen (`.card-3d-sheen`).
+    - Selective 3D scope: applied to dashboard stat tiles, report cards, and featured intake tiles; large map, form fields, and data tables stay flat.
+    - Fine pointer gating: `@media (hover: hover) and (pointer: fine)` with touch press-down fallback (`:active { transform: scale(0.98); }`).
+    - Accessibility: strictly respects `@media (prefers-reduced-motion: reduce)`, preserving visible focus rings (`:focus-visible`), contrast, and crisp text rendering.
+  - 57 automated tests passing across 7 test suites (including `motionAndCard.test.tsx`), 0 build/type errors.
 
 ### Milestone 2: Backend & Database Features (Tested)
 - FastAPI asynchronous web framework with standard Uvicorn runner

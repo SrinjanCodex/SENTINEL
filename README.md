@@ -20,7 +20,7 @@ SENTINEL connects community reports, geographic data, historical records, and en
 | 5 — Prioritisation & Missing-Signal Detector | ⬜ Planned |
 | 6 — Polish & Validation | ⬜ Planned |
 
-**What works right now:** Full React frontend + FastAPI backend + SQLite database (`sentinel.db`). Supports creating, retrieving, searching, and filtering waterlogging reports with real SQLite persistence, secure photo upload with EXIF sanitization, dashboard aggregations, synthetic data seeding, and automated test coverage (51 frontend tests + 14 backend tests). Toggle between offline mock and live backend via `VITE_USE_MOCK_API`.
+**What works right now:** Full React frontend + FastAPI backend + SQLite database (`sentinel.db`). Supports creating, retrieving, searching, and filtering waterlogging reports with real SQLite persistence, secure photo upload with EXIF sanitization, dashboard aggregations, synthetic data seeding, and automated test coverage (57 frontend tests + 14 backend tests). Toggle between offline mock and live backend via `VITE_USE_MOCK_API`.
 
 ---
 
