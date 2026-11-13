@@ -27,13 +27,13 @@ function Section({
 }) {
   return (
     <Card hoverEffect={true} className={`p-5 sm:p-6 overflow-hidden animate-card-rise ${stagger}`}>
-      <div className="flex items-center gap-2.5 mb-3 pb-3 border-b border-slate-100">
-        {Icon && <Icon className="w-4 h-4 text-teal-600" />}
-        <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+      <div className="flex items-center gap-2.5 mb-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+        {Icon && <Icon className="w-4 h-4 text-teal-600 dark:text-teal-400" />}
+        <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight">
           {title}
         </h2>
       </div>
-      <div className="text-xs sm:text-sm text-slate-600 space-y-3 leading-relaxed">
+      <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 space-y-3 leading-relaxed">
         {children}
       </div>
     </Card>
@@ -46,25 +46,25 @@ function ParamTable({
   rows: { param: string; value: string; note: string }[];
 }) {
   return (
-    <div className="overflow-x-auto mt-3 border border-slate-200/80 rounded-xl">
+    <div className="overflow-x-auto mt-3 border border-slate-200/80 dark:border-slate-800 rounded-xl">
       <table className="w-full text-xs text-left border-collapse">
-        <thead className="bg-slate-50 border-b border-slate-200/80 text-slate-700 font-semibold uppercase tracking-wider text-[11px]">
+        <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold uppercase tracking-wider text-[11px]">
           <tr>
             <th className="px-3.5 py-2.5">Parameter Token</th>
             <th className="px-3.5 py-2.5">Initial Default</th>
             <th className="px-3.5 py-2.5">Algorithmic Function</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100 font-normal">
+        <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-normal">
           {rows.map(({ param, value, note }) => (
-            <tr key={param} className="hover:bg-slate-50/60 transition-colors">
-              <td className="px-3.5 py-2 font-mono text-slate-800 font-semibold">
+            <tr key={param} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
+              <td className="px-3.5 py-2 font-mono text-slate-800 dark:text-slate-200 font-semibold">
                 {param}
               </td>
-              <td className="px-3.5 py-2 font-semibold text-teal-700 whitespace-nowrap">
+              <td className="px-3.5 py-2 font-semibold text-teal-700 dark:text-teal-400 whitespace-nowrap">
                 {value}
               </td>
-              <td className="px-3.5 py-2 text-slate-500">
+              <td className="px-3.5 py-2 text-slate-500 dark:text-slate-400">
                 {note}
               </td>
             </tr>
@@ -88,11 +88,11 @@ export default function SystemInfo() {
 
       <div
         role="note"
-        className="flex items-start gap-3 p-4 bg-amber-50/90 border border-amber-200/90 rounded-xl text-xs sm:text-sm text-amber-900 shadow-2xs animate-fade-in stagger-2"
+        className="flex items-start gap-3 p-4 bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200/90 dark:border-amber-800/60 rounded-xl text-xs sm:text-sm text-amber-900 dark:text-amber-200 shadow-2xs animate-fade-in stagger-2"
       >
-        <Info className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+        <Info className="w-4 h-4 text-amber-700 dark:text-amber-400 shrink-0 mt-0.5" />
         <div className="leading-relaxed">
-          <strong>Milestone 1 Architecture Placeholder:</strong> The parameters and weights displayed below represent our planned specification constants. In Milestone 5, these values will be queried directly from the live backend configuration endpoint (<code className="font-mono text-xs bg-amber-100 px-1 py-0.5 rounded">/api/system/info</code>).
+          <strong>Milestone 1 Architecture Placeholder:</strong> The parameters and weights displayed below represent our planned specification constants. In Milestone 5, these values will be queried directly from the live backend configuration endpoint (<code className="font-mono text-xs bg-amber-100 dark:bg-amber-900/60 px-1 py-0.5 rounded">/api/system/info</code>).
         </div>
       </div>
 
@@ -173,16 +173,16 @@ export default function SystemInfo() {
         <p>
           The Missing-Signal Detector systematically evaluates the evidence graph and flags critical information gaps. A rule fires <strong>only when data is genuinely absent, stale, or conflicting</strong>:
         </p>
-        <div className="overflow-x-auto mt-3 border border-slate-200/80 rounded-xl">
+        <div className="overflow-x-auto mt-3 border border-slate-200/80 dark:border-slate-800 rounded-xl">
           <table className="w-full text-xs text-left border-collapse">
-            <thead className="bg-slate-50 border-b border-slate-200/80 text-slate-700 font-semibold uppercase tracking-wider text-[11px]">
+            <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold uppercase tracking-wider text-[11px]">
               <tr>
                 <th className="px-3.5 py-2.5">Rule ID</th>
                 <th className="px-3.5 py-2.5">Trigger Condition</th>
                 <th className="px-3.5 py-2.5">Recommended Municipal Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 font-normal">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-normal">
               {[
                 { rule: 'MS-LOC', trigger: 'Coordinates missing or location coarse', action: 'Dispatch verification request for precise coordinates' },
                 { rule: 'MS-TIME', trigger: 'Observation timestamp missing from contributing report', action: 'Request temporal observation window' },
@@ -193,10 +193,10 @@ export default function SystemInfo() {
                 { rule: 'MS-WX', trigger: 'Rainfall/precipitation telemetry unavailable or stale', action: 'Pull current precipitation data from official meteorological API' },
                 { rule: 'MS-PHOTO', trigger: 'No photographic evidence uploaded (low severity)', action: 'Request citizen photo if safe to take' },
               ].map(({ rule, trigger, action }) => (
-                <tr key={rule} className="hover:bg-slate-50/60 transition-colors">
-                  <td className="px-3.5 py-2.5 font-mono font-bold text-slate-800 whitespace-nowrap">{rule}</td>
-                  <td className="px-3.5 py-2.5 text-slate-700">{trigger}</td>
-                  <td className="px-3.5 py-2.5 text-slate-500">{action}</td>
+                <tr key={rule} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
+                  <td className="px-3.5 py-2.5 font-mono font-bold text-slate-800 dark:text-slate-200 whitespace-nowrap">{rule}</td>
+                  <td className="px-3.5 py-2.5 text-slate-700 dark:text-slate-300">{trigger}</td>
+                  <td className="px-3.5 py-2.5 text-slate-500 dark:text-slate-400">{action}</td>
                 </tr>
               ))}
             </tbody>
@@ -207,23 +207,23 @@ export default function SystemInfo() {
       <Section title="Status Verification Protocol" icon={ShieldCheck} stagger="stagger-8">
         <ul className="space-y-2 list-none pl-0">
           <li className="flex items-start gap-2">
-            <span className="font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded text-[11px]">Suspected:</span>
+            <span className="font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 px-2 py-0.5 rounded text-[11px]">Suspected:</span>
             <span>Algorithmic hypothesis formed by automated cluster correlation. Unverified by humans.</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded text-[11px]">Under Verification:</span>
+            <span className="font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 px-2 py-0.5 rounded text-[11px]">Under Verification:</span>
             <span>Assigned to municipal field team for physical triage.</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded text-[11px]">Verified:</span>
+            <span className="font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 px-2 py-0.5 rounded text-[11px]">Verified:</span>
             <span>Confirmed by recorded human inspection. Only human action can promote to this status.</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-[11px]">Dismissed:</span>
+            <span className="font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded text-[11px]">Dismissed:</span>
             <span>Investigated and determined to be non-actionable or false alarm.</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-[11px]">Resolved:</span>
+            <span className="font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded text-[11px]">Resolved:</span>
             <span>Physical drainage issue corrected by civic works.</span>
           </li>
         </ul>

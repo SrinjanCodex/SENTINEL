@@ -3,19 +3,16 @@
  * Civic waterlogging intelligence command center featuring an asymmetric Bento grid,
  * interactive GIS preview hero tile, active anomaly correlator, and drifting background tiles.
  */
-import { useEffect, useState, lazy, Suspense } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MapContainer, CircleMarker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { SentinelTileLayer } from '../components/SentinelTileLayer';
 import { MapErrorBoundary } from '../components/ErrorBoundary';
 import { FloatingTiles } from '../components/FloatingTiles';
-import TiltedCard from '../components/TiltedCard';
 import GradientText from '../components/GradientText';
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from '../lib/mapConfig';
 import { useCountUp } from '../lib/useCountUp';
-
-const LiquidChrome = lazy(() => import('../components/LiquidChrome'));
 
 import { getApiClient } from '../api';
 import type { DashboardStats, Report, Incident } from '../types';
@@ -108,20 +105,6 @@ export default function Dashboard() {
       
       {/* Bento Header Tile with Ambient Floating Shapes & Grid Texture */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-slate-800 p-6 sm:p-8 text-white shadow-sm animate-card-rise stagger-1">
-        {/* Subtle LiquidChrome background - lazy loaded, low intensity, hidden on mobile */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden hidden sm:block opacity-35" aria-hidden="true">
-          <Suspense fallback={null}>
-            <LiquidChrome
-              color={[0.04, 0.16, 0.22]}
-              speed={0.12}
-              amplitude={0.18}
-              roughness={0.65}
-              exposure={0.2}
-              interactive={true}
-              rippleStrength={0.5}
-            />
-          </Suspense>
-        </div>
         <div className="absolute inset-0 civic-grid-pattern opacity-40 pointer-events-none" />
         <FloatingTiles count={4} />
 
@@ -185,96 +168,89 @@ export default function Dashboard() {
       <section aria-label="Incident Prioritisation Metrics">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           
-          {/* Card 1: Total Reports with React Bits TiltedCard */}
+          {/* Card 1: Total Reports */}
           <div className="animate-card-rise stagger-1 h-full">
-            <TiltedCard
-              containerWidth="100%"
-              containerHeight="100%"
-              imageWidth="100%"
-              imageHeight="100%"
-              scaleOnHover={1.03}
-              rotateAmplitude={5}
-              glare={0.2}
-              glareColor="#0d9488"
-              radius="0.75rem"
-              className="w-full h-full"
-            >
-              <Card tilt3d={false} className="p-4 sm:p-5 h-full relative overflow-hidden group hover:border-slate-300">
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <span className="text-xs font-semibold text-slate-600 tracking-tight">Total Reports</span>
-                  <div className="p-2 rounded-lg bg-slate-100 text-slate-600 group-hover:scale-105 transition-transform">
-                    <FileText className="w-4 h-4" />
-                  </div>
+            <Card className="p-4 sm:p-5 h-full relative overflow-hidden group hover:border-slate-300 dark:hover:border-slate-700">
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 tracking-tight">Total Reports</span>
+                <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 group-hover:scale-105 transition-transform">
+                  <FileText className="w-4 h-4" />
                 </div>
-                <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight tabular-numbers">
-                  {totalReportsCount}
-                </div>
-                <div className="mt-1 flex items-center justify-between text-[11px] text-slate-500">
-                  <span>Community submissions</span>
-                  <span className="font-mono text-[10px] bg-slate-100 text-slate-700 px-1.5 py-0.2 rounded font-medium">
-                    Stored
-                  </span>
-                </div>
-              </Card>
-            </TiltedCard>
+              </div>
+              <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight tabular-numbers">
+                {totalReportsCount}
+              </div>
+              <div className="mt-1 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                <span>Community submissions</span>
+                <span className="font-mono text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-1.5 py-0.2 rounded font-medium">
+                  Stored
+                </span>
+              </div>
+            </Card>
           </div>
 
           {/* Card 2: Potential Clusters */}
-          <Card tilt3d={true} maxTilt={4} className="p-4 sm:p-5 relative overflow-hidden group hover:border-slate-300 animate-card-rise stagger-2">
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <span className="text-xs font-semibold text-slate-600 tracking-tight">Potential Clusters</span>
-              <div className="p-2 rounded-lg bg-blue-50 text-blue-600 group-hover:scale-105 transition-transform">
-                <Layers className="w-4 h-4" />
+          <div className="animate-card-rise stagger-2 h-full">
+            <Card className="p-4 sm:p-5 h-full relative overflow-hidden group hover:border-slate-300 dark:hover:border-slate-700">
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 tracking-tight">Potential Clusters</span>
+                <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 group-hover:scale-105 transition-transform">
+                  <Layers className="w-4 h-4" />
+                </div>
               </div>
-            </div>
-            <div className="text-2xl sm:text-3xl font-extrabold text-blue-600 tracking-tight tabular-numbers">
-              {clustersCount}
-            </div>
-            <div className="mt-1 flex items-center justify-between text-[11px] text-slate-500">
-              <span>Correlated anomalies</span>
-              <span className="font-mono text-[10px] bg-blue-50 text-blue-700 px-1.5 py-0.2 rounded font-medium border border-blue-200/50">
-                Correlated
-              </span>
-            </div>
-          </Card>
+              <div className="text-2xl sm:text-3xl font-extrabold text-blue-600 dark:text-blue-400 tracking-tight tabular-numbers">
+                {clustersCount}
+              </div>
+              <div className="mt-1 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                <span>Correlated anomalies</span>
+                <span className="font-mono text-[10px] bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 px-1.5 py-0.2 rounded font-medium border border-blue-200/50 dark:border-blue-800/50">
+                  Correlated
+                </span>
+              </div>
+            </Card>
+          </div>
 
           {/* Card 3: Awaiting Inspection */}
-          <Card tilt3d={true} maxTilt={4} className="p-4 sm:p-5 relative overflow-hidden group hover:border-slate-300 animate-card-rise stagger-3">
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <span className="text-xs font-semibold text-slate-600 tracking-tight">Awaiting Inspection</span>
-              <div className="p-2 rounded-lg bg-amber-50 text-amber-600 group-hover:scale-105 transition-transform">
-                <Clock className="w-4 h-4" />
+          <div className="animate-card-rise stagger-3 h-full">
+            <Card className="p-4 sm:p-5 h-full relative overflow-hidden group hover:border-slate-300 dark:hover:border-slate-700">
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 tracking-tight">Awaiting Inspection</span>
+                <div className="p-2 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 group-hover:scale-105 transition-transform">
+                  <Clock className="w-4 h-4" />
+                </div>
               </div>
-            </div>
-            <div className="text-2xl sm:text-3xl font-extrabold text-amber-600 tracking-tight tabular-numbers">
-              {awaitingCount}
-            </div>
-            <div className="mt-1 flex items-center justify-between text-[11px] text-slate-500">
-              <span>Field verification</span>
-              <span className="font-mono text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.2 rounded font-medium border border-amber-200/50">
-                Action Req.
-              </span>
-            </div>
-          </Card>
+              <div className="text-2xl sm:text-3xl font-extrabold text-amber-600 dark:text-amber-400 tracking-tight tabular-numbers">
+                {awaitingCount}
+              </div>
+              <div className="mt-1 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                <span>Field verification</span>
+                <span className="font-mono text-[10px] bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 px-1.5 py-0.2 rounded font-medium border border-amber-200/50 dark:border-amber-800/50">
+                  Action Req.
+                </span>
+              </div>
+            </Card>
+          </div>
 
           {/* Card 4: High Priority */}
-          <Card tilt3d={true} maxTilt={4} className="p-4 sm:p-5 relative overflow-hidden group hover:border-slate-300 animate-card-rise stagger-4">
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <span className="text-xs font-semibold text-slate-600 tracking-tight">High Priority</span>
-              <div className="p-2 rounded-lg bg-red-50 text-red-600 group-hover:scale-105 transition-transform">
-                <ShieldAlert className="w-4 h-4" />
+          <div className="animate-card-rise stagger-4 h-full">
+            <Card className="p-4 sm:p-5 h-full relative overflow-hidden group hover:border-slate-300 dark:hover:border-slate-700">
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 tracking-tight">High Priority</span>
+                <div className="p-2 rounded-lg bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 group-hover:scale-105 transition-transform">
+                  <ShieldAlert className="w-4 h-4" />
+                </div>
               </div>
-            </div>
-            <div className="text-2xl sm:text-3xl font-extrabold text-red-600 tracking-tight tabular-numbers">
-              {highPriorityCount}
-            </div>
-            <div className="mt-1 flex items-center justify-between text-[11px] text-slate-500">
-              <span>Index score ≥ 70</span>
-              <span className="font-mono text-[10px] bg-red-50 text-red-700 px-1.5 py-0.2 rounded font-medium border border-red-200/50">
-                Indicator
-              </span>
-            </div>
-          </Card>
+              <div className="text-2xl sm:text-3xl font-extrabold text-red-600 dark:text-red-400 tracking-tight tabular-numbers">
+                {highPriorityCount}
+              </div>
+              <div className="mt-1 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                <span>Index score ≥ 70</span>
+                <span className="font-mono text-[10px] bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 px-1.5 py-0.2 rounded font-medium border border-red-200/50 dark:border-red-800/50">
+                  Indicator
+                </span>
+              </div>
+            </Card>
+          </div>
 
         </div>
         <p className="mt-2 text-[11px] text-slate-400 italic flex items-center gap-1.5">
@@ -287,20 +263,20 @@ export default function Dashboard() {
         
         {/* Bento Hero Tile: Interactive GIS Spatial Overview (8 Columns) - Note: Large Map does not tilt */}
         <section className="lg:col-span-8 animate-card-rise stagger-3" aria-label="Spatial GIS Preview">
-          <Card className="overflow-hidden h-full flex flex-col shadow-sm">
-            <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+          <Card tilt={false} className="overflow-hidden h-full flex flex-col shadow-sm">
+            <div className="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/70 dark:bg-slate-800/50">
               <div className="flex items-center gap-2.5">
-                <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
+                <div className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400">
                   <Map className="w-4 h-4" />
                 </div>
                 <div>
-                  <h2 className="font-bold text-slate-900 text-sm tracking-tight flex items-center gap-2">
+                  <h2 className="font-bold text-slate-900 dark:text-slate-100 text-sm tracking-tight flex items-center gap-2">
                     GIS Spatial Overview
-                    <span className="text-[10px] font-mono bg-blue-50 text-blue-700 border border-blue-200/60 px-1.5 py-0.2 rounded">
+                    <span className="text-[10px] font-mono bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60 px-1.5 py-0.2 rounded">
                       {mappableIncidents.length} Centroids
                     </span>
                   </h2>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
                     Cluster centroids plotted on India spatial layer · Radius indicates priority magnitude
                   </p>
                 </div>
@@ -309,7 +285,7 @@ export default function Dashboard() {
               <Link
                 to="/map"
                 viewTransition
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-600 hover:text-teal-700 bg-white border border-slate-200/80 px-3 py-1.5 rounded-lg shadow-2xs hover:shadow-xs transition-all btn-press"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 px-3 py-1.5 rounded-lg shadow-2xs hover:shadow-xs transition-all btn-press"
               >
                 <span>Interactive Map</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -517,41 +493,29 @@ export default function Dashboard() {
           </Card>
         </section>
 
-        {/* Community Sensor Intake Bento Tile (4 Columns) - Feature tile with React Bits TiltedCard */}
+        {/* Community Sensor Intake Bento Tile (4 Columns) */}
         <section className="lg:col-span-4 animate-card-rise stagger-6" aria-label="Community Sensor Information">
-          <TiltedCard
-            containerWidth="100%"
-            containerHeight="100%"
-            imageWidth="100%"
-            imageHeight="100%"
-            scaleOnHover={1.02}
-            rotateAmplitude={4}
-            glare={0.2}
-            glareColor="#14b8a6"
-            radius="0.75rem"
-            className="w-full h-full"
-          >
-            <Card tilt3d={false} className="p-5 h-full flex flex-col justify-between bg-gradient-to-br from-teal-500/10 via-slate-50 to-white border-teal-200/70 shadow-sm">
+          <Card className="p-5 h-full flex flex-col justify-between bg-gradient-to-br from-teal-500/10 via-slate-50 to-white dark:from-teal-950/20 dark:via-slate-900 dark:to-slate-900 border-teal-200/70 dark:border-teal-800/70 shadow-sm">
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-xl bg-teal-600 text-white shadow-xs">
                   <Radio className="w-4 h-4" />
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-teal-800 block">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-teal-800 dark:text-teal-300 block">
                     Citizen Sensor Network
                   </span>
-                  <h3 className="font-extrabold text-slate-900 text-sm">
+                  <h3 className="font-extrabold text-slate-900 dark:text-slate-100 text-sm">
                     Heuristic Signal Pipeline
                   </h3>
                 </div>
               </div>
 
-              <p className="text-xs text-slate-600 leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                 Observed standing road water or blocked drainage? Submissions feed directly into spatial-temporal clustering models to identify systemic municipal failures.
               </p>
 
-              <div className="space-y-1.5 pt-1 text-[11px] text-slate-500">
+              <div className="space-y-1.5 pt-1 text-[11px] text-slate-500 dark:text-slate-400">
                 <div className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-teal-500" />
                   <span>Sub-kilometer spatial clustering</span>
@@ -567,7 +531,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="pt-4 border-t border-teal-100/80">
+            <div className="pt-4 border-t border-teal-100/80 dark:border-teal-900/60">
               <Link
                 to="/report"
                 viewTransition
@@ -578,8 +542,7 @@ export default function Dashboard() {
               </Link>
             </div>
           </Card>
-        </TiltedCard>
-      </section>
+        </section>
 
       </div>
 

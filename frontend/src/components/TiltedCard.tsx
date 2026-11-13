@@ -271,7 +271,7 @@ const TiltedCard = ({
       time += dt;
       let busy = false;
 
-      const amplitude = s.amplitude * (reduced ? 0.3 : 1);
+      const amplitude = reduced ? 0 : s.amplitude;
       const hovering = pointer.inside && pointer.mouse;
       const touching = press.active && !pointer.mouse;
       const following = hovering || touching || (s.trackWindow && pointer.seen && !coarse);
@@ -578,7 +578,7 @@ const TiltedCard = ({
   return (
     <figure
       ref={figureRef}
-      className={`tilted-card group relative m-0 flex select-none items-center justify-center outline-none [-webkit-tap-highlight-color:transparent] [touch-action:pan-y_pinch-zoom] data-[active]:z-[2] data-[interactive]:cursor-pointer ${className}`.trim()}
+      className={`tilted-card group relative m-0 flex select-text items-center justify-center outline-none [-webkit-tap-highlight-color:transparent] [touch-action:pan-y_pinch-zoom] data-[active]:z-[2] data-[interactive]:cursor-pointer w-full ${className}`.trim()}
       style={{
         width: toLength(containerWidth),
         height: toLength(containerHeight),
@@ -602,7 +602,7 @@ const TiltedCard = ({
       />
       <div
         ref={bodyRef}
-        className="relative max-h-full max-w-full [transform-style:preserve-3d]"
+        className="relative max-h-full max-w-full w-full [transform-style:preserve-3d]"
         style={
           {
             width: toLength(imageWidth),
@@ -612,7 +612,7 @@ const TiltedCard = ({
           } as CSSProperties
         }
       >
-        <div className="tilted-card__face tilted-card__front absolute inset-0 isolate overflow-hidden rounded-[var(--tc-radius)] [backface-visibility:hidden] [-webkit-backface-visibility:hidden]">
+        <div className={`tilted-card__face tilted-card__front ${flippable || imageSrc ? 'absolute inset-0' : 'relative w-full h-full'} isolate overflow-hidden rounded-[var(--tc-radius)] [backface-visibility:hidden] [-webkit-backface-visibility:hidden]`}>
           {imageSrc && (
             <img
               className="pointer-events-none absolute block max-w-none object-cover"

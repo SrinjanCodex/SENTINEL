@@ -300,7 +300,56 @@ Provides modern SaaS polish and sensory immersion appropriate for an emergency c
 
 **Alternatives considered:**
 - **Installing `framer-motion` or `ogl`:** Official React Bits registry components (`@react-bits/*-TS-TW`) run entirely on raw WebGL2 and standard CSS custom properties; adding external libraries would add ~120KB unnecessary weight.
-- **Full-page WebGL backgrounds:** Rejected because full-page shaders consume excessive GPU resources and degrade map performance. Scoping `LiquidChrome` to the hero banner achieves atmospheric depth with zero impact on data density or map fluidity.
+- **Section-local multiple WebGL backgrounds:** Initially tested in the hero banner, but running multiple per-page canvases caused GPU context thrashing. Replaced with a single shared full-page fixed layer.
+
+---
+
+## 2026-11-13 — Frontend Sequential Pagination & API Bounds Safeguard (Part 1 Bug Fix)
+
+**Decision:** Enforce `API_MAX_PAGE_SIZE = 100` in the frontend API layer, implement a sequential multi-page fetcher (`fetchAllReports`), and add client-side clamping `Math.min(Math.max(1, per_page), 100)` in `realClient.ts`. Upgrade `ErrorAlert` with a user-friendly headline, retry callback, and collapsible technical disclosure.
+
+**Reason:** Backend FastAPI endpoint `/api/reports` enforces `per_page: int = Query(10, ge=1, le=100)`. When `MapPage.tsx` queried `per_page: 200`, the server rejected the request with an unhandled 422 Unprocessable Entity error ("Input should be less than or equal to 100"). Rather than relaxing the backend safeguard (which protects against unconstrained resource exhaustion), the frontend now respects the backend contract and pages sequentially up to a safety cap of 10 pages (1,000 reports).
+
+**Alternatives considered:**
+- Raising backend `le=100` to `le=500`: Rejected because backend safeguards exist to protect memory and query performance; client-side paging is the correct architectural pattern.
+- Single unpaginated `/api/reports/all` endpoint: Valid future optimization for map geometries, but requires touching backend Python code which was explicitly disallowed.
+
+---
+
+## 2026-11-13 — Single Full-Viewport LiquidChrome Background
+
+**Decision:** Mount a single, fixed, full-viewport WebGL2 `LiquidChrome` canvas in `App.tsx` (`GlobalBackground`), and remove section-local instances from page headers (e.g., Dashboard hero).
+
+**Reason:** Running multiple simultaneous WebGL contexts causes GPU contention, memory leaks, context exhaustion on mobile devices, and dropped frames under CPU throttling. A single background layer behind the entire app provides a serene, unified atmosphere with low visual intensity (`opacity-20` light, `opacity-30` dark), runs at capped device pixel ratio (`1.0`), and pauses when the tab is blurred or hidden. Fallback to a static tinted gradient is automatic if WebGL is unavailable or `prefers-reduced-motion` is active.
+
+**Alternatives considered:**
+- Multiple per-section WebGL canvases: Causes severe frame drops, GPU context thrashing, and high battery drain.
+- Pure CSS animated gradient: Lightweight, but lacks the organic fluid viscosity of the WebGL raymarched normal map.
+
+---
+
+## 2026-11-13 — Class-Based Dark Mode with Cartographic Map Inversion
+
+**Decision:** Implement class-based `.dark` theme toggling (`light`, `dark`, `system`) with pre-hydration storage check in `index.html`, Tailwind v4 `@custom-variant dark (&:where(.dark, .dark *));`, and an inverted CSS filter on OpenStreetMap tiles (`html.dark .leaflet-tile-pane`).
+
+**Reason:** Eliminates initial white flash on dark mode load. OpenStreetMap raster tiles do not natively provide dark mode cartography without paid commercial keys; applying a calibrated CSS filter (`brightness(0.65) invert(1) contrast(2.6) hue-rotate(200deg) saturate(0.35) brightness(0.75)`) yields clean, legible night-mode cartography while keeping markers, popups, and zoom controls un-inverted.
+
+**Alternatives considered:**
+- Separate dark tile provider (e.g. CARTO dark matter): Requires third-party credentials or rate-limited free tiers.
+- OS-only `@media (prefers-color-scheme: dark)` without manual toggle: Prevents user preference override in the UI.
+
+---
+
+## 2026-11-13 — Universal Card Tilt Unification via React Bits TiltedCard
+
+**Decision:** Embed React Bits `TiltedCard` directly inside the primary `<Card>` component in `ui.tsx`, replacing older ad-hoc CSS pointer listeners and sheens (`--tilt-x`, `card-3d`, `.card-3d-sheen`). Provide explicit `tilt={false}` overrides for wide tables, maps, and form inputs.
+
+**Reason:** Avoids competing or double-tilt effects where both CSS transforms and WebGL/spring matrices operate on the same element. Making `<Card>` the single source of truth ensures all cards (dashboard metrics, report items, system specifications) share identical physics (3.5° max tilt, 1.015 scale, 0.14 glare) while respecting pointer fine gating and reduced-motion settings.
+
+**Alternatives considered:**
+- Keeping both custom CSS tilt and `TiltedCard`: Caused visual jitter and dual-transformation conflicts.
+- Manually wrapping every card instance individually: Error-prone and violates DRY principles.
+
 
 
 

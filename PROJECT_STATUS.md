@@ -98,28 +98,39 @@
 - React Bits Sensory UI Enhancements (Branch: `reactbits-ui`):
   - **Zero External Dependencies:** Integrated all four verified React Bits components (`TiltedCard`, `LiquidChrome`, `GradientText`, `GlowCursor`) using native TypeScript, modern WebGL2, and CSS transforms — **0 npm packages added**.
   - **Path Alias & Registry:** Initialized `components.json` with `@/` path alias and `@react-bits` registry, configured in `vite.config.ts`, `tsconfig.json`, and `tsconfig.app.json`.
-  - **`TiltedCard` (Selective 3D Focal Accent):**
-    - Smooth 3D tilt with depth perspective, gentle glare reflection, and subtle scale (`scaleOnHover={1.03}`, `rotateAmplitude={5}`, `glare={0.2}`).
-    - Applied selectively to the Dashboard primary KPI tile ("Total Reports") and the intake CTA tile ("Community Sensor Intake").
-    - Explicitly set `tilt3d={false}` on inner `<Card>` components to prevent dual-tilt stacking; remaining metrics and cards retain the lightweight built-in CSS tilt.
-  - **`LiquidChrome` (Atmospheric Fluid Mesh Backdrop):**
-    - Interactive fluid WebGL2 distortion canvas custom tuned to SENTINEL's dark navy/teal aesthetic (`baseColor: [0.04, 0.16, 0.22]`, `speed: 0.12`, `amplitude: 0.18`, `interactive: true`).
-    - Positioned behind the Dashboard hero header banner at low opacity (`opacity-35`, `pointer-events-none`) with high contrast text preserving WCAG AA legibility.
-    - Lazy-loaded via `React.lazy` into an independent asynchronous chunk (`16.12 kB / 6.10 kB gz`), hidden on mobile viewports (`hidden sm:block`), and auto-paused when window loses focus.
-  - **`GradientText` (Dynamic Telemetry Accents):**
-    - Smoothly animated iridescent text gradient using SENTINEL's cyan/teal palette (`#2dd4bf`, `#38bdf8`, `#5eead4`, `#7dd3fc`, `animationSpeed: 6`).
-    - Applied to the top brand header in `Navigation.tsx` ("SENTINEL //") and the Dashboard hero greeting ("Civic Intelligence Overview").
-    - Features solid fallback color under `prefers-reduced-motion`.
-  - **`GlowCursor` (Adaptive Fine-Pointer Ambiance):**
-    - Subtle dual-ring cursor follower with ambient teal glow (`#0d9488`, `glowSize: 65`, `smoothing: 0.14`).
-    - Lazy-loaded (`20.93 kB / 7.18 kB gz`) in `App.tsx`. Strictly gated by `@media (hover: hover) and (pointer: fine)` (zero overhead on touch/tablets), completely disabled under `prefers-reduced-motion: reduce`, with `pointer-events: none`.
-    - Automatically suppresses glow trails when hovering over form elements (`input`, `textarea`, `select`), during active typing, or across the interactive Leaflet GIS map.
+  - **Part 1 Bug Fix (Pagination Bounds & Error Resilience — Commit `e27d9a8`):**
+    - Fixed the 422 Unprocessable Entity error caused by `per_page: 200` exceeding FastAPI's strict validation constraint (`per_page <= 100`).
+    - Added `frontend/src/api/pagination.ts` with sequential chunked pagination (`fetchAllReports`), `API_MAX_PAGE_SIZE = 100`, and `MAX_FETCH_PAGES_CAP = 10`.
+    - Added defensive clamping in `realClient.ts` (`Math.min(Math.max(1, per_page), 100)`).
+    - Upgraded `ErrorAlert` with clear plain-language messaging, interactive retry callback, and collapsible technical disclosure.
+    - Added unit test suite in `frontend/src/api/__tests__/pagination.test.ts` (4 tests).
+  - **Part 2 Full-Page Shared LiquidChrome Background:**
+    - Replaced fragmented section-local canvases with a single, fixed, full-viewport WebGL2 canvas layer in `App.tsx` (`GlobalBackground`).
+    - Calibrated with tranquil, low-intensity civic palette (`speed={0.07}`, `amplitude={0.12}`, `opacity-20` light, `opacity-30` dark, `maxDevicePixelRatio={1}`).
+    - Built-in static tinted gradient fallback for unsupported WebGL environments, mobile viewports, tab blur, or `prefers-reduced-motion`.
+    - Completely eliminates GPU context thrashing and preserves 60fps scrolling under 4x CPU slowdown.
+  - **Part 3 Dark Mode Architecture:**
+    - Added accessible theme selector with `light`, `dark`, and `system` modes in desktop header and mobile drawer (`Navigation.tsx`).
+    - Pre-hydration script in `index.html` preventing theme flash on initial load.
+    - `ThemeContext.tsx` with error-resilient `localStorage` persistence and dynamic `prefers-color-scheme` listener.
+    - Tailwind CSS v4 class-based dark mode enabled via `@custom-variant dark (&:where(.dark, .dark *));`.
+    - Cohesive civic design tokens: deep ink/navy surfaces (`#070b12`, `#0b1220`, `slate-900`), balanced cyan/teal accents, high contrast text (WCAG AA).
+    - Night-mode GIS cartography: CSS tile filter inversion/hue-rotation on standard OpenStreetMap tiles (`html.dark .leaflet-tile-pane`) preserving un-inverted markers, popups, and zoom controls.
+  - **Part 4 Universal Card Tilt Unification:**
+    - Embedded React Bits `TiltedCard` as the core engine of the centralized `<Card>` component in `ui.tsx`.
+    - Replaced older CSS pointer event listeners and sheen, preventing competing double-tilt effects.
+    - Gated by default to `@media (hover: hover) and (pointer: fine)` with touch press-down fallback; disabled under `prefers-reduced-motion`.
+    - Configured with subtle civic defaults (`DEFAULT_CARD_MAX_TILT = 3.5`, `DEFAULT_CARD_SCALE = 1.015`, `DEFAULT_CARD_GLARE = 0.14`).
+    - Explicit `tilt={false}` exclusions applied to wide data tables, map containers, and active form typing cards.
+  - **`GradientText` & `GlowCursor`:**
+    - Smooth cyan/teal iridescent headers and interactive navigation branding.
+    - Adaptive fine-pointer cursor follower with auto-suppression over forms and map controls.
   - **Performance & Testing Verification:**
-    - 68 Vitest tests passing across 9 test files (including new `reactBits.test.tsx` and `routesIntegration.test.tsx`).
-    - 14 backend pytest tests passing.
-    - Oxlint clean with 0 errors (9 standard react compiler warnings in 41 files).
-    - Production build succeeds with 0 errors. Initial app JS bundle: 563.70 kB (165.41 kB gz); standalone deferred chunks: LiquidChrome (16.12 kB / 6.10 kB gz), GlowCursor (20.93 kB / 7.18 kB gz).
-    - 4x CPU slowdown testing: 60fps scrolling and smooth cursor response maintained; WebGL shaders auto-pause on blur.
+    - **72 Vitest tests passing across 10 test files** (including `motionAndCard.test.tsx`, `reactBits.test.tsx`, `pagination.test.ts`, and `routesIntegration.test.tsx`).
+    - **14 backend pytest tests passing** (100% backend integrity maintained).
+    - Oxlint clean with 0 errors.
+    - Production build succeeds with 0 TypeScript/bundler errors. Initial app JS bundle: 580.45 kB (167.97 kB gz); standalone deferred chunks: LiquidChrome (16.12 kB / 6.10 kB gz), GlowCursor (20.93 kB / 7.18 kB gz).
+    - Smooth 60fps operation verified under 4x CPU slowdown.
 
 ### Milestone 2: Backend & Database Features (Tested)
 - FastAPI asynchronous web framework with standard Uvicorn runner

@@ -116,8 +116,8 @@ export default function Reports() {
   const hasActiveFilters = Boolean(search || category || status || dateFrom || dateTo);
 
   const inputClass =
-    'rounded-lg border border-slate-300/80 px-3 py-1.5 text-xs text-slate-800 bg-white ' +
-    'placeholder:text-slate-400 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500 transition-all';
+    'rounded-lg border border-slate-300/80 dark:border-slate-700 px-3 py-1.5 text-xs text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-900 ' +
+    'placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500 transition-all';
 
   return (
     <div className="space-y-5 pb-6 animate-page-enter">
@@ -147,18 +147,18 @@ export default function Reports() {
       )}
 
       {/* Filter Command Bar */}
-      <Card className="p-4 bg-slate-50/70 border-slate-200 shadow-xs animate-card-rise stagger-2">
+      <Card tilt={false} className="p-4 bg-slate-50/70 dark:bg-slate-900/70 border-slate-200 dark:border-slate-800 shadow-xs animate-card-rise stagger-2">
         <fieldset>
           <legend className="sr-only">Filter incident reports</legend>
           <div className="flex flex-wrap gap-3 items-end">
             
             {/* Search Input */}
             <div className="flex-1 min-w-[220px]">
-              <label htmlFor="search-input" className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
+              <label htmlFor="search-input" className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
                 Keyword Query
               </label>
               <div className="relative">
-                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5 pointer-events-none" />
+                <Search className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 absolute left-2.5 top-2.5 pointer-events-none" />
                 <input
                   id="search-input"
                   type="search"
@@ -172,7 +172,7 @@ export default function Reports() {
 
             {/* Category Filter */}
             <div>
-              <label htmlFor="category-filter" className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
+              <label htmlFor="category-filter" className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
                 Category
               </label>
               <select
@@ -189,7 +189,7 @@ export default function Reports() {
 
             {/* Status Filter */}
             <div>
-              <label htmlFor="status-filter" className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
+              <label htmlFor="status-filter" className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
                 Status
               </label>
               <select
@@ -206,7 +206,7 @@ export default function Reports() {
 
             {/* Date From */}
             <div>
-              <label htmlFor="date-from" className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
+              <label htmlFor="date-from" className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
                 From Date
               </label>
               <input
@@ -220,7 +220,7 @@ export default function Reports() {
 
             {/* Date To */}
             <div>
-              <label htmlFor="date-to" className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
+              <label htmlFor="date-to" className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
                 To Date
               </label>
               <input
@@ -236,7 +236,7 @@ export default function Reports() {
             {hasActiveFilters && (
               <button
                 onClick={clearAllFilters}
-                className="inline-flex items-center gap-1 text-xs text-slate-600 hover:text-slate-900 bg-white border border-slate-200 px-2.5 py-1.5 rounded-lg shadow-2xs hover:shadow-xs transition-all btn-press"
+                className="inline-flex items-center gap-1 text-xs text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-2.5 py-1.5 rounded-lg shadow-2xs hover:shadow-xs transition-all btn-press"
               >
                 <X className="w-3.5 h-3.5 text-slate-400" />
                 <span>Reset Filters</span>
@@ -252,18 +252,18 @@ export default function Reports() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6" aria-busy="true">
           <div className="lg:col-span-7 space-y-3">
             {[1, 2, 3, 4].map((n) => (
-              <Card key={n} className="p-5 animate-pulse skeleton-shimmer">
+              <Card key={n} tilt={false} className="p-5 animate-pulse skeleton-shimmer">
                 <div className="flex gap-3 mb-2">
-                  <div className="h-5 bg-slate-200 rounded w-28" />
-                  <div className="h-5 bg-slate-200 rounded w-20" />
+                  <div className="h-5 bg-slate-200 dark:bg-slate-800 rounded w-28" />
+                  <div className="h-5 bg-slate-200 dark:bg-slate-800 rounded w-20" />
                 </div>
-                <div className="h-4 bg-slate-200 rounded w-5/6 mb-2" />
-                <div className="h-3 bg-slate-200 rounded w-1/3" />
+                <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-5/6 mb-2" />
+                <div className="h-3 bg-slate-200 dark:bg-slate-800 rounded w-1/3" />
               </Card>
             ))}
           </div>
           <div className="hidden lg:block lg:col-span-5">
-            <Card className="p-6 h-96 animate-pulse skeleton-shimmer rounded-xl">
+            <Card tilt={false} className="p-6 h-96 animate-pulse skeleton-shimmer rounded-xl">
               <div className="w-full h-full" />
             </Card>
           </div>
@@ -307,10 +307,10 @@ export default function Reports() {
                   key={r.id}
                   as="article"
                   hoverEffect={true}
-                  tilt3d={true}
-                  maxTilt={3}
+                  tilt={true}
+                  maxTilt={3.5}
                   className={`animate-fade-in stagger-${Math.min(idx + 1, 5)} transition-all duration-150 ${
-                    isSelected ? 'ring-2 ring-teal-500/80 border-teal-500/80 bg-teal-50/10' : ''
+                    isSelected ? 'ring-2 ring-teal-500/80 border-teal-500/80 bg-teal-50/10 dark:bg-teal-950/20' : ''
                   }`}
                 >
                   {/* Desktop click updates detail panel; double-click or direct link navigates */}
@@ -336,46 +336,46 @@ export default function Reports() {
                           <StatusBadge status={r.status} size="sm" />
                           
                           {r.reported_severity != null && (
-                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                               {severityLabel(r.reported_severity)}
                             </span>
                           )}
 
                           {r.is_synthetic ? (
-                            <span className="text-[10px] font-mono text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 font-semibold">
+                            <span className="text-[10px] font-mono text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-800/60 font-semibold">
                               DEMO
                             </span>
                           ) : (
-                            <span className="text-[10px] font-mono text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200 font-semibold">
+                            <span className="text-[10px] font-mono text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 px-1.5 py-0.5 rounded border border-blue-200 dark:border-blue-800/60 font-semibold">
                               LOCAL
                             </span>
                           )}
                         </div>
 
                         {/* Report Text */}
-                        <p className="text-xs sm:text-sm text-slate-800 line-clamp-2 leading-relaxed font-normal">
+                        <p className="text-xs sm:text-sm text-slate-800 dark:text-slate-200 line-clamp-2 leading-relaxed font-normal">
                           "{r.original_description}"
                         </p>
 
                         {/* Telemetry Metadata Pills */}
-                        <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-slate-500">
+                        <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-slate-500 dark:text-slate-400">
                           <span className="flex items-center gap-1">
-                            <Clock className="w-3.5 h-3.5 text-slate-400" />
+                            <Clock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                             <span>Submitted {relativeTime(r.submitted_at)}</span>
                           </span>
 
                           {r.address ? (
                             <span className="flex items-center gap-1 truncate max-w-[220px]">
-                              <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                              <MapPin className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
                               <span className="truncate">{r.address}</span>
                             </span>
                           ) : (
-                            <span className="text-slate-400 italic">Location unstated</span>
+                            <span className="text-slate-400 dark:text-slate-500 italic">Location unstated</span>
                           )}
 
                           {r.latitude != null && r.longitude != null && (
-                            <span className="flex items-center gap-1 font-mono text-[10px] text-slate-500">
-                              <Compass className="w-3 h-3 text-slate-400" />
+                            <span className="flex items-center gap-1 font-mono text-[10px] text-slate-500 dark:text-slate-400">
+                              <Compass className="w-3 h-3 text-slate-400 dark:text-slate-500" />
                               <span>{r.latitude.toFixed(4)}, {r.longitude.toFixed(4)}</span>
                             </span>
                           )}
@@ -388,7 +388,7 @@ export default function Reports() {
                           to={`/reports/${r.id}`}
                           viewTransition
                           onClick={(e) => e.stopPropagation()}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-teal-600 hover:bg-slate-100 transition-colors"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                           title="Open dedicated report page"
                           aria-label={`Open dedicated page for report ${r.id}`}
                         >
@@ -403,26 +403,26 @@ export default function Reports() {
 
             {/* Pagination Controls */}
             {total > 20 && (
-              <div className="flex items-center justify-between pt-4 border-t border-slate-200">
-                <p className="text-xs text-slate-500">
-                  Showing <span className="font-semibold text-slate-800">{(page - 1) * 20 + 1}</span>–
-                  <span className="font-semibold text-slate-800">{Math.min(page * 20, total)}</span> of{' '}
-                  <span className="font-semibold text-slate-800">{total}</span> reports
+              <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-800">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Showing <span className="font-semibold text-slate-800 dark:text-slate-200">{(page - 1) * 20 + 1}</span>–
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">{Math.min(page * 20, total)}</span> of{' '}
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">{total}</span> reports
                 </p>
                 <div className="flex items-center gap-2">
                   <button
                     disabled={page <= 1}
                     onClick={() => updateParam('page', String(page - 1))}
-                    className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+                    className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
                     aria-label="Previous page"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
-                  <span className="text-xs font-semibold text-slate-700 px-2">Page {page}</span>
+                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 px-2">Page {page}</span>
                   <button
                     disabled={page * 20 >= total}
                     onClick={() => updateParam('page', String(page + 1))}
-                    className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+                    className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
                     aria-label="Next page"
                   >
                     <ChevronRight className="w-4 h-4" />
@@ -440,16 +440,17 @@ export default function Reports() {
             {selectedReport ? (
               <Card
                 key={selectedReport.id}
-                className="p-5 border-slate-200 shadow-md space-y-4 animate-slide-in-right"
+                tilt={false}
+                className="p-5 border-slate-200 dark:border-slate-800 shadow-md space-y-4 animate-slide-in-right"
               >
                 
                 {/* Panel Header */}
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                   <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
                       Incident Inspector
                     </span>
-                    <h3 className="font-mono text-xs font-bold text-slate-800 truncate max-w-[200px]">
+                    <h3 className="font-mono text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-[200px]">
                       {selectedReport.id}
                     </h3>
                   </div>
@@ -457,7 +458,7 @@ export default function Reports() {
                   <Link
                     to={`/reports/${selectedReport.id}`}
                     viewTransition
-                    className="inline-flex items-center gap-1 text-xs font-bold text-teal-600 hover:text-teal-700 bg-teal-50 hover:bg-teal-100/80 px-2.5 py-1.5 rounded-lg transition-colors border border-teal-200/60"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 bg-teal-50 dark:bg-teal-950/40 hover:bg-teal-100/80 dark:hover:bg-teal-900/60 px-2.5 py-1.5 rounded-lg transition-colors border border-teal-200/60 dark:border-teal-800/60"
                   >
                     <span>Full Audit View</span>
                     <ExternalLink className="w-3 h-3" />
@@ -469,70 +470,70 @@ export default function Reports() {
                   <CategoryBadge category={selectedReport.category} />
                   <StatusBadge status={selectedReport.status} size="sm" />
                   {selectedReport.reported_severity != null && (
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                       {severityLabel(selectedReport.reported_severity)}
                     </span>
                   )}
                   {selectedReport.is_synthetic ? (
-                    <span className="text-[10px] font-mono text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 font-semibold">
+                    <span className="text-[10px] font-mono text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-800/60 font-semibold">
                       DEMO DATA
                     </span>
                   ) : (
-                    <span className="text-[10px] font-mono text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200 font-semibold">
+                    <span className="text-[10px] font-mono text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 px-1.5 py-0.5 rounded border border-blue-200 dark:border-blue-800/60 font-semibold">
                       LOCAL RECORD
                     </span>
                   )}
                 </div>
 
                 {/* Full Description */}
-                <div className="space-y-1 bg-slate-50/80 p-3.5 rounded-xl border border-slate-100">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                <div className="space-y-1 bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
                     Citizen Narrative
                   </span>
-                  <p className="text-xs text-slate-800 leading-relaxed font-normal whitespace-pre-wrap">
+                  <p className="text-xs text-slate-800 dark:text-slate-200 leading-relaxed font-normal whitespace-pre-wrap">
                     "{selectedReport.original_description}"
                   </p>
                 </div>
 
                 {/* Geolocation & Metadata Details */}
-                <div className="space-y-2.5 text-xs text-slate-600">
+                <div className="space-y-2.5 text-xs text-slate-600 dark:text-slate-400">
                   <div className="flex items-start gap-2">
-                    <MapPin className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                    <MapPin className="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0 mt-0.5" />
                     <div>
-                      <span className="font-semibold text-slate-800 block text-[11px]">Location / Address</span>
-                      <span className="text-slate-600 text-xs">
+                      <span className="font-semibold text-slate-800 dark:text-slate-200 block text-[11px]">Location / Address</span>
+                      <span className="text-slate-600 dark:text-slate-300 text-xs">
                         {selectedReport.address || 'No street address specified in report.'}
                       </span>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-2">
-                    <Compass className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                    <Compass className="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0 mt-0.5" />
                     <div>
-                      <span className="font-semibold text-slate-800 block text-[11px]">Spatial Coordinates</span>
+                      <span className="font-semibold text-slate-800 dark:text-slate-200 block text-[11px]">Spatial Coordinates</span>
                       {selectedReport.latitude != null && selectedReport.longitude != null ? (
                         <div className="flex items-center gap-2 mt-0.5">
-                          <code className="text-[11px] font-mono bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 text-slate-700">
+                          <code className="text-[11px] font-mono bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
                             {selectedReport.latitude.toFixed(5)}, {selectedReport.longitude.toFixed(5)}
                           </code>
                           <Link
                             to={`/map?lat=${selectedReport.latitude}&lng=${selectedReport.longitude}`}
-                            className="text-[11px] text-teal-600 font-semibold hover:underline"
+                            className="text-[11px] text-teal-600 dark:text-teal-400 font-semibold hover:underline"
                           >
                             Locate on Map
                           </Link>
                         </div>
                       ) : (
-                        <span className="text-slate-400 italic text-[11px]">Unmapped Coordinates</span>
+                        <span className="text-slate-400 dark:text-slate-500 italic text-[11px]">Unmapped Coordinates</span>
                       )}
                     </div>
                   </div>
 
                   <div className="flex items-start gap-2">
-                    <Clock className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                    <Clock className="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0 mt-0.5" />
                     <div>
-                      <span className="font-semibold text-slate-800 block text-[11px]">Provenance Timestamps</span>
-                      <div className="text-[11px] text-slate-500 space-y-0.5">
+                      <span className="font-semibold text-slate-800 dark:text-slate-200 block text-[11px]">Provenance Timestamps</span>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5">
                         <p>Logged: {formatDateTime(selectedReport.submitted_at)} ({relativeTime(selectedReport.submitted_at)})</p>
                         {selectedReport.observed_at && (
                           <p>Observed: {formatDateTime(selectedReport.observed_at)}</p>
@@ -543,10 +544,10 @@ export default function Reports() {
                 </div>
 
                 {/* Footer Action */}
-                <div className="pt-2 border-t border-slate-100">
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
                   <Link
                     to={`/reports/${selectedReport.id}`}
-                    className="w-full inline-flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2.5 rounded-xl transition-all shadow-xs btn-press"
+                    className="w-full inline-flex items-center justify-center gap-1.5 bg-slate-900 dark:bg-teal-600 hover:bg-slate-800 dark:hover:bg-teal-500 text-white font-bold text-xs py-2.5 rounded-xl transition-all shadow-xs btn-press"
                   >
                     <span>Inspect Full Verification History</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -555,7 +556,7 @@ export default function Reports() {
 
               </Card>
             ) : (
-              <Card className="p-8 text-center text-xs text-slate-400 border-dashed">
+              <Card tilt={false} className="p-8 text-center text-xs text-slate-400 dark:text-slate-500 border-dashed">
                 Select a report from the stream to inspect details here.
               </Card>
             )}
