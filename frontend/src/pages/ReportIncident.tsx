@@ -122,7 +122,7 @@ export default function ReportIncident() {
   const labelClass = 'block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1';
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 pb-12 animate-page-enter">
+    <div className="max-w-5xl mx-auto space-y-6 pb-12 animate-page-enter">
       
       {/* Header Banner with Survey Texture & Ambient Floating Shapes */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-slate-800 p-6 sm:p-8 text-white shadow-sm animate-card-rise stagger-1">
@@ -153,9 +153,9 @@ export default function ReportIncident() {
       {/* Local Storage Telemetry Banner */}
       <div
         role="note"
-        className="flex items-start gap-3 p-3.5 bg-blue-50/90 border border-blue-200/90 rounded-xl text-xs sm:text-sm text-blue-900 shadow-2xs animate-fade-in stagger-2"
+        className="flex items-start gap-3 p-4 sm:p-5 bg-blue-50/90 dark:bg-blue-950/40 border border-blue-200/90 dark:border-blue-800/60 rounded-2xl text-xs sm:text-sm text-blue-900 dark:text-blue-200 shadow-2xs animate-fade-in stagger-2"
       >
-        <div className="p-1 rounded-md bg-blue-100 text-blue-700 shrink-0 mt-0.5">
+        <div className="p-1 rounded-md bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 shrink-0 mt-0.5">
           <Info className="w-4 h-4" />
         </div>
         <div className="leading-relaxed">
@@ -165,7 +165,7 @@ export default function ReportIncident() {
 
       {/* Success Notification Card */}
       {success && (
-        <Card tilt={false} className="p-5 border-emerald-300 dark:border-emerald-800 bg-emerald-50/70 dark:bg-emerald-950/40 shadow-sm animate-success-pop">
+        <Card tilt={false} className="p-5 sm:p-6 border-emerald-300 dark:border-emerald-800 bg-emerald-50/70 dark:bg-emerald-950/40 shadow-sm animate-success-pop">
           <div className="flex items-start gap-3.5">
             <div className="p-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 shrink-0">
               <CheckCircle2 className="w-5 h-5" />
@@ -201,7 +201,7 @@ export default function ReportIncident() {
         </div>
       )}
 
-      {/* Main Intake Form with Grouped Cards */}
+      {/* Main Intake Form with Wide Grouped Cards */}
       <form
         onSubmit={handleSubmit}
         noValidate
@@ -209,7 +209,7 @@ export default function ReportIncident() {
         className="space-y-6"
       >
         {/* Section 1: Observation & Severity */}
-        <Card tilt={false} className="p-5 sm:p-6 shadow-sm space-y-5 animate-card-rise stagger-2">
+        <Card tilt={false} className="p-6 sm:p-8 shadow-sm space-y-6 animate-card-rise stagger-2">
           <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100 dark:border-slate-800">
             <div className="p-1.5 rounded-lg bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400">
               <FileText className="w-4 h-4" />
@@ -292,7 +292,7 @@ export default function ReportIncident() {
         </Card>
 
         {/* Section 2: Spatial Coordinates & Address */}
-        <Card tilt={false} className="p-5 sm:p-6 shadow-sm space-y-5 animate-card-rise stagger-3">
+        <Card tilt={false} className="p-6 sm:p-8 shadow-sm space-y-6 animate-card-rise stagger-3">
           <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100 dark:border-slate-800">
             <div className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400">
               <Compass className="w-4 h-4" />
@@ -329,11 +329,11 @@ export default function ReportIncident() {
             </p>
           </div>
 
-          <fieldset className="space-y-2">
-            <legend className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+          <fieldset className="space-y-3">
+            <legend className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
               Geographic Coordinates (GPS Lat / Lng)
             </legend>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="field-latitude" className="sr-only">Latitude</label>
                 <div className="relative">
@@ -378,65 +378,67 @@ export default function ReportIncident() {
           </fieldset>
         </Card>
 
-        {/* Section 3: Observation Time & Photo Notice */}
-        <Card tilt={false} className="p-5 sm:p-6 shadow-sm space-y-5 animate-card-rise stagger-4">
+        {/* Section 3: Observation Time & Photo Notice — Wide Horizontal Slab */}
+        <Card tilt={false} className="p-6 sm:p-8 shadow-sm space-y-6 animate-card-rise stagger-4">
           <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100 dark:border-slate-800">
             <div className="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400">
               <Calendar className="w-4 h-4" />
             </div>
             <div>
               <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 tracking-tight">
-                3. Temporal Observation Timestamp
+                3. Temporal Observation & Photographic Verification
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Record the approximate time the condition occurred.
+                Record the approximate observation time and inspect cryptographic intake protocols.
               </p>
             </div>
           </div>
 
-          <div>
-            <label htmlFor="field-observed_at" className={labelClass}>
-              Observation Timestamp
-            </label>
-            <div className="relative">
-              <Calendar className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
-              <input
-                id="field-observed_at"
-                name="observed_at"
-                type="datetime-local"
-                value={form.observed_at}
-                onChange={handleChange}
-                max={maxDateTime}
-                className={`pl-9 ${inputClass(!!errors.observed_at)}`}
-                disabled={submitting}
-              />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            <div>
+              <label htmlFor="field-observed_at" className={labelClass}>
+                Observation Timestamp
+              </label>
+              <div className="relative">
+                <Calendar className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
+                <input
+                  id="field-observed_at"
+                  name="observed_at"
+                  type="datetime-local"
+                  value={form.observed_at}
+                  onChange={handleChange}
+                  max={maxDateTime}
+                  className={`pl-9 ${inputClass(!!errors.observed_at)}`}
+                  disabled={submitting}
+                />
+              </div>
+              <p className="mt-1.5 text-[11px] text-slate-400 dark:text-slate-500">
+                When was the waterlogging observed? Must not be in the future.
+              </p>
+              <FieldError message={errors.observed_at} />
             </div>
-            <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500">
-              When was the waterlogging observed? Must not be in the future.
-            </p>
-            <FieldError message={errors.observed_at} />
-          </div>
 
-          <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 rounded-xl flex items-start gap-3 text-xs text-slate-600 dark:text-slate-300">
-            <Camera className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
-            <div className="leading-relaxed">
-              <strong>Cryptographic Photographic Intake:</strong> Direct image uploading with EXIF location privacy stripping is enabled via our verified multipart storage handler.
+            <div className="p-4 bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 rounded-xl flex items-start gap-3 text-xs text-slate-600 dark:text-slate-300">
+              <Camera className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
+              <div className="leading-relaxed">
+                <strong>Cryptographic Photographic Intake:</strong> Direct image uploading with EXIF location privacy stripping is enabled via our verified multipart storage handler.
+              </div>
             </div>
           </div>
         </Card>
 
-        {/* Sticky Submit Action Bar */}
-        <div className="sticky bottom-4 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-4 rounded-2xl border border-slate-200/90 dark:border-slate-800/90 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4 animate-card-rise stagger-5">
+        {/* Sticky Submit Action Bar — Wide Slab */}
+        <div className="sticky bottom-4 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-4 sm:p-5 sm:px-8 rounded-2xl border border-slate-200/90 dark:border-slate-800/90 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4 animate-card-rise stagger-5">
           <div className="text-xs text-slate-500 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
-            <span>Ready to commit observation to civic store</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-teal-500 animate-pulse" />
+            <span className="font-medium text-slate-700 dark:text-slate-300">Ready to commit observation to civic store</span>
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <button
               type="submit"
               disabled={submitting}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-500 active:bg-teal-700 disabled:bg-teal-300 text-white font-bold text-xs sm:text-sm px-6 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 btn-press"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-500 active:bg-teal-700 disabled:bg-teal-300 text-white font-bold text-xs sm:text-sm px-7 py-3 rounded-xl shadow-md hover:shadow-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 btn-press"
               aria-disabled={submitting}
             >
               {submitting ? (

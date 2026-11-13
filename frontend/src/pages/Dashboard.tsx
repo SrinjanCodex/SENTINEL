@@ -3,7 +3,7 @@
  * Civic waterlogging intelligence command center featuring an asymmetric Bento grid,
  * interactive GIS preview hero tile, active anomaly correlator, and drifting background tiles.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { MapContainer, CircleMarker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -38,6 +38,8 @@ import {
   Activity,
   Flame,
   Radio,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -47,11 +49,32 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const reportScrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const checkScroll = () => {
+    const el = reportScrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 10);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 10);
+  };
+
+  const scrollReports = (direction: 'left' | 'right') => {
+    const el = reportScrollRef.current;
+    if (!el) return;
+    const scrollAmount = el.clientWidth * 0.75;
+    el.scrollBy({
+      left: direction === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth',
+    });
+  };
+
   useEffect(() => {
     const client = getApiClient();
     Promise.all([
       client.getDashboardStats(),
-      client.listReports({ per_page: 5 }),
+      client.listReports({ per_page: 8 }),
       client.listIncidents(),
     ])
       .then(([s, r, i]) => {
@@ -164,27 +187,33 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Bento Metric Strip: Asymmetric KPI Layout */}
+      {/* Bento Metric Strip: Wide Horizontal Slab KPI Tiles */}
       <section aria-label="Incident Prioritisation Metrics">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           
           {/* Card 1: Total Reports */}
           <div className="animate-card-rise stagger-1 h-full">
             <Card className="p-4 sm:p-5 h-full relative overflow-hidden group hover:border-slate-300 dark:hover:border-slate-700">
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 tracking-tight">Total Reports</span>
-                <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 group-hover:scale-105 transition-transform">
-                  <FileText className="w-4 h-4" />
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
+                    Total Reports
+                  </span>
+                  <div className="mt-1 flex items-baseline gap-2">
+                    <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight tabular-numbers">
+                      {totalReportsCount}
+                    </span>
+                    <span className="font-mono text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-1.5 py-0.5 rounded font-semibold border border-slate-200/60 dark:border-slate-700/60">
+                      Stored
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                    Community submissions
+                  </p>
                 </div>
-              </div>
-              <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight tabular-numbers">
-                {totalReportsCount}
-              </div>
-              <div className="mt-1 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-                <span>Community submissions</span>
-                <span className="font-mono text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-1.5 py-0.2 rounded font-medium">
-                  Stored
-                </span>
+                <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 group-hover:scale-105 transition-transform shrink-0">
+                  <FileText className="w-5 h-5" />
+                </div>
               </div>
             </Card>
           </div>
@@ -192,20 +221,26 @@ export default function Dashboard() {
           {/* Card 2: Potential Clusters */}
           <div className="animate-card-rise stagger-2 h-full">
             <Card className="p-4 sm:p-5 h-full relative overflow-hidden group hover:border-slate-300 dark:hover:border-slate-700">
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 tracking-tight">Potential Clusters</span>
-                <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 group-hover:scale-105 transition-transform">
-                  <Layers className="w-4 h-4" />
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
+                    Potential Clusters
+                  </span>
+                  <div className="mt-1 flex items-baseline gap-2">
+                    <span className="text-2xl sm:text-3xl font-extrabold text-blue-600 dark:text-blue-400 tracking-tight tabular-numbers">
+                      {clustersCount}
+                    </span>
+                    <span className="font-mono text-[10px] bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded font-semibold border border-blue-200/50 dark:border-blue-800/50">
+                      Correlated
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                    Correlated anomalies
+                  </p>
                 </div>
-              </div>
-              <div className="text-2xl sm:text-3xl font-extrabold text-blue-600 dark:text-blue-400 tracking-tight tabular-numbers">
-                {clustersCount}
-              </div>
-              <div className="mt-1 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-                <span>Correlated anomalies</span>
-                <span className="font-mono text-[10px] bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 px-1.5 py-0.2 rounded font-medium border border-blue-200/50 dark:border-blue-800/50">
-                  Correlated
-                </span>
+                <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 group-hover:scale-105 transition-transform shrink-0">
+                  <Layers className="w-5 h-5" />
+                </div>
               </div>
             </Card>
           </div>
@@ -213,20 +248,26 @@ export default function Dashboard() {
           {/* Card 3: Awaiting Inspection */}
           <div className="animate-card-rise stagger-3 h-full">
             <Card className="p-4 sm:p-5 h-full relative overflow-hidden group hover:border-slate-300 dark:hover:border-slate-700">
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 tracking-tight">Awaiting Inspection</span>
-                <div className="p-2 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 group-hover:scale-105 transition-transform">
-                  <Clock className="w-4 h-4" />
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
+                    Awaiting Inspection
+                  </span>
+                  <div className="mt-1 flex items-baseline gap-2">
+                    <span className="text-2xl sm:text-3xl font-extrabold text-amber-600 dark:text-amber-400 tracking-tight tabular-numbers">
+                      {awaitingCount}
+                    </span>
+                    <span className="font-mono text-[10px] bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded font-semibold border border-amber-200/50 dark:border-amber-800/50">
+                      Action Req.
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                    Field verification
+                  </p>
                 </div>
-              </div>
-              <div className="text-2xl sm:text-3xl font-extrabold text-amber-600 dark:text-amber-400 tracking-tight tabular-numbers">
-                {awaitingCount}
-              </div>
-              <div className="mt-1 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-                <span>Field verification</span>
-                <span className="font-mono text-[10px] bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 px-1.5 py-0.2 rounded font-medium border border-amber-200/50 dark:border-amber-800/50">
-                  Action Req.
-                </span>
+                <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 group-hover:scale-105 transition-transform shrink-0">
+                  <Clock className="w-5 h-5" />
+                </div>
               </div>
             </Card>
           </div>
@@ -234,20 +275,26 @@ export default function Dashboard() {
           {/* Card 4: High Priority */}
           <div className="animate-card-rise stagger-4 h-full">
             <Card className="p-4 sm:p-5 h-full relative overflow-hidden group hover:border-slate-300 dark:hover:border-slate-700">
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 tracking-tight">High Priority</span>
-                <div className="p-2 rounded-lg bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 group-hover:scale-105 transition-transform">
-                  <ShieldAlert className="w-4 h-4" />
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
+                    High Priority
+                  </span>
+                  <div className="mt-1 flex items-baseline gap-2">
+                    <span className="text-2xl sm:text-3xl font-extrabold text-red-600 dark:text-red-400 tracking-tight tabular-numbers">
+                      {highPriorityCount}
+                    </span>
+                    <span className="font-mono text-[10px] bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 px-1.5 py-0.5 rounded font-semibold border border-red-200/50 dark:border-red-800/50">
+                      Indicator
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                    Index score ≥ 70
+                  </p>
                 </div>
-              </div>
-              <div className="text-2xl sm:text-3xl font-extrabold text-red-600 dark:text-red-400 tracking-tight tabular-numbers">
-                {highPriorityCount}
-              </div>
-              <div className="mt-1 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-                <span>Index score ≥ 70</span>
-                <span className="font-mono text-[10px] bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 px-1.5 py-0.2 rounded font-medium border border-red-200/50 dark:border-red-800/50">
-                  Indicator
-                </span>
+                <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 group-hover:scale-105 transition-transform shrink-0">
+                  <ShieldAlert className="w-5 h-5" />
+                </div>
               </div>
             </Card>
           </div>
@@ -292,8 +339,8 @@ export default function Dashboard() {
               </Link>
             </div>
 
-            <div style={{ height: '360px' }} className="w-full relative bg-slate-100 flex-1">
-              <MapErrorBoundary height="360px">
+            <div style={{ height: '420px' }} className="w-full relative bg-slate-100 dark:bg-slate-950 flex-1">
+              <MapErrorBoundary height="420px">
                 {mappableIncidents.length > 0 ? (
                   <MapContainer
                     center={DEFAULT_MAP_CENTER}
@@ -340,7 +387,7 @@ export default function Dashboard() {
             </div>
 
             {/* Map Legend Footer */}
-            <div className="px-5 py-2.5 border-t border-slate-100 bg-slate-50/50 flex flex-wrap items-center justify-between text-[11px] text-slate-500 gap-2">
+            <div className="px-5 py-2.5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex flex-wrap items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 gap-2">
               <div className="flex items-center gap-3">
                 <span className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-red-600" /> Urgent (≥75)
@@ -352,7 +399,7 @@ export default function Dashboard() {
                   <span className="w-2 h-2 rounded-full bg-teal-600" /> Routine (&lt;50)
                 </span>
               </div>
-              <span className="text-slate-400">Vector tiles with Latin English nomenclature</span>
+              <span className="text-slate-400 dark:text-slate-500">Vector tiles with Latin English nomenclature</span>
             </div>
           </Card>
         </section>
@@ -360,28 +407,28 @@ export default function Dashboard() {
         {/* Bento Side Tile: Active Anomalies Correlator (4 Columns) */}
         <section className="lg:col-span-4 animate-card-rise stagger-4" aria-label="Potential Incident Clusters">
           <Card className="h-full flex flex-col shadow-sm">
-            <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+            <div className="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/70 dark:bg-slate-800/50">
               <div className="flex items-center gap-2">
                 <Flame className="w-4 h-4 text-amber-500" />
-                <h2 className="font-bold text-slate-900 text-sm tracking-tight">Active Anomalies</h2>
+                <h2 className="font-bold text-slate-900 dark:text-slate-100 text-sm tracking-tight">Active Anomalies</h2>
               </div>
-              <span className="text-[10px] font-mono uppercase bg-slate-200/80 text-slate-700 px-1.5 py-0.5 rounded font-medium">
+              <span className="text-[10px] font-mono uppercase bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/60 px-1.5 py-0.5 rounded font-semibold">
                 Cluster Feed
               </span>
             </div>
 
-            <ul className="divide-y divide-slate-100/90 flex-1 overflow-y-auto" role="list">
+            <ul className="divide-y divide-slate-100/90 dark:divide-slate-800 flex-1 overflow-y-auto" role="list">
               {incidents.slice(0, 4).map((inc, idx) => (
                 <li
                   key={inc.id}
                   role="listitem"
-                  className={`p-4 hover:bg-slate-50/80 transition-colors animate-fade-in stagger-${Math.min(idx + 1, 5)}`}
+                  className={`p-4 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors animate-fade-in stagger-${Math.min(idx + 1, 5)}`}
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">
-                    <p className="text-xs font-bold text-slate-800 line-clamp-1 leading-snug">
+                    <p className="text-xs font-bold text-slate-900 dark:text-slate-100 line-clamp-1 leading-snug">
                       {inc.title}
                     </p>
-                    <span className="text-[10px] font-mono text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded shrink-0">
+                    <span className="text-[10px] font-mono text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded shrink-0 border border-slate-200/60 dark:border-slate-700/60">
                       {inc.report_ids.length} rpts
                     </span>
                   </div>
@@ -393,16 +440,17 @@ export default function Dashboard() {
                     <Link
                       to={`/incidents/${inc.id}`}
                       viewTransition
-                      className="text-[11px] font-semibold text-teal-600 hover:text-teal-700 flex items-center gap-1 transition-colors"
+                      className="text-[11px] font-semibold text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 flex items-center gap-1 transition-colors"
                     >
-                      Audit <ArrowRight className="w-3 h-3" />
+                      <span>Audit Cluster</span>
+                      <ArrowRight className="w-3 h-3" />
                     </Link>
                   </div>
                 </li>
               ))}
             </ul>
 
-            <div className="p-4 border-t border-slate-100 bg-slate-50/40 rounded-b-xl">
+            <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/40 rounded-b-xl">
               <SafetyNotice />
             </div>
           </Card>
@@ -411,89 +459,169 @@ export default function Dashboard() {
       </div>
 
       {/* Lower Bento Grid: Recent Reports & Sensor Gateway */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         
-        {/* Recent Reports Stream (8 Columns) */}
+        {/* Recent Reports Stream (8 Columns) — Wide Horizontal Slab Card with Horizontal Scroll Carousel */}
         <section className="lg:col-span-8 animate-card-rise stagger-5" aria-label="Recent reports stream">
-          <Card className="h-full flex flex-col shadow-sm">
-            <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70 rounded-t-xl">
-              <div className="flex items-center gap-2">
-                <Activity className="w-4 h-4 text-teal-600" />
-                <h2 className="font-bold text-slate-900 text-sm tracking-tight">Recent Report Stream</h2>
+          <Card className="h-full flex flex-col shadow-sm relative overflow-hidden">
+            <div className="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/70 dark:bg-slate-800/50">
+              <div className="flex items-center gap-2.5">
+                <div className="p-1.5 rounded-lg bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400">
+                  <Activity className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 className="font-bold text-slate-900 dark:text-slate-100 text-sm tracking-tight flex items-center gap-2">
+                    Recent Report Stream
+                    <span className="text-[10px] font-mono bg-teal-50 dark:bg-teal-950/40 text-teal-700 dark:text-teal-300 border border-teal-200/60 dark:border-teal-800/60 px-1.5 py-0.2 rounded">
+                      {recent.length} Logged
+                    </span>
+                  </h2>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Chronological citizen observations · Horizontal carousel with keyboard and scroll-snap support
+                  </p>
+                </div>
               </div>
-              <Link
-                to="/reports"
-                viewTransition
-                className="inline-flex items-center gap-1 text-xs text-teal-600 hover:text-teal-700 font-semibold transition-colors"
-              >
-                <span>Full Directory</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
 
-            {recent.length === 0 ? (
-              <div className="p-8 text-center text-xs text-slate-400 flex-1 flex flex-col justify-center items-center">
-                <p>No community reports logged in this session yet.</p>
-                <Link to="/report" viewTransition className="mt-2 text-teal-600 font-semibold hover:underline">
-                  Submit the initial observation →
+              <div className="flex items-center gap-2">
+                {recent.length > 0 && (
+                  <div className="flex items-center gap-1 bg-white dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-2xs">
+                    <button
+                      type="button"
+                      onClick={() => scrollReports('left')}
+                      disabled={!canScrollLeft}
+                      aria-label="Scroll recent reports left"
+                      className="p-1 rounded text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => scrollReports('right')}
+                      disabled={!canScrollRight}
+                      aria-label="Scroll recent reports right"
+                      className="p-1 rounded text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+                <Link
+                  to="/reports"
+                  viewTransition
+                  className="inline-flex items-center gap-1 text-xs text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 font-semibold px-2.5 py-1.5 rounded-lg hover:bg-teal-50 dark:hover:bg-teal-950/40 transition-colors"
+                >
+                  <span>Full Directory</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
-            ) : (
-              <ul className="divide-y divide-slate-100/90 flex-1" role="list">
-                {recent.map((r, idx) => (
-                  <li key={r.id} role="listitem" className={`animate-fade-in stagger-${Math.min(idx + 1, 5)}`}>
+            </div>
+
+            {/* Horizontal Scroll Slab Container with Edge Fade Cues */}
+            <div className="relative flex-1 p-4 overflow-hidden">
+              {/* Left edge fade cue */}
+              {canScrollLeft && (
+                <div
+                  aria-hidden="true"
+                  className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white dark:from-slate-900 to-transparent z-10 pointer-events-none"
+                />
+              )}
+
+              {/* Right edge fade cue */}
+              {canScrollRight && recent.length > 2 && (
+                <div
+                  aria-hidden="true"
+                  className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white dark:from-slate-900 to-transparent z-10 pointer-events-none"
+                />
+              )}
+
+              {recent.length === 0 ? (
+                <div className="p-8 text-center text-xs text-slate-400 dark:text-slate-500 h-full flex flex-col justify-center items-center">
+                  <p>No community reports logged in this session yet.</p>
+                  <Link to="/report" viewTransition className="mt-2 text-teal-600 dark:text-teal-400 font-semibold hover:underline">
+                    Submit the initial observation →
+                  </Link>
+                </div>
+              ) : (
+                <div
+                  ref={reportScrollRef}
+                  onScroll={checkScroll}
+                  tabIndex={0}
+                  role="region"
+                  aria-label="Recent reports horizontal stream"
+                  onKeyDown={(e) => {
+                    if (e.key === 'ArrowLeft') {
+                      e.preventDefault();
+                      scrollReports('left');
+                    } else if (e.key === 'ArrowRight') {
+                      e.preventDefault();
+                      scrollReports('right');
+                    }
+                  }}
+                  onWheel={(e) => {
+                    const el = reportScrollRef.current;
+                    if (el && Math.abs(e.deltaX) < Math.abs(e.deltaY) && Math.abs(e.deltaY) > 5) {
+                      el.scrollLeft += e.deltaY;
+                    }
+                  }}
+                  className="flex gap-4 overflow-x-auto pb-2 scroll-smooth snap-x snap-mandatory focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 rounded-xl"
+                  style={{ scrollbarWidth: 'thin' }}
+                >
+                  {recent.map((r, idx) => (
                     <Link
+                      key={r.id}
                       to={`/reports/${r.id}`}
                       viewTransition
-                      className="block px-5 py-3.5 hover:bg-slate-50/90 transition-all duration-150 group"
+                      className={`min-w-[280px] sm:min-w-[320px] max-w-[360px] snap-start shrink-0 flex flex-col justify-between p-4 bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 rounded-xl hover:border-teal-500/60 dark:hover:border-teal-500/60 hover:shadow-sm transition-all group animate-fade-in stagger-${Math.min(idx + 1, 5)}`}
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                            <CategoryBadge category={r.category} />
-                            <StatusBadge status={r.status} size="sm" />
-                            {r.is_synthetic ? (
-                              <span className="text-[10px] font-mono text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200/60 font-medium">
-                                DEMO
-                              </span>
-                            ) : (
-                              <span className="text-[10px] font-mono text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-200/60 font-medium">
-                                LOCAL
-                              </span>
-                            )}
-                          </div>
-
-                          <p className="text-xs sm:text-sm text-slate-700 line-clamp-2 leading-relaxed group-hover:text-slate-900 transition-colors">
-                            {r.original_description}
-                          </p>
-
-                          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-400">
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-3 h-3 text-slate-400" />
-                              {relativeTime(r.submitted_at)}
+                      <div>
+                        <div className="flex flex-wrap items-center gap-1.5 mb-2">
+                          <CategoryBadge category={r.category} />
+                          <StatusBadge status={r.status} size="sm" />
+                          {r.is_synthetic ? (
+                            <span className="text-[10px] font-mono text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.2 rounded border border-amber-200/60 dark:border-amber-800/60 font-medium">
+                              DEMO
                             </span>
-                            {r.address && (
-                              <span className="flex items-center gap-1 truncate max-w-[240px]">
-                                <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
-                                <span className="truncate">{r.address}</span>
-                              </span>
-                            )}
-                          </div>
+                          ) : (
+                            <span className="text-[10px] font-mono text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 px-1.5 py-0.2 rounded border border-blue-200/60 dark:border-blue-800/60 font-medium">
+                              LOCAL
+                            </span>
+                          )}
                         </div>
 
-                        <div className="text-slate-400 group-hover:text-teal-600 group-hover:translate-x-0.5 transition-all shrink-0 self-center">
-                          <ArrowRight className="w-4 h-4" />
+                        <p className="text-xs sm:text-sm text-slate-800 dark:text-slate-200 line-clamp-3 leading-relaxed group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors font-normal">
+                          "{r.original_description}"
+                        </p>
+                      </div>
+
+                      <div className="mt-3 pt-2.5 border-t border-slate-200/70 dark:border-slate-700/60 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                        <div className="flex items-center gap-2 truncate max-w-[220px]">
+                          {r.address ? (
+                            <span className="flex items-center gap-1 truncate">
+                              <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                              <span className="truncate">{r.address}</span>
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-3 h-3 text-slate-400 shrink-0" />
+                              <span>{relativeTime(r.submitted_at)}</span>
+                            </span>
+                          )}
                         </div>
+
+                        <span className="text-teal-600 dark:text-teal-400 group-hover:translate-x-0.5 transition-transform shrink-0 flex items-center gap-0.5 font-semibold text-2xs">
+                          <span>Inspect</span>
+                          <ArrowRight className="w-3 h-3" />
+                        </span>
                       </div>
                     </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </Card>
         </section>
 
-        {/* Community Sensor Intake Bento Tile (4 Columns) */}
+        {/* Community Sensor Intake Bento Tile (4 Columns) — Right-Hand Side */}
         <section className="lg:col-span-4 animate-card-rise stagger-6" aria-label="Community Sensor Information">
           <Card className="p-5 h-full flex flex-col justify-between bg-gradient-to-br from-teal-500/10 via-slate-50 to-white dark:from-teal-950/20 dark:via-slate-900 dark:to-slate-900 border-teal-200/70 dark:border-teal-800/70 shadow-sm">
             <div className="space-y-3">

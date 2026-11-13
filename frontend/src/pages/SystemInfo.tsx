@@ -18,23 +18,41 @@ function Section({
   title,
   icon: Icon,
   stagger = 'stagger-3',
+  summary,
   children,
 }: {
   title: string;
   icon?: typeof Info;
   stagger?: string;
+  summary?: ReactNode;
   children: ReactNode;
 }) {
   return (
-    <Card hoverEffect={true} className={`p-5 sm:p-6 overflow-hidden animate-card-rise ${stagger}`}>
-      <div className="flex items-center gap-2.5 mb-3 pb-3 border-b border-slate-100 dark:border-slate-800">
-        {Icon && <Icon className="w-4 h-4 text-teal-600 dark:text-teal-400" />}
-        <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight">
-          {title}
-        </h2>
-      </div>
-      <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 space-y-3 leading-relaxed">
-        {children}
+    <Card tilt={false} className={`p-6 sm:p-8 overflow-hidden animate-card-rise ${stagger} border-slate-200/90 dark:border-slate-800/90 shadow-xs`}>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Column: Heading, Icon & Executive Summary */}
+        <div className="lg:col-span-4 lg:sticky lg:top-24 space-y-3">
+          <div className="flex items-center gap-2.5">
+            {Icon && (
+              <div className="p-2 rounded-xl bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400 shrink-0 border border-teal-200/60 dark:border-teal-800/60">
+                <Icon className="w-5 h-5" />
+              </div>
+            )}
+            <h2 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
+              {title}
+            </h2>
+          </div>
+          {summary && (
+            <div className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-normal">
+              {summary}
+            </div>
+          )}
+        </div>
+
+        {/* Right Column: Algorithmic Details, Formulations & Tables */}
+        <div className="lg:col-span-8 text-xs sm:text-sm text-slate-600 dark:text-slate-300 space-y-3 leading-relaxed border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-slate-800 pt-4 lg:pt-0 lg:pl-6">
+          {children}
+        </div>
       </div>
     </Card>
   );
@@ -77,7 +95,7 @@ function ParamTable({
 
 export default function SystemInfo() {
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-8 animate-page-enter">
+    <div className="max-w-5xl mx-auto space-y-6 pb-8 animate-page-enter">
       <div className="animate-card-rise stagger-1">
         <PageHeader
           title="System Specifications & Methodology"
@@ -96,7 +114,16 @@ export default function SystemInfo() {
         </div>
       </div>
 
-      <Section title="What is SENTINEL?" icon={Info} stagger="stagger-3">
+      <Section
+        title="What is SENTINEL?"
+        icon={Info}
+        stagger="stagger-3"
+        summary={
+          <p>
+            AI-assisted civic decision support platform designed specifically for urban waterlogging and stormwater infrastructure triage.
+          </p>
+        }
+      >
         <p>
           SENTINEL is an <strong>AI-assisted civic intelligence and decision-support platform</strong> designed specifically for urban waterlogging and stormwater infrastructure failures. Rather than functioning as a standard grievance portal, SENTINEL correlates noisy, fragmentary citizen reports to detect systemic drainage blockages before catastrophic ponding occurs.
         </p>
@@ -106,7 +133,16 @@ export default function SystemInfo() {
         <SafetyNotice />
       </Section>
 
-      <Section title="Report Classification Baseline" icon={Code2} stagger="stagger-4">
+      <Section
+        title="Report Classification Baseline"
+        icon={Code2}
+        stagger="stagger-4"
+        summary={
+          <p>
+            Transparent deterministic keyword classifier categorizing raw citizen descriptions into discrete infrastructure failure classes.
+          </p>
+        }
+      >
         <p>
           Submitted observations are processed through a transparent, deterministic keyword matching classifier. Incoming descriptions are matched against categorized phrase tokens (e.g., <em>"road flooded"</em>, <em>"blocked drain"</em>, <em>"water entering building"</em>, <em>"standing water"</em>).
         </p>
@@ -118,7 +154,16 @@ export default function SystemInfo() {
         </p>
       </Section>
 
-      <Section title="Report Pair Matching Architecture" icon={Sliders} stagger="stagger-5">
+      <Section
+        title="Report Pair Matching Architecture"
+        icon={Sliders}
+        stagger="stagger-5"
+        summary={
+          <p>
+            Multi-factor scoring algorithm assessing semantic similarity, geographic distance decay, and temporal proximity between report pairs.
+          </p>
+        }
+      >
         <p>
           Potential correlation between two distinct reports is assessed by computing a multi-factor pair match score:
         </p>
@@ -150,7 +195,16 @@ export default function SystemInfo() {
         />
       </Section>
 
-      <Section title="Prioritisation Scoring Formula" icon={Cpu} stagger="stagger-6">
+      <Section
+        title="Prioritisation Scoring Formula"
+        icon={Cpu}
+        stagger="stagger-6"
+        summary={
+          <p>
+            Standardized 0–100 index ranking correlated incident clusters by corroborated evidence weight, independent reporters, and severity heuristics.
+          </p>
+        }
+      >
         <p>
           Correlated incident clusters receive a <strong>Prioritisation Index from 0 to 100</strong>. This score ranks incidents by corroborated evidence weight and potential civic hazard:
         </p>
@@ -169,7 +223,16 @@ export default function SystemInfo() {
         </p>
       </Section>
 
-      <Section title="Missing-Signal Detector (Signature Feature)" icon={AlertTriangle} stagger="stagger-7">
+      <Section
+        title="Missing-Signal Detector (Signature Feature)"
+        icon={AlertTriangle}
+        stagger="stagger-7"
+        summary={
+          <p>
+            Automated gap detection engine evaluating the evidence graph and surfacing actionable verification requests when data is absent, coarse, or conflicting.
+          </p>
+        }
+      >
         <p>
           The Missing-Signal Detector systematically evaluates the evidence graph and flags critical information gaps. A rule fires <strong>only when data is genuinely absent, stale, or conflicting</strong>:
         </p>
@@ -204,8 +267,17 @@ export default function SystemInfo() {
         </div>
       </Section>
 
-      <Section title="Status Verification Protocol" icon={ShieldCheck} stagger="stagger-8">
-        <ul className="space-y-2 list-none pl-0">
+      <Section
+        title="Status Verification Protocol"
+        icon={ShieldCheck}
+        stagger="stagger-8"
+        summary={
+          <p>
+            Deterministic verification pipeline ensuring unverified citizen inputs never masquerade as confirmed infrastructure facts.
+          </p>
+        }
+      >
+        <ul className="space-y-2.5 list-none pl-0">
           <li className="flex items-start gap-2">
             <span className="font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 px-2 py-0.5 rounded text-[11px]">Suspected:</span>
             <span>Algorithmic hypothesis formed by automated cluster correlation. Unverified by humans.</span>
@@ -229,7 +301,16 @@ export default function SystemInfo() {
         </ul>
       </Section>
 
-      <Section title="Data Source Attribution" icon={Database} stagger="stagger-8">
+      <Section
+        title="Data Source Attribution"
+        icon={Database}
+        stagger="stagger-8"
+        summary={
+          <p>
+            Transparent provenance tracking separating synthetic demonstration callouts from live community observations.
+          </p>
+        }
+      >
         <p>In Milestone 1, intelligence is derived strictly from:</p>
         <ul className="list-disc pl-5 space-y-1">
           <li><strong>Demonstration Dataset:</strong> 8 synthetic reports and 3 synthetic incidents (labelled ⚠️ DEMO).</li>

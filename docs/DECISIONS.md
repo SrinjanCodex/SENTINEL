@@ -350,6 +350,24 @@ Provides modern SaaS polish and sensory immersion appropriate for an emergency c
 - Keeping both custom CSS tilt and `TiltedCard`: Caused visual jitter and dual-transformation conflicts.
 - Manually wrapping every card instance individually: Error-prone and violates DRY principles.
 
+---
+
+## 2026-11-13 — Wide Horizontal Slab Layout Architecture & Dashboard Carousel
+
+**Decision:** Transform narrow vertical card stacks across all seven application pages into expansive, wide horizontal slab cards (`flex-row` / multi-column grids) and replace the dashboard recent reports list with an accessible horizontal scrolling carousel slab (`snap-x snap-mandatory`).
+
+**Reason:** Small, narrow vertical cards waste horizontal desktop real estate, induce excessive vertical scrolling, and cause visual clutter on modern widescreen monitors. Arranging metadata in horizontal rows (narrative/identity on the left, structured metadata tags and actions on the right) improves scannability and information density. On the dashboard:
+- "Recent Report Stream" occupies an 8-column wide slab (`lg:col-span-8`) featuring a horizontal scroll carousel with directional button controls, keyboard arrow navigation (`ArrowLeft`/`ArrowRight`), mouse-wheel deflection, and visible edge gradient fades.
+- "Heuristic Signal Pipeline" is placed on the right-hand side (`lg:col-span-4`) preserving its exact audit checklist, styling, and action triggers.
+- "Active Anomalies" remains clearly positioned as the cluster incident feed next to the GIS Map preview.
+- System Information sections are redesigned into 2-column specification slabs (sticky executive summary left, technical formulas/tables right).
+- On mobile devices, layouts gracefully collapse to a single-column vertical stack with no horizontal viewport overflow (`overflow-x-hidden`).
+
+**Alternatives considered:**
+- Vertical infinite scroll stream: Clutters the dashboard and forces users to scroll past dozens of items to reach downstream panels.
+- Fixed 3-column card grid: Creates tall, ragged card heights that look uneven when text lengths differ. Horizontal row slabs standardize height and improve scannability.
+
+
 
 
 
