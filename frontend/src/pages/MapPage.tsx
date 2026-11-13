@@ -2,7 +2,7 @@
  * SENTINEL — Spatial Telemetry GIS Command
  * Verified geographic mapping with explicit segregation of unconfirmed coordinates
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   MapContainer,
   CircleMarker,
@@ -14,7 +14,7 @@ import { SentinelTileLayer } from '../components/SentinelTileLayer';
 import { MapErrorBoundary } from '../components/ErrorBoundary';
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM, STREET_LEVEL_ZOOM } from '../lib/mapConfig';
 import { Link } from 'react-router-dom';
-import { getApiClient } from '../api';
+import { getApiClient, fetchAllReports } from '../api';
 import type { Report, ReportCategory } from '../types';
 import {
   Card,
@@ -76,17 +76,27 @@ const FILTER_CATEGORIES: { value: ReportCategory | ''; label: string }[] = [
 export default function MapPage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [errorState, setErrorState] = useState<{ message: string; details?: string } | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<ReportCategory | ''>('');
   const [viewMode, setViewMode] = useState<'india' | 'cluster'>('india');
 
-  useEffect(() => {
-    getApiClient()
-      .listReports({ per_page: 200 })
-      .then((r) => setReports(r.items))
-      .catch((err) => setError('Could not load GIS telemetry. ' + ((err as Error)?.message ?? '')))
+  const loadReports = useCallback(() => {
+    setLoading(true);
+    setErrorState(null);
+    fetchAllReports(getApiClient())
+      .then((items) => setReports(items))
+      .catch((err) => {
+        setErrorState({
+          message: 'The map data could not be loaded. Try again.',
+          details: (err as Error)?.message || String(err),
+        });
+      })
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    loadReports();
+  }, [loadReports]);
 
   const filtered =
     categoryFilter
@@ -183,8 +193,13 @@ export default function MapPage() {
 
       {loading ? (
         <LoadingSpinner label="Compiling geospatial coordinate points…" />
-      ) : error ? (
-        <ErrorAlert message={error} />
+      ) : errorState ? (
+        <ErrorAlert
+          title="Map Telemetry Notice"
+          message={errorState.message}
+          technicalDetails={errorState.details}
+          onRetry={loadReports}
+        />
       ) : (
         <>
           {/* GIS Map Frame */}

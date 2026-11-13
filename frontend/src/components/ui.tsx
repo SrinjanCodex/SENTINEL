@@ -12,6 +12,7 @@ import {
   Info,
   FileQuestion,
   TrendingUp,
+  RotateCw,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -370,18 +371,64 @@ export function LoadingSpinner({ label = 'Retrieving intelligence…' }: { label
 
 // ── ErrorAlert ────────────────────────────────────────────────────────────────
 
-export function ErrorAlert({ message }: { message: string }) {
+export interface ErrorAlertProps {
+  title?: string;
+  message: string;
+  technicalDetails?: string;
+  onRetry?: () => void;
+}
+
+export function ErrorAlert({
+  title = 'Notice',
+  message,
+  technicalDetails,
+  onRetry,
+}: ErrorAlertProps) {
+  const [showDetails, setShowDetails] = useState(false);
+
   return (
     <div
       role="alert"
-      className="flex items-start gap-3 p-4 bg-red-50/90 border border-red-200/90 rounded-xl text-sm text-red-900 shadow-sm animate-fade-in"
+      className="flex items-start gap-3 p-4 bg-red-50/90 border border-red-200/90 rounded-xl text-sm text-red-900 shadow-sm animate-fade-in dark:bg-red-950/40 dark:border-red-900/60 dark:text-red-200"
     >
-      <div className="p-1 rounded-lg bg-red-100 text-red-700 shrink-0">
+      <div className="p-1.5 rounded-lg bg-red-100 text-red-700 dark:bg-red-900/60 dark:text-red-300 shrink-0 mt-0.5">
         <AlertTriangle className="w-4 h-4" aria-hidden="true" />
       </div>
-      <div className="flex-1 text-xs sm:text-sm">
-        <p className="font-semibold text-red-950 mb-0.5">Operation Alert</p>
-        <p>{message}</p>
+      <div className="flex-1 min-w-0 text-xs sm:text-sm space-y-2">
+        <div className="flex items-start justify-between gap-2 flex-wrap">
+          <div>
+            <p className="font-semibold text-red-950 dark:text-red-200">{title}</p>
+            <p className="text-red-800 dark:text-red-300 mt-0.5 leading-relaxed">{message}</p>
+          </div>
+          {onRetry && (
+            <button
+              type="button"
+              onClick={onRetry}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-100 hover:bg-red-200 text-red-900 dark:bg-red-900/60 dark:hover:bg-red-800/80 dark:text-red-100 transition-colors btn-press cursor-pointer"
+            >
+              <RotateCw className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>Retry</span>
+            </button>
+          )}
+        </div>
+
+        {technicalDetails && (
+          <div className="pt-1">
+            <button
+              type="button"
+              onClick={() => setShowDetails(!showDetails)}
+              className="text-xs text-red-700 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200 underline underline-offset-2 flex items-center gap-1 cursor-pointer font-medium"
+              aria-expanded={showDetails}
+            >
+              <span>{showDetails ? 'Hide technical details' : 'Details'}</span>
+            </button>
+            {showDetails && (
+              <pre className="mt-2 p-2.5 bg-red-100/70 dark:bg-red-950/70 text-red-900 dark:text-red-200 rounded-lg text-2xs font-mono overflow-x-auto whitespace-pre-wrap border border-red-200 dark:border-red-900">
+                {technicalDetails}
+              </pre>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
