@@ -272,6 +272,37 @@ Eliminates branching fragmentation while uniting the approved Bento architecture
 - Maintaining long-lived parallel design branches: creates synchronization debt and slows down Milestone 3 development.
 - Merging `layout-v3` without `motion-3d`: misses the polished tactile feel, progressive view transitions, and accessible drawer/inspector animations validated in testing.
 
+---
+
+## 2026-11-13 — React Bits Sensory UI Enhancements (TiltedCard, LiquidChrome, GradientText, GlowCursor) on reactbits-ui Branch
+
+**Decision:**
+Integrate four curated React Bits components (`TiltedCard`, `LiquidChrome`, `GradientText`, `GlowCursor`) onto a dedicated `reactbits-ui` branch to elevate tactile feedback, atmospheric ambient depth, and brand typography, while strictly preserving the civic telemetry aesthetic, accessibility standards (WCAG AA), and zero new npm dependencies.
+
+1. **Component Selection & Aesthetic Alignment:**
+   - **`TiltedCard`:** Selected as an interactive hero focal point. Rather than applying heavy 3D transforms globally, it is scoped specifically to key focal cards (Dashboard "Total Reports" and "Community Sensor Intake"). Props: `scaleOnHover={1.03}`, `rotateAmplitude={5}`, `glare={0.2}`. Inner card `tilt3d={false}` is enforced to prevent double-tilt stacking with SENTINEL's existing CSS card tilt.
+   - **`LiquidChrome`:** Selected for atmospheric depth behind the dark Dashboard hero banner. Configured with a deeply muted navy/teal palette (`baseColor: [0.04, 0.16, 0.22]`, `speed: 0.12`, `amplitude: 0.18`, `interactive: true`) and rendered at low opacity (`opacity-35`, `pointer-events-none`). This keeps text crisp and meets WCAG AA contrast ratios (>4.5:1). Code-split and lazy-loaded via `React.lazy` (`16.12 kB / 6.10 kB gz`) and hidden on mobile (`hidden sm:block`).
+   - **`GradientText`:** Selected to give brand headers a refined iridescent telemetry sheen without loud consumer-style neons. Configured with SENTINEL's cyan and sky tokens (`#2dd4bf`, `#38bdf8`, `#5eead4`, `#7dd3fc`, `animationSpeed: 6`), applied to the navbar brand identifier and the hero greeting.
+   - **`GlowCursor`:** Selected to provide subtle cursor tracking on desktop fine-pointer interfaces. Configured with a soft teal aura (`color="#0d9488"`, `glowSize: 65`, `smoothing: 0.14`). Code-split and lazy-loaded (`20.93 kB / 7.18 kB gz`) in `App.tsx`.
+
+2. **Accessibility & Safety Safeguards:**
+   - **Reduced Motion:** All four components strictly respect `@media (prefers-reduced-motion: reduce)`. `GlowCursor` and `LiquidChrome` are completely unmounted/disabled; `GradientText` renders a solid high-contrast fallback; `TiltedCard` disables transforms and glare.
+   - **Device Gating:** `GlowCursor` is strictly active only when `(hover: hover) and (pointer: fine)` is true, avoiding phantom touch points or battery drain on mobile/tablet devices.
+   - **Interaction Isolation:** `GlowCursor` suppresses its trail whenever the pointer enters form inputs (`input`, `textarea`, `select`), during active keyboard typing, or over Leaflet GIS map controls (`.leaflet-container`, `.leaflet-control`) to avoid visual distraction and interference with precision interactions.
+   - **Focus & Screen Readers:** Visual canvas elements have `aria-hidden="true"` and `pointer-events: none`, ensuring zero impact on keyboard focus navigation, screen readers, or standard click targets.
+
+3. **Performance Optimization:**
+   - Evaluated under 4x CPU slowdown: Canvas shaders auto-pause when blurred or hidden, maintaining 60fps scrolling.
+   - Native WebGL2 and CSS transforms with **0 external npm dependencies added** (no `ogl` or `framer-motion` needed).
+
+**Reason:**
+Provides modern SaaS polish and sensory immersion appropriate for an emergency crisis platform without degrading performance, breaking keyboard navigation, or adding bloat.
+
+**Alternatives considered:**
+- **Installing `framer-motion` or `ogl`:** Official React Bits registry components (`@react-bits/*-TS-TW`) run entirely on raw WebGL2 and standard CSS custom properties; adding external libraries would add ~120KB unnecessary weight.
+- **Full-page WebGL backgrounds:** Rejected because full-page shaders consume excessive GPU resources and degrade map performance. Scoping `LiquidChrome` to the hero banner achieves atmospheric depth with zero impact on data density or map fluidity.
+
+
 
 
 

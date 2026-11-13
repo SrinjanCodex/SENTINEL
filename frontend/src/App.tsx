@@ -2,7 +2,7 @@
  * SENTINEL — Root Application
  * Top-level routing, accessible skip-link, and unified telemetry shell
  */
-import { useEffect } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { Navigation } from './components/Navigation';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -15,6 +15,49 @@ import MapPage from './pages/MapPage';
 import SystemInfo from './pages/SystemInfo';
 import IncidentDetail from './pages/IncidentDetail';
 import { ShieldAlert, Compass, ArrowLeft } from 'lucide-react';
+
+const GlowCursor = lazy(() => import('./components/GlowCursor'));
+
+function GlobalGlowCursor() {
+  const [enabled, setEnabled] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const check = () => {
+      const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      setEnabled(fine && !reduced);
+    };
+    check();
+    const mqHover = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const mqMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    mqHover.addEventListener('change', check);
+    mqMotion.addEventListener('change', check);
+    return () => {
+      mqHover.removeEventListener('change', check);
+      mqMotion.removeEventListener('change', check);
+    };
+  }, []);
+
+  if (!enabled) return null;
+
+  return (
+    <Suspense fallback={null}>
+      <div className="fixed inset-0 pointer-events-none z-30 overflow-hidden" aria-hidden="true">
+        <GlowCursor
+          color="#0d9488"
+          secondaryColor="#0284c7"
+          intensity={0.25}
+          glow={0.3}
+          trailWidth={14}
+          linger={0.5}
+          theme="light"
+          blendMode="screen"
+        />
+      </div>
+    </Suspense>
+  );
+}
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -78,6 +121,7 @@ export default function App() {
       </a>
 
       <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
+        <GlobalGlowCursor />
         <Navigation />
 
         <main

@@ -15,6 +15,7 @@ import {
   X,
   Search,
 } from 'lucide-react';
+import GradientText from './GradientText';
 
 const NAV_ITEMS = [
   { to: '/',            label: 'Dashboard',   icon: LayoutDashboard },
@@ -89,7 +90,14 @@ export function Navigation() {
               </div>
               <div>
                 <span className="font-bold text-base tracking-tight text-white flex items-center gap-1.5">
-                  SENTINEL
+                  <GradientText
+                    colors={['#2dd4bf', '#38bdf8', '#5eead4', '#7dd3fc']}
+                    animationSpeed={6}
+                    showBorder={false}
+                    className="inline-block"
+                  >
+                    SENTINEL
+                  </GradientText>
                   <span className="text-[10px] font-mono tracking-wider font-semibold px-1.5 py-0.2 rounded bg-slate-800 text-teal-400 border border-slate-700/80 uppercase">
                     v0.1
                   </span>

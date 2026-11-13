@@ -1,8 +1,8 @@
 # SENTINEL — Project Status
 
-**Last Updated:** 2026-11-08
+**Last Updated:** 2026-11-13
 **Current Milestone:** 2 — Backend & Database
-**Status:** ✅ Complete (Milestones 1 & 2 verified; Frontend Design & Motion consolidated on `main`; ready for Milestone 3 approval)
+**Status:** ✅ Complete (Milestones 1 & 2 verified; React Bits sensory additions implemented on branch `reactbits-ui`; ready for review)
 
 ---
 
@@ -95,6 +95,31 @@
     - Fine pointer gating: `@media (hover: hover) and (pointer: fine)` with touch press-down fallback (`:active { transform: scale(0.98); }`).
     - Accessibility: strictly respects `@media (prefers-reduced-motion: reduce)`, preserving visible focus rings (`:focus-visible`), contrast, and crisp text rendering.
   - 57 automated tests passing across 7 test suites (including `motionAndCard.test.tsx`), 0 build/type errors.
+- React Bits Sensory UI Enhancements (Branch: `reactbits-ui`):
+  - **Zero External Dependencies:** Integrated all four verified React Bits components (`TiltedCard`, `LiquidChrome`, `GradientText`, `GlowCursor`) using native TypeScript, modern WebGL2, and CSS transforms — **0 npm packages added**.
+  - **Path Alias & Registry:** Initialized `components.json` with `@/` path alias and `@react-bits` registry, configured in `vite.config.ts`, `tsconfig.json`, and `tsconfig.app.json`.
+  - **`TiltedCard` (Selective 3D Focal Accent):**
+    - Smooth 3D tilt with depth perspective, gentle glare reflection, and subtle scale (`scaleOnHover={1.03}`, `rotateAmplitude={5}`, `glare={0.2}`).
+    - Applied selectively to the Dashboard primary KPI tile ("Total Reports") and the intake CTA tile ("Community Sensor Intake").
+    - Explicitly set `tilt3d={false}` on inner `<Card>` components to prevent dual-tilt stacking; remaining metrics and cards retain the lightweight built-in CSS tilt.
+  - **`LiquidChrome` (Atmospheric Fluid Mesh Backdrop):**
+    - Interactive fluid WebGL2 distortion canvas custom tuned to SENTINEL's dark navy/teal aesthetic (`baseColor: [0.04, 0.16, 0.22]`, `speed: 0.12`, `amplitude: 0.18`, `interactive: true`).
+    - Positioned behind the Dashboard hero header banner at low opacity (`opacity-35`, `pointer-events-none`) with high contrast text preserving WCAG AA legibility.
+    - Lazy-loaded via `React.lazy` into an independent asynchronous chunk (`16.12 kB / 6.10 kB gz`), hidden on mobile viewports (`hidden sm:block`), and auto-paused when window loses focus.
+  - **`GradientText` (Dynamic Telemetry Accents):**
+    - Smoothly animated iridescent text gradient using SENTINEL's cyan/teal palette (`#2dd4bf`, `#38bdf8`, `#5eead4`, `#7dd3fc`, `animationSpeed: 6`).
+    - Applied to the top brand header in `Navigation.tsx` ("SENTINEL //") and the Dashboard hero greeting ("Civic Intelligence Overview").
+    - Features solid fallback color under `prefers-reduced-motion`.
+  - **`GlowCursor` (Adaptive Fine-Pointer Ambiance):**
+    - Subtle dual-ring cursor follower with ambient teal glow (`#0d9488`, `glowSize: 65`, `smoothing: 0.14`).
+    - Lazy-loaded (`20.93 kB / 7.18 kB gz`) in `App.tsx`. Strictly gated by `@media (hover: hover) and (pointer: fine)` (zero overhead on touch/tablets), completely disabled under `prefers-reduced-motion: reduce`, with `pointer-events: none`.
+    - Automatically suppresses glow trails when hovering over form elements (`input`, `textarea`, `select`), during active typing, or across the interactive Leaflet GIS map.
+  - **Performance & Testing Verification:**
+    - 68 Vitest tests passing across 9 test files (including new `reactBits.test.tsx` and `routesIntegration.test.tsx`).
+    - 14 backend pytest tests passing.
+    - Oxlint clean with 0 errors (9 standard react compiler warnings in 41 files).
+    - Production build succeeds with 0 errors. Initial app JS bundle: 563.70 kB (165.41 kB gz); standalone deferred chunks: LiquidChrome (16.12 kB / 6.10 kB gz), GlowCursor (20.93 kB / 7.18 kB gz).
+    - 4x CPU slowdown testing: 60fps scrolling and smooth cursor response maintained; WebGL shaders auto-pause on blur.
 
 ### Milestone 2: Backend & Database Features (Tested)
 - FastAPI asynchronous web framework with standard Uvicorn runner

@@ -3,15 +3,19 @@
  * Civic waterlogging intelligence command center featuring an asymmetric Bento grid,
  * interactive GIS preview hero tile, active anomaly correlator, and drifting background tiles.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { MapContainer, CircleMarker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { SentinelTileLayer } from '../components/SentinelTileLayer';
 import { MapErrorBoundary } from '../components/ErrorBoundary';
 import { FloatingTiles } from '../components/FloatingTiles';
+import TiltedCard from '../components/TiltedCard';
+import GradientText from '../components/GradientText';
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from '../lib/mapConfig';
 import { useCountUp } from '../lib/useCountUp';
+
+const LiquidChrome = lazy(() => import('../components/LiquidChrome'));
 
 import { getApiClient } from '../api';
 import type { DashboardStats, Report, Incident } from '../types';
@@ -104,8 +108,22 @@ export default function Dashboard() {
       
       {/* Bento Header Tile with Ambient Floating Shapes & Grid Texture */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-slate-800 p-6 sm:p-8 text-white shadow-sm animate-card-rise stagger-1">
+        {/* Subtle LiquidChrome background - lazy loaded, low intensity, hidden on mobile */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden hidden sm:block opacity-35" aria-hidden="true">
+          <Suspense fallback={null}>
+            <LiquidChrome
+              color={[0.04, 0.16, 0.22]}
+              speed={0.12}
+              amplitude={0.18}
+              roughness={0.65}
+              exposure={0.2}
+              interactive={true}
+              rippleStrength={0.5}
+            />
+          </Suspense>
+        </div>
         <div className="absolute inset-0 civic-grid-pattern opacity-40 pointer-events-none" />
-        <FloatingTiles count={6} />
+        <FloatingTiles count={4} />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
@@ -120,7 +138,14 @@ export default function Dashboard() {
             </div>
             
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              Civic Intelligence Overview
+              <GradientText
+                colors={['#ffffff', '#2dd4bf', '#38bdf8', '#ffffff']}
+                animationSpeed={8}
+                showBorder={false}
+                className="inline-block"
+              >
+                Civic Intelligence Overview
+              </GradientText>
             </h1>
             
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
@@ -160,24 +185,39 @@ export default function Dashboard() {
       <section aria-label="Incident Prioritisation Metrics">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           
-          {/* Card 1: Total Reports */}
-          <Card tilt3d={true} maxTilt={4} className="p-4 sm:p-5 relative overflow-hidden group hover:border-slate-300 animate-card-rise stagger-1">
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <span className="text-xs font-semibold text-slate-600 tracking-tight">Total Reports</span>
-              <div className="p-2 rounded-lg bg-slate-100 text-slate-600 group-hover:scale-105 transition-transform">
-                <FileText className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight tabular-numbers">
-              {totalReportsCount}
-            </div>
-            <div className="mt-1 flex items-center justify-between text-[11px] text-slate-500">
-              <span>Community submissions</span>
-              <span className="font-mono text-[10px] bg-slate-100 text-slate-700 px-1.5 py-0.2 rounded font-medium">
-                Stored
-              </span>
-            </div>
-          </Card>
+          {/* Card 1: Total Reports with React Bits TiltedCard */}
+          <div className="animate-card-rise stagger-1 h-full">
+            <TiltedCard
+              containerWidth="100%"
+              containerHeight="100%"
+              imageWidth="100%"
+              imageHeight="100%"
+              scaleOnHover={1.03}
+              rotateAmplitude={5}
+              glare={0.2}
+              glareColor="#0d9488"
+              radius="0.75rem"
+              className="w-full h-full"
+            >
+              <Card tilt3d={false} className="p-4 sm:p-5 h-full relative overflow-hidden group hover:border-slate-300">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <span className="text-xs font-semibold text-slate-600 tracking-tight">Total Reports</span>
+                  <div className="p-2 rounded-lg bg-slate-100 text-slate-600 group-hover:scale-105 transition-transform">
+                    <FileText className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight tabular-numbers">
+                  {totalReportsCount}
+                </div>
+                <div className="mt-1 flex items-center justify-between text-[11px] text-slate-500">
+                  <span>Community submissions</span>
+                  <span className="font-mono text-[10px] bg-slate-100 text-slate-700 px-1.5 py-0.2 rounded font-medium">
+                    Stored
+                  </span>
+                </div>
+              </Card>
+            </TiltedCard>
+          </div>
 
           {/* Card 2: Potential Clusters */}
           <Card tilt3d={true} maxTilt={4} className="p-4 sm:p-5 relative overflow-hidden group hover:border-slate-300 animate-card-rise stagger-2">
@@ -477,9 +517,21 @@ export default function Dashboard() {
           </Card>
         </section>
 
-        {/* Community Sensor Intake Bento Tile (4 Columns) - Feature tile with 3D feel */}
+        {/* Community Sensor Intake Bento Tile (4 Columns) - Feature tile with React Bits TiltedCard */}
         <section className="lg:col-span-4 animate-card-rise stagger-6" aria-label="Community Sensor Information">
-          <Card tilt3d={true} maxTilt={3} className="p-5 h-full flex flex-col justify-between bg-gradient-to-br from-teal-500/10 via-slate-50 to-white border-teal-200/70 shadow-sm">
+          <TiltedCard
+            containerWidth="100%"
+            containerHeight="100%"
+            imageWidth="100%"
+            imageHeight="100%"
+            scaleOnHover={1.02}
+            rotateAmplitude={4}
+            glare={0.2}
+            glareColor="#14b8a6"
+            radius="0.75rem"
+            className="w-full h-full"
+          >
+            <Card tilt3d={false} className="p-5 h-full flex flex-col justify-between bg-gradient-to-br from-teal-500/10 via-slate-50 to-white border-teal-200/70 shadow-sm">
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-xl bg-teal-600 text-white shadow-xs">
@@ -526,7 +578,8 @@ export default function Dashboard() {
               </Link>
             </div>
           </Card>
-        </section>
+        </TiltedCard>
+      </section>
 
       </div>
 
