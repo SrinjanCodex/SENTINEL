@@ -8,5 +8,5 @@ Tracking progress of Milestone 3 implementation steps:
 - [x] Step 4: `classifier.py` + `data/seed_reports.csv` + train script (Severity classifier + tests)
 - [x] Step 5: `confidence.py` (0-1 confidence score & human-readable reason + tests)
 - [x] Step 6: API endpoints (`POST /reports/{id}/analyze`, `GET /reports/{id}/analysis`, auto-analysis + tests)
-- [ ] Step 7: Frontend UI on ReportDetail view (Severity badge, confidence, extracted details, duplicates list)
+- [x] Step 7: Frontend UI on ReportDetail view (Severity badge, confidence, extracted details, duplicates list)
 - [ ] Step 8: Docs update (`PROJECT_STATUS.md`, `README.md`, `ARCHITECTURE.md` + curl examples + limitations)

@@ -8,6 +8,7 @@
 import type {
   ApiClient,
   Report,
+  ReportAnalysis,
   Incident,
   CreateReportPayload,
   DashboardStats,
@@ -101,5 +102,19 @@ export class RealApiClient implements ApiClient {
 
   async getIncident(id: string): Promise<Incident> {
     return this.request<Incident>(`/api/incidents/${encodeURIComponent(id)}`);
+  }
+
+  async getReportAnalysis(id: string): Promise<ReportAnalysis | null> {
+    try {
+      return await this.request<ReportAnalysis>(`/api/reports/${encodeURIComponent(id)}/analysis`);
+    } catch {
+      return null;
+    }
+  }
+
+  async analyzeReport(id: string): Promise<ReportAnalysis> {
+    return this.request<ReportAnalysis>(`/api/reports/${encodeURIComponent(id)}/analyze`, {
+      method: 'POST',
+    });
   }
 }
