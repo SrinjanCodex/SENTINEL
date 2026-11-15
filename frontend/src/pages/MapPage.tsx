@@ -2,7 +2,7 @@
  * SENTINEL — Spatial Telemetry GIS Command
  * Verified geographic mapping with explicit segregation of unconfirmed coordinates
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   MapContainer,
   CircleMarker,
@@ -14,7 +14,7 @@ import { SentinelTileLayer } from '../components/SentinelTileLayer';
 import { MapErrorBoundary } from '../components/ErrorBoundary';
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM, STREET_LEVEL_ZOOM } from '../lib/mapConfig';
 import { Link } from 'react-router-dom';
-import { getApiClient } from '../api';
+import { getApiClient, fetchAllReports } from '../api';
 import type { Report, ReportCategory } from '../types';
 import {
   Card,
@@ -76,17 +76,27 @@ const FILTER_CATEGORIES: { value: ReportCategory | ''; label: string }[] = [
 export default function MapPage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [errorState, setErrorState] = useState<{ message: string; details?: string } | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<ReportCategory | ''>('');
   const [viewMode, setViewMode] = useState<'india' | 'cluster'>('india');
 
-  useEffect(() => {
-    getApiClient()
-      .listReports({ per_page: 200 })
-      .then((r) => setReports(r.items))
-      .catch((err) => setError('Could not load GIS telemetry. ' + ((err as Error)?.message ?? '')))
+  const loadReports = useCallback(() => {
+    setLoading(true);
+    setErrorState(null);
+    fetchAllReports(getApiClient())
+      .then((items) => setReports(items))
+      .catch((err) => {
+        setErrorState({
+          message: 'The map data could not be loaded. Try again.',
+          details: (err as Error)?.message || String(err),
+        });
+      })
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    loadReports();
+  }, [loadReports]);
 
   const filtered =
     categoryFilter
@@ -103,7 +113,7 @@ export default function MapPage() {
   const hasDemo = reports.some((r) => r.is_synthetic);
 
   const inputClass =
-    'rounded-lg border border-slate-300/80 px-3 py-1.5 text-xs text-slate-800 bg-white ' +
+    'rounded-lg border border-slate-300/80 dark:border-slate-700 px-3 py-1.5 text-xs text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-900 ' +
     'focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500 transition-all';
 
   return (
@@ -121,11 +131,11 @@ export default function MapPage() {
         </div>
       )}
 
-      {/* Map Control Toolbar */}
-      <Card className="p-3.5 bg-slate-50/50 flex flex-wrap items-center justify-between gap-3 animate-card-rise stagger-2">
+      {/* Map Control Toolbar — Wide Slab */}
+      <Card tilt={false} className="p-4 sm:p-5 bg-slate-50/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4 animate-card-rise stagger-2">
         <div className="flex items-center gap-2.5">
-          <Filter className="w-4 h-4 text-slate-500" />
-          <label htmlFor="map-category-filter" className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+          <Filter className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+          <label htmlFor="map-category-filter" className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
             Layer Filter:
           </label>
           <select
@@ -141,13 +151,13 @@ export default function MapPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <div className="inline-flex rounded-lg border border-slate-200/90 bg-white p-0.5 shadow-2xs">
+          <div className="inline-flex rounded-lg border border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-800 p-0.5 shadow-2xs">
             <button
               onClick={() => setViewMode('india')}
-              className={`px-2.5 py-1 text-xs rounded-md font-medium transition-all btn-press ${
+              className={`px-3 py-1.5 text-xs rounded-md font-medium transition-all btn-press ${
                 viewMode === 'india'
-                  ? 'bg-slate-800 text-teal-400 font-semibold shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-slate-800 dark:bg-slate-700 text-teal-400 font-semibold shadow-xs'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:white'
               }`}
             >
               🇮🇳 India Overview
@@ -155,10 +165,10 @@ export default function MapPage() {
             {mappable.length > 0 && (
               <button
                 onClick={() => setViewMode('cluster')}
-                className={`px-2.5 py-1 text-xs rounded-md font-medium transition-all btn-press ${
+                className={`px-3 py-1.5 text-xs rounded-md font-medium transition-all btn-press ${
                   viewMode === 'cluster'
-                    ? 'bg-slate-800 text-teal-400 font-semibold shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-slate-800 dark:bg-slate-700 text-teal-400 font-semibold shadow-xs'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:white'
                 }`}
               >
                 📍 Street View Reports ({mappable.length})
@@ -166,14 +176,14 @@ export default function MapPage() {
             )}
           </div>
 
-          <div className="flex items-center gap-3 text-xs text-slate-500">
+          <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
-              <strong className="text-slate-800">{mappable.length}</strong> Plotted Points
+              <strong className="text-slate-800 dark:text-slate-200">{mappable.length}</strong> Plotted Points
             </span>
             {unmappable.length > 0 && (
-              <span className="flex items-center gap-1.5 text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                <AlertTriangle className="w-3 h-3 text-amber-600" />
+              <span className="flex items-center gap-1.5 text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 rounded-md border border-amber-200 dark:border-amber-800/60 font-medium">
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                 <strong>{unmappable.length}</strong> Unmapped Gap
               </span>
             )}
@@ -183,15 +193,20 @@ export default function MapPage() {
 
       {loading ? (
         <LoadingSpinner label="Compiling geospatial coordinate points…" />
-      ) : error ? (
-        <ErrorAlert message={error} />
+      ) : errorState ? (
+        <ErrorAlert
+          title="Map Telemetry Notice"
+          message={errorState.message}
+          technicalDetails={errorState.details}
+          onRetry={loadReports}
+        />
       ) : (
         <>
           {/* GIS Map Frame */}
-          <Card className="overflow-hidden border-slate-300 shadow-sm animate-card-rise stagger-3">
+          <Card tilt={false} className="overflow-hidden border-slate-300 dark:border-slate-800 shadow-sm animate-card-rise stagger-3">
             <div
               style={{ height: '520px' }}
-              className="w-full relative bg-slate-100"
+              className="w-full relative bg-slate-100 dark:bg-slate-950"
               role="application"
               aria-label="Interactive map of incident reports"
             >
@@ -255,15 +270,15 @@ export default function MapPage() {
             </div>
           </Card>
 
-          {/* Color-Coded Category Legend */}
-          <Card className="p-4 bg-slate-50/50">
-            <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-slate-500" />
+          {/* Color-Coded Category Legend — Wide Slab Grid */}
+          <Card tilt={false} className="p-5 sm:p-6 bg-slate-50/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800">
+            <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
               <span>Spatial Categorization Legend</span>
             </h3>
-            <div className="flex flex-wrap gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
               {FILTER_CATEGORIES.filter((c) => c.value).map(({ value, label }) => (
-                <div key={value} className="flex items-center gap-1.5 text-xs text-slate-700 font-medium bg-white px-2.5 py-1 rounded-md border border-slate-200/80 shadow-2xs">
+                <div key={value} className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 font-medium bg-white dark:bg-slate-800 px-3 py-2 rounded-lg border border-slate-200/80 dark:border-slate-700 shadow-2xs">
                   <span
                     style={{
                       display: 'inline-block',
@@ -274,63 +289,68 @@ export default function MapPage() {
                     }}
                     aria-hidden="true"
                   />
-                  <span>{label}</span>
+                  <span className="truncate">{label}</span>
                 </div>
               ))}
             </div>
           </Card>
 
-          {/* Explicit Unmapped Reports Segregation Callout */}
+          {/* Explicit Unmapped Reports Segregation Callout — Wide Slab Row Items */}
           {unmappable.length > 0 && (
-            <Card className="overflow-hidden border-amber-200/80 animate-card-rise stagger-4">
-              <div className="px-5 py-3.5 border-b border-amber-100 bg-amber-50/60 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-amber-600" />
+            <Card tilt={false} className="overflow-hidden border-amber-200/80 dark:border-amber-800/60 animate-card-rise stagger-4">
+              <div className="px-6 py-4 border-b border-amber-100 dark:border-amber-900/50 bg-amber-50/60 dark:bg-amber-950/40 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
                   <div>
-                    <h2 className="font-bold text-amber-950 text-xs sm:text-sm uppercase tracking-wider">
+                    <h2 className="font-bold text-amber-950 dark:text-amber-200 text-xs sm:text-sm uppercase tracking-wider">
                       Location-Unconfirmed Reports ({unmappable.length})
                     </h2>
-                    <p className="text-[11px] text-amber-800">
+                    <p className="text-xs text-amber-800 dark:text-amber-300">
                       Rule Compliance: Missing-Signal Detector (MS-LOC) flags these gaps. SENTINEL never invents artificial coordinates.
                     </p>
                   </div>
                 </div>
-                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300/60">
+                <span className="text-[10px] font-mono font-semibold px-2.5 py-1 rounded-md bg-amber-100 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200 border border-amber-300/60 dark:border-amber-700/60 shrink-0">
                   MS-LOC Triggered
                 </span>
               </div>
 
-              <ul className="divide-y divide-slate-100">
+              <ul className="divide-y divide-slate-100 dark:divide-slate-800">
                 {unmappable.map((r, idx) => (
                   <li key={r.id} className={`animate-fade-in stagger-${Math.min(idx + 1, 5)}`}>
                     <Link
                       to={`/reports/${r.id}`}
                       viewTransition
-                      className="block px-5 py-3.5 hover:bg-slate-50 transition-colors group"
+                      className="block p-5 sm:p-6 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors group"
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs sm:text-sm text-slate-800 line-clamp-2 leading-relaxed group-hover:text-slate-950 font-normal">
+                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        <div className="flex-1 min-w-0 space-y-2">
+                          <p className="text-xs sm:text-sm text-slate-800 dark:text-slate-200 line-clamp-2 leading-relaxed group-hover:text-slate-950 dark:group-hover:text-white font-normal">
                             "{r.original_description}"
                           </p>
-                          <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-slate-400">
-                            <StatusBadge status={r.status} size="sm" />
-                            <CategoryBadge category={r.category} />
-                            {r.address && (
-                              <span className="flex items-center gap-1 text-slate-500">
-                                <MapPin className="w-3 h-3 text-slate-400" />
-                                <span>{r.address}</span>
-                              </span>
-                            )}
-                            <span className="flex items-center gap-1 text-slate-400">
-                              <Clock className="w-3 h-3" />
-                              <span>{relativeTime(r.submitted_at)}</span>
-                            </span>
-                          </div>
+                          {r.address && (
+                            <p className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                              <MapPin className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                              <span className="truncate">{r.address}</span>
+                            </p>
+                          )}
                         </div>
-                        <div className="shrink-0 flex items-center gap-1 text-xs font-semibold text-teal-600 group-hover:text-teal-700">
-                          <span>Inspect Gap</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
+
+                        <div className="flex flex-wrap sm:flex-nowrap items-center justify-between lg:justify-end gap-4 shrink-0 pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-100 dark:border-slate-800">
+                          <div className="flex items-center gap-2">
+                            <CategoryBadge category={r.category} />
+                            <StatusBadge status={r.status} size="sm" />
+                          </div>
+
+                          <div className="text-right text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                            <Clock className="w-3.5 h-3.5 shrink-0" />
+                            <span>{relativeTime(r.submitted_at)}</span>
+                          </div>
+
+                          <div className="inline-flex items-center gap-1 text-xs font-semibold text-teal-600 dark:text-teal-400 group-hover:text-teal-700 dark:group-hover:text-teal-300 pl-2">
+                            <span>Inspect Gap</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </div>
                         </div>
                       </div>
                     </Link>

@@ -14,7 +14,12 @@ import {
   Menu,
   X,
   Search,
+  Sun,
+  Moon,
+  Monitor,
 } from 'lucide-react';
+import GradientText from './GradientText';
+import { useTheme } from '../context/ThemeContext';
 
 const NAV_ITEMS = [
   { to: '/',            label: 'Dashboard',   icon: LayoutDashboard },
@@ -30,6 +35,7 @@ export function Navigation() {
   const drawerRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
 
   const handleClose = useCallback(() => {
     if (!open || isClosing) return;
@@ -73,7 +79,7 @@ export function Navigation() {
 
   return (
     <header className="bg-slate-900 border-b border-slate-800/90 sticky top-0 z-50 shadow-sm backdrop-blur-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-4">
           
           {/* Brand Logo & Telemetry Indicator */}
@@ -89,7 +95,14 @@ export function Navigation() {
               </div>
               <div>
                 <span className="font-bold text-base tracking-tight text-white flex items-center gap-1.5">
-                  SENTINEL
+                  <GradientText
+                    colors={['#2dd4bf', '#38bdf8', '#5eead4', '#7dd3fc']}
+                    animationSpeed={6}
+                    showBorder={false}
+                    className="inline-block"
+                  >
+                    SENTINEL
+                  </GradientText>
                   <span className="text-[10px] font-mono tracking-wider font-semibold px-1.5 py-0.2 rounded bg-slate-800 text-teal-400 border border-slate-700/80 uppercase">
                     v0.1
                   </span>
@@ -146,8 +159,61 @@ export function Navigation() {
             })}
           </nav>
 
-          {/* Quick Action Button & Mobile Menu Toggle */}
+          {/* Quick Action Button, Theme Selector & Mobile Menu Toggle */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Desktop Theme Selector Pill */}
+            <div
+              className="hidden sm:flex items-center rounded-lg bg-slate-800/80 p-0.5 border border-slate-700/60"
+              role="radiogroup"
+              aria-label="Color theme selector"
+            >
+              <button
+                type="button"
+                role="radio"
+                aria-checked={theme === 'light'}
+                onClick={() => setTheme('light')}
+                className={`p-1.5 rounded-md transition-all cursor-pointer ${
+                  theme === 'light'
+                    ? 'bg-slate-700 text-teal-300 shadow-xs'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+                title="Light mode"
+                aria-label="Light mode"
+              >
+                <Sun className="w-3.5 h-3.5" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={theme === 'dark'}
+                onClick={() => setTheme('dark')}
+                className={`p-1.5 rounded-md transition-all cursor-pointer ${
+                  theme === 'dark'
+                    ? 'bg-slate-700 text-teal-300 shadow-xs'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+                title="Dark mode"
+                aria-label="Dark mode"
+              >
+                <Moon className="w-3.5 h-3.5" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={theme === 'system'}
+                onClick={() => setTheme('system')}
+                className={`p-1.5 rounded-md transition-all cursor-pointer ${
+                  theme === 'system'
+                    ? 'bg-slate-700 text-teal-300 shadow-xs'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+                title="System theme"
+                aria-label="System theme"
+              >
+                <Monitor className="w-3.5 h-3.5" aria-hidden="true" />
+              </button>
+            </div>
+
             <Link
               to="/report"
               viewTransition
@@ -177,7 +243,7 @@ export function Navigation() {
         <div
           ref={drawerRef}
           id="mobile-navigation"
-          className={`md:hidden border-t border-slate-800 bg-slate-900/95 px-4 pt-3 pb-4 space-y-1 ${
+          className={`md:hidden border-t border-slate-800 bg-slate-900/95 px-4 pt-3 pb-4 space-y-2 ${
             isClosing ? 'animate-drawer-up' : 'animate-drawer-down'
           }`}
         >
@@ -200,7 +266,45 @@ export function Navigation() {
               {label}
             </NavLink>
           ))}
-          <div className="pt-2 mt-2 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+
+          {/* Mobile Theme Selector */}
+          <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-xs text-slate-300">
+            <span>Theme:</span>
+            <div className="flex items-center rounded-lg bg-slate-800 p-0.5 border border-slate-700/60" role="radiogroup" aria-label="Mobile color theme selector">
+              <button
+                type="button"
+                role="radio"
+                aria-checked={theme === 'light'}
+                onClick={() => setTheme('light')}
+                className={`px-2.5 py-1 rounded text-xs flex items-center gap-1.5 transition-colors ${theme === 'light' ? 'bg-slate-700 text-teal-300 font-semibold shadow-xs' : 'text-slate-400'}`}
+              >
+                <Sun className="w-3 h-3" />
+                <span>Light</span>
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={theme === 'dark'}
+                onClick={() => setTheme('dark')}
+                className={`px-2.5 py-1 rounded text-xs flex items-center gap-1.5 transition-colors ${theme === 'dark' ? 'bg-slate-700 text-teal-300 font-semibold shadow-xs' : 'text-slate-400'}`}
+              >
+                <Moon className="w-3 h-3" />
+                <span>Dark</span>
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={theme === 'system'}
+                onClick={() => setTheme('system')}
+                className={`px-2.5 py-1 rounded text-xs flex items-center gap-1.5 transition-colors ${theme === 'system' ? 'bg-slate-700 text-teal-300 font-semibold shadow-xs' : 'text-slate-400'}`}
+              >
+                <Monitor className="w-3 h-3" />
+                <span>Auto</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
             <span>Status: Synthetic Demo Telemetry</span>
             <span className="w-2 h-2 rounded-full bg-emerald-400" />
           </div>

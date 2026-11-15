@@ -1,8 +1,8 @@
 # SENTINEL — Project Status
 
-**Last Updated:** 2026-11-08
+**Last Updated:** 2026-11-13
 **Current Milestone:** 2 — Backend & Database
-**Status:** ✅ Complete (Milestones 1 & 2 verified; Frontend Design & Motion consolidated on `main`; ready for Milestone 3 approval)
+**Status:** ✅ Complete (Milestones 1 & 2 verified; React Bits sensory additions implemented on branch `reactbits-ui`; ready for review)
 
 ---
 
@@ -62,13 +62,28 @@
   - Isolated `MapErrorBoundary` wrapping GIS preview and full map views, ensuring map component failures never crash the rest of the intelligence dashboard
 - React Leaflet map preview on Dashboard and full GIS page
 - Accessibility pass (focus states, ARIA labels, form field labels)
-- Automated unit testing with Vitest (51 tests passed):
+- Automated unit testing with Vitest (72 tests passed across 10 test suites):
+  - `src/components/__tests__/reactBits.test.tsx` (5 tests passed)
+  - `src/components/__tests__/motionAndCard.test.tsx` (6 tests passed)
+  - `src/components/__tests__/routesIntegration.test.tsx` (6 tests passed)
+  - `src/api/__tests__/pagination.test.ts` (4 tests passed)
   - `src/api/__tests__/realClient.test.ts` (4 tests passed)
   - `src/__tests__/smoke.test.tsx` (3 tests passed)
   - `src/lib/__tests__/mapConfig.test.ts` (9 tests passed)
   - `src/lib/__tests__/validation.test.ts` (24 tests passed)
   - `src/lib/__tests__/useCountUp.test.ts` (2 tests passed)
   - `src/lib/__tests__/classification.test.ts` (9 tests passed)
+- Wide Horizontal Slab Layout Architecture & 1600px Container (branch `reactbits-ui`):
+  - **App & Navigation:** Expanded top container from `max-w-7xl` to `max-w-[1600px]` with generous horizontal padding, eliminating dark gutter dead-space on widescreen monitors.
+  - **TiltedCard Dimension Fix:** Resolved root cause where React Bits `TiltedCard` defaulted height and image width to 300px; now defaults to `auto` and `100%`, allowing all tilted cards to expand naturally.
+  - **Dashboard:**
+    - Row 1: 4 wide horizontal KPI slab tiles (`min-h-[120px] max-h-[140px]`) in `grid-cols-1 sm:grid-cols-2 xl:grid-cols-4`.
+    - Row 2: Two-column grid (`lg:grid-cols-12`): "Recent Report Stream" as a large horizontal slab (`lg:col-span-8`, `min-h-[420px]`) containing full-width horizontal report rows (narrative left, category/status/location/time columns, direct inspect link right); "Heuristic Signal Pipeline" card moved to the right-hand side (`lg:col-span-4`).
+    - Row 3: "Active Anomalies & Cluster Hotspots" as 3 large feature cards (`min-h-[220px] min-w-[360px]`) showing centroid coordinates and priority scores.
+    - Row 4: "GIS Spatial Overview" full-width map preview with a dedicated 440px canvas and legend footer.
+  - **Reports List:** Converted into full-width horizontal cards/rows (`1401px` wide x `99px` tall on desktop), retired the restrictive 7/5 split, and updated loading skeletons to match.
+  - **System Information, Report Detail & Incident Detail:** Restructured into wide two-column layouts inside `max-w-[1600px]`.
+  - **Report Incident:** Maintained clean `max-w-5xl` container with generous `p-6 sm:p-8` padding.
 - Production build verified (`npm run build` succeeds cleanly with 0 TypeScript/bundler errors)
 - Dev server verified (`npm run dev` serves HTTP 200 at http://localhost:5173)
 - Consolidated Frontend Design & Motion (Merged into `main` via `motion-3d`):
@@ -95,6 +110,42 @@
     - Fine pointer gating: `@media (hover: hover) and (pointer: fine)` with touch press-down fallback (`:active { transform: scale(0.98); }`).
     - Accessibility: strictly respects `@media (prefers-reduced-motion: reduce)`, preserving visible focus rings (`:focus-visible`), contrast, and crisp text rendering.
   - 57 automated tests passing across 7 test suites (including `motionAndCard.test.tsx`), 0 build/type errors.
+- React Bits Sensory UI Enhancements (Branch: `reactbits-ui`):
+  - **Zero External Dependencies:** Integrated all four verified React Bits components (`TiltedCard`, `LiquidChrome`, `GradientText`, `GlowCursor`) using native TypeScript, modern WebGL2, and CSS transforms — **0 npm packages added**.
+  - **Path Alias & Registry:** Initialized `components.json` with `@/` path alias and `@react-bits` registry, configured in `vite.config.ts`, `tsconfig.json`, and `tsconfig.app.json`.
+  - **Part 1 Bug Fix (Pagination Bounds & Error Resilience — Commit `e27d9a8`):**
+    - Fixed the 422 Unprocessable Entity error caused by `per_page: 200` exceeding FastAPI's strict validation constraint (`per_page <= 100`).
+    - Added `frontend/src/api/pagination.ts` with sequential chunked pagination (`fetchAllReports`), `API_MAX_PAGE_SIZE = 100`, and `MAX_FETCH_PAGES_CAP = 10`.
+    - Added defensive clamping in `realClient.ts` (`Math.min(Math.max(1, per_page), 100)`).
+    - Upgraded `ErrorAlert` with clear plain-language messaging, interactive retry callback, and collapsible technical disclosure.
+    - Added unit test suite in `frontend/src/api/__tests__/pagination.test.ts` (4 tests).
+  - **Part 2 Full-Page Shared LiquidChrome Background:**
+    - Replaced fragmented section-local canvases with a single, fixed, full-viewport WebGL2 canvas layer in `App.tsx` (`GlobalBackground`).
+    - Calibrated with tranquil, low-intensity civic palette (`speed={0.07}`, `amplitude={0.12}`, `opacity-20` light, `opacity-30` dark, `maxDevicePixelRatio={1}`).
+    - Built-in static tinted gradient fallback for unsupported WebGL environments, mobile viewports, tab blur, or `prefers-reduced-motion`.
+    - Completely eliminates GPU context thrashing and preserves 60fps scrolling under 4x CPU slowdown.
+  - **Part 3 Dark Mode Architecture:**
+    - Added accessible theme selector with `light`, `dark`, and `system` modes in desktop header and mobile drawer (`Navigation.tsx`).
+    - Pre-hydration script in `index.html` preventing theme flash on initial load.
+    - `ThemeContext.tsx` with error-resilient `localStorage` persistence and dynamic `prefers-color-scheme` listener.
+    - Tailwind CSS v4 class-based dark mode enabled via `@custom-variant dark (&:where(.dark, .dark *));`.
+    - Cohesive civic design tokens: deep ink/navy surfaces (`#070b12`, `#0b1220`, `slate-900`), balanced cyan/teal accents, high contrast text (WCAG AA).
+    - Night-mode GIS cartography: CSS tile filter inversion/hue-rotation on standard OpenStreetMap tiles (`html.dark .leaflet-tile-pane`) preserving un-inverted markers, popups, and zoom controls.
+  - **Part 4 Universal Card Tilt Unification:**
+    - Embedded React Bits `TiltedCard` as the core engine of the centralized `<Card>` component in `ui.tsx`.
+    - Replaced older CSS pointer event listeners and sheen, preventing competing double-tilt effects.
+    - Gated by default to `@media (hover: hover) and (pointer: fine)` with touch press-down fallback; disabled under `prefers-reduced-motion`.
+    - Configured with subtle civic defaults (`DEFAULT_CARD_MAX_TILT = 3.5`, `DEFAULT_CARD_SCALE = 1.015`, `DEFAULT_CARD_GLARE = 0.14`).
+    - Explicit `tilt={false}` exclusions applied to wide data tables, map containers, and active form typing cards.
+  - **`GradientText` & `GlowCursor`:**
+    - Smooth cyan/teal iridescent headers and interactive navigation branding.
+    - Adaptive fine-pointer cursor follower with auto-suppression over forms and map controls.
+  - **Performance & Testing Verification:**
+    - **72 Vitest tests passing across 10 test files** (including `motionAndCard.test.tsx`, `reactBits.test.tsx`, `pagination.test.ts`, and `routesIntegration.test.tsx`).
+    - **14 backend pytest tests passing** (100% backend integrity maintained).
+    - Oxlint clean with 0 errors.
+    - Production build succeeds with 0 TypeScript/bundler errors. Initial app JS bundle: 580.45 kB (167.97 kB gz); standalone deferred chunks: LiquidChrome (16.12 kB / 6.10 kB gz), GlowCursor (20.93 kB / 7.18 kB gz).
+    - Smooth 60fps operation verified under 4x CPU slowdown.
 
 ### Milestone 2: Backend & Database Features (Tested)
 - FastAPI asynchronous web framework with standard Uvicorn runner

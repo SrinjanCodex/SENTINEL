@@ -79,8 +79,12 @@ export class RealApiClient implements ApiClient {
     if (filters?.status) params.set('status', filters.status);
     if (filters?.date_from) params.set('date_from', filters.date_from);
     if (filters?.date_to) params.set('date_to', filters.date_to);
-    if (filters?.page) params.set('page', String(filters.page));
-    if (filters?.per_page) params.set('per_page', String(filters.per_page));
+    if (filters?.page) params.set('page', String(Math.max(1, filters.page)));
+    if (filters?.per_page) {
+      // Backend validates ge=1, le=100. Clamp client-side to prevent 422 errors.
+      const safePerPage = Math.min(Math.max(1, filters.per_page), 100);
+      params.set('per_page', String(safePerPage));
+    }
 
     const queryString = params.toString();
     const endpoint = `/api/reports${queryString ? `?${queryString}` : ''}`;

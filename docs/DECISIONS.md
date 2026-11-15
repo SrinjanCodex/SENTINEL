@@ -272,6 +272,132 @@ Eliminates branching fragmentation while uniting the approved Bento architecture
 - Maintaining long-lived parallel design branches: creates synchronization debt and slows down Milestone 3 development.
 - Merging `layout-v3` without `motion-3d`: misses the polished tactile feel, progressive view transitions, and accessible drawer/inspector animations validated in testing.
 
+---
+
+## 2026-11-13 — React Bits Sensory UI Enhancements (TiltedCard, LiquidChrome, GradientText, GlowCursor) on reactbits-ui Branch
+
+**Decision:**
+Integrate four curated React Bits components (`TiltedCard`, `LiquidChrome`, `GradientText`, `GlowCursor`) onto a dedicated `reactbits-ui` branch to elevate tactile feedback, atmospheric ambient depth, and brand typography, while strictly preserving the civic telemetry aesthetic, accessibility standards (WCAG AA), and zero new npm dependencies.
+
+1. **Component Selection & Aesthetic Alignment:**
+   - **`TiltedCard`:** Selected as an interactive hero focal point. Rather than applying heavy 3D transforms globally, it is scoped specifically to key focal cards (Dashboard "Total Reports" and "Community Sensor Intake"). Props: `scaleOnHover={1.03}`, `rotateAmplitude={5}`, `glare={0.2}`. Inner card `tilt3d={false}` is enforced to prevent double-tilt stacking with SENTINEL's existing CSS card tilt.
+   - **`LiquidChrome`:** Selected for atmospheric depth behind the dark Dashboard hero banner. Configured with a deeply muted navy/teal palette (`baseColor: [0.04, 0.16, 0.22]`, `speed: 0.12`, `amplitude: 0.18`, `interactive: true`) and rendered at low opacity (`opacity-35`, `pointer-events-none`). This keeps text crisp and meets WCAG AA contrast ratios (>4.5:1). Code-split and lazy-loaded via `React.lazy` (`16.12 kB / 6.10 kB gz`) and hidden on mobile (`hidden sm:block`).
+   - **`GradientText`:** Selected to give brand headers a refined iridescent telemetry sheen without loud consumer-style neons. Configured with SENTINEL's cyan and sky tokens (`#2dd4bf`, `#38bdf8`, `#5eead4`, `#7dd3fc`, `animationSpeed: 6`), applied to the navbar brand identifier and the hero greeting.
+   - **`GlowCursor`:** Selected to provide subtle cursor tracking on desktop fine-pointer interfaces. Configured with a soft teal aura (`color="#0d9488"`, `glowSize: 65`, `smoothing: 0.14`). Code-split and lazy-loaded (`20.93 kB / 7.18 kB gz`) in `App.tsx`.
+
+2. **Accessibility & Safety Safeguards:**
+   - **Reduced Motion:** All four components strictly respect `@media (prefers-reduced-motion: reduce)`. `GlowCursor` and `LiquidChrome` are completely unmounted/disabled; `GradientText` renders a solid high-contrast fallback; `TiltedCard` disables transforms and glare.
+   - **Device Gating:** `GlowCursor` is strictly active only when `(hover: hover) and (pointer: fine)` is true, avoiding phantom touch points or battery drain on mobile/tablet devices.
+   - **Interaction Isolation:** `GlowCursor` suppresses its trail whenever the pointer enters form inputs (`input`, `textarea`, `select`), during active keyboard typing, or over Leaflet GIS map controls (`.leaflet-container`, `.leaflet-control`) to avoid visual distraction and interference with precision interactions.
+   - **Focus & Screen Readers:** Visual canvas elements have `aria-hidden="true"` and `pointer-events: none`, ensuring zero impact on keyboard focus navigation, screen readers, or standard click targets.
+
+3. **Performance Optimization:**
+   - Evaluated under 4x CPU slowdown: Canvas shaders auto-pause when blurred or hidden, maintaining 60fps scrolling.
+   - Native WebGL2 and CSS transforms with **0 external npm dependencies added** (no `ogl` or `framer-motion` needed).
+
+**Reason:**
+Provides modern SaaS polish and sensory immersion appropriate for an emergency crisis platform without degrading performance, breaking keyboard navigation, or adding bloat.
+
+**Alternatives considered:**
+- **Installing `framer-motion` or `ogl`:** Official React Bits registry components (`@react-bits/*-TS-TW`) run entirely on raw WebGL2 and standard CSS custom properties; adding external libraries would add ~120KB unnecessary weight.
+- **Section-local multiple WebGL backgrounds:** Initially tested in the hero banner, but running multiple per-page canvases caused GPU context thrashing. Replaced with a single shared full-page fixed layer.
+
+---
+
+## 2026-11-13 — Frontend Sequential Pagination & API Bounds Safeguard (Part 1 Bug Fix)
+
+**Decision:** Enforce `API_MAX_PAGE_SIZE = 100` in the frontend API layer, implement a sequential multi-page fetcher (`fetchAllReports`), and add client-side clamping `Math.min(Math.max(1, per_page), 100)` in `realClient.ts`. Upgrade `ErrorAlert` with a user-friendly headline, retry callback, and collapsible technical disclosure.
+
+**Reason:** Backend FastAPI endpoint `/api/reports` enforces `per_page: int = Query(10, ge=1, le=100)`. When `MapPage.tsx` queried `per_page: 200`, the server rejected the request with an unhandled 422 Unprocessable Entity error ("Input should be less than or equal to 100"). Rather than relaxing the backend safeguard (which protects against unconstrained resource exhaustion), the frontend now respects the backend contract and pages sequentially up to a safety cap of 10 pages (1,000 reports).
+
+**Alternatives considered:**
+- Raising backend `le=100` to `le=500`: Rejected because backend safeguards exist to protect memory and query performance; client-side paging is the correct architectural pattern.
+- Single unpaginated `/api/reports/all` endpoint: Valid future optimization for map geometries, but requires touching backend Python code which was explicitly disallowed.
+
+---
+
+## 2026-11-13 — Single Full-Viewport LiquidChrome Background
+
+**Decision:** Mount a single, fixed, full-viewport WebGL2 `LiquidChrome` canvas in `App.tsx` (`GlobalBackground`), and remove section-local instances from page headers (e.g., Dashboard hero).
+
+**Reason:** Running multiple simultaneous WebGL contexts causes GPU contention, memory leaks, context exhaustion on mobile devices, and dropped frames under CPU throttling. A single background layer behind the entire app provides a serene, unified atmosphere with low visual intensity (`opacity-20` light, `opacity-30` dark), runs at capped device pixel ratio (`1.0`), and pauses when the tab is blurred or hidden. Fallback to a static tinted gradient is automatic if WebGL is unavailable or `prefers-reduced-motion` is active.
+
+**Alternatives considered:**
+- Multiple per-section WebGL canvases: Causes severe frame drops, GPU context thrashing, and high battery drain.
+- Pure CSS animated gradient: Lightweight, but lacks the organic fluid viscosity of the WebGL raymarched normal map.
+
+---
+
+## 2026-11-13 — Class-Based Dark Mode with Cartographic Map Inversion
+
+**Decision:** Implement class-based `.dark` theme toggling (`light`, `dark`, `system`) with pre-hydration storage check in `index.html`, Tailwind v4 `@custom-variant dark (&:where(.dark, .dark *));`, and an inverted CSS filter on OpenStreetMap tiles (`html.dark .leaflet-tile-pane`).
+
+**Reason:** Eliminates initial white flash on dark mode load. OpenStreetMap raster tiles do not natively provide dark mode cartography without paid commercial keys; applying a calibrated CSS filter (`brightness(0.65) invert(1) contrast(2.6) hue-rotate(200deg) saturate(0.35) brightness(0.75)`) yields clean, legible night-mode cartography while keeping markers, popups, and zoom controls un-inverted.
+
+**Alternatives considered:**
+- Separate dark tile provider (e.g. CARTO dark matter): Requires third-party credentials or rate-limited free tiers.
+- OS-only `@media (prefers-color-scheme: dark)` without manual toggle: Prevents user preference override in the UI.
+
+---
+
+## 2026-11-13 — Universal Card Tilt Unification via React Bits TiltedCard
+
+**Decision:** Embed React Bits `TiltedCard` directly inside the primary `<Card>` component in `ui.tsx`, replacing older ad-hoc CSS pointer listeners and sheens (`--tilt-x`, `card-3d`, `.card-3d-sheen`). Provide explicit `tilt={false}` overrides for wide tables, maps, and form inputs.
+
+**Reason:** Avoids competing or double-tilt effects where both CSS transforms and WebGL/spring matrices operate on the same element. Making `<Card>` the single source of truth ensures all cards (dashboard metrics, report items, system specifications) share identical physics (3.5° max tilt, 1.015 scale, 0.14 glare) while respecting pointer fine gating and reduced-motion settings.
+
+**Alternatives considered:**
+- Keeping both custom CSS tilt and `TiltedCard`: Caused visual jitter and dual-transformation conflicts.
+- Manually wrapping every card instance individually: Error-prone and violates DRY principles.
+
+---
+
+## 2026-11-13 — Wide Horizontal Slab Layout Architecture & Dashboard Carousel
+
+**Decision:** Transform narrow vertical card stacks across all seven application pages into expansive, wide horizontal slab cards (`flex-row` / multi-column grids) and replace the dashboard recent reports list with an accessible horizontal scrolling carousel slab (`snap-x snap-mandatory`).
+
+**Reason:** Small, narrow vertical cards waste horizontal desktop real estate, induce excessive vertical scrolling, and cause visual clutter on modern widescreen monitors. Arranging metadata in horizontal rows (narrative/identity on the left, structured metadata tags and actions on the right) improves scannability and information density. On the dashboard:
+- "Recent Report Stream" occupies an 8-column wide slab (`lg:col-span-8`) featuring a horizontal scroll carousel with directional button controls, keyboard arrow navigation (`ArrowLeft`/`ArrowRight`), mouse-wheel deflection, and visible edge gradient fades.
+- "Heuristic Signal Pipeline" is placed on the right-hand side (`lg:col-span-4`) preserving its exact audit checklist, styling, and action triggers.
+- "Active Anomalies" remains clearly positioned as the cluster incident feed next to the GIS Map preview.
+- System Information sections are redesigned into 2-column specification slabs (sticky executive summary left, technical formulas/tables right).
+- On mobile devices, layouts gracefully collapse to a single-column vertical stack with no horizontal viewport overflow (`overflow-x-hidden`).
+
+**Alternatives considered:**
+- Vertical infinite scroll stream: Clutters the dashboard and forces users to scroll past dozens of items to reach downstream panels.
+- Fixed 3-column card grid: Creates tall, ragged card heights that look uneven when text lengths differ. Horizontal row slabs standardize height and improve scannability.
+
+---
+
+## 2026-11-15 — Expansive 1600px Container, TiltedCard Height Fix, & Wide Dashboard Restructuring
+
+**Decision:**
+1. Expand the application max-width container in `App.tsx` and `Navigation.tsx` from `max-w-7xl` (1280px) to `max-w-[1600px]` with generous padding (`px-4 sm:px-6 lg:px-8`).
+2. Fix the React Bits `TiltedCard.tsx` default parameters from hardcoded `containerHeight = '300px'`, `imageHeight = '300px'`, `imageWidth = '300px'` to `containerHeight = 'auto'`, `imageHeight = 'auto'`, `imageWidth = '100%'`, and pass explicit responsive parameters in `<Card>`.
+3. Restructure Dashboard layout into 4 distinct rows:
+   - **Row 1:** 4 wide horizontal KPI slab tiles (`min-h-[120px] max-h-[140px] flex items-center justify-between`) in `grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6`.
+   - **Row 2:** Two-column grid (`lg:grid-cols-12 gap-8`):
+     - **LEFT (`lg:col-span-8`):** "Recent Report Stream" as a large horizontal slab (`min-h-[420px]`) containing full-width horizontal report rows (narrative on left, structured badges in columns, direct inspect link on right).
+     - **RIGHT (`lg:col-span-4`):** "Heuristic Signal Pipeline" card moved to the right-hand side, preserving exact styling, checklist, and action trigger.
+   - **Row 3:** "Active Anomalies & Cluster Hotspots" as 3 large feature cards (`min-h-[220px] min-w-[360px]`) with centroid coordinates and priority scores.
+   - **Row 4:** "GIS Spatial Overview" full-width map preview with a dedicated 440px canvas, active centroids, and legend footer.
+4. Convert `/reports` into full-width horizontal cards (retiring the restrictive 7/5 split and synchronizing the loading skeleton) and restructure `/reports/:id`, `/incidents/:id`, and `/system-info` into wide two-column layouts.
+
+**Reason:**
+- Root Cause Investigation revealed two major bottlenecks:
+  - `max-w-7xl` (1280px) clamped desktop width and left giant dark empty gutters on 1440px+ screens.
+  - React Bits `TiltedCard` defaulted height and image width to 300px, which clamped every `<Card>` wrapped in tilt physics into a narrow, vertical, square box.
+- Fixing `TiltedCard` to respect children and expanding the container to 1600px gives all cards their intended wide horizontal slab proportions.
+- The dashboard row hierarchy now follows executive priority: KPI slabs at top -> live report stream & pipeline -> anomaly clusters -> spatial GIS map preview.
+
+**Alternatives considered:**
+- Completely removing 3D tilt: Unnecessary because `TiltedCard` works smoothly once its hardcoded 300px dimension constraints are removed.
+- Keeping 7/5 split on Reports page: Cramped the narrative text and pushed badges into awkward multi-line stacks; full-width horizontal cards provide significantly better scannability.
+
+
+
+
+
 
 
 
