@@ -73,13 +73,17 @@
   - `src/lib/__tests__/validation.test.ts` (24 tests passed)
   - `src/lib/__tests__/useCountUp.test.ts` (2 tests passed)
   - `src/lib/__tests__/classification.test.ts` (9 tests passed)
-- Wide Horizontal Slab Layout Architecture & Dashboard Carousel (branch `reactbits-ui`):
-  - **Dashboard:** Bento metric tiles rendered as wide horizontal slabs; Active Anomalies incident feed structured on the right of GIS Map (`lg:col-span-4`); Recent Report Stream converted to an 8-column wide horizontal carousel (`lg:col-span-8`) with directional controls, edge fade cues, CSS scroll snap, and keyboard navigation; Heuristic Signal Pipeline positioned on the right-hand side (`lg:col-span-4`).
-  - **Reports List:** Filter command bar widened; report stream rows converted from narrow vertical blocks into wide horizontal slabs with multi-column metadata tags and direct action links; expanded sticky inspector.
-  - **System Information:** Redesigned into 2-column wide specification slabs (sticky executive summary on left, technical formulas/tables on right) across all 7 architecture sections.
-  - **Incident Detail & Report Detail:** Expanded containers to `max-w-5xl`; Prioritisation Index, Centroid Coordinates, and Milestone 5 stubs converted to wide horizontal 2-column slabs; Report Detail features an expansive quote slab and 2-column metadata provenance grid.
-  - **Report Incident:** Expanded container to `max-w-5xl`, generous card padding (`p-6 sm:p-8`), and 2-column horizontal grouping for timestamps and cryptographic photographic intake protocols.
-  - **Map Page:** Wide horizontal control toolbar, wide category legend grid, and location-unconfirmed (MS-LOC) reports rendered as wide horizontal row slabs.
+- Wide Horizontal Slab Layout Architecture & 1600px Container (branch `reactbits-ui`):
+  - **App & Navigation:** Expanded top container from `max-w-7xl` to `max-w-[1600px]` with generous horizontal padding, eliminating dark gutter dead-space on widescreen monitors.
+  - **TiltedCard Dimension Fix:** Resolved root cause where React Bits `TiltedCard` defaulted height and image width to 300px; now defaults to `auto` and `100%`, allowing all tilted cards to expand naturally.
+  - **Dashboard:**
+    - Row 1: 4 wide horizontal KPI slab tiles (`min-h-[120px] max-h-[140px]`) in `grid-cols-1 sm:grid-cols-2 xl:grid-cols-4`.
+    - Row 2: Two-column grid (`lg:grid-cols-12`): "Recent Report Stream" as a large horizontal slab (`lg:col-span-8`, `min-h-[420px]`) containing full-width horizontal report rows (narrative left, category/status/location/time columns, direct inspect link right); "Heuristic Signal Pipeline" card moved to the right-hand side (`lg:col-span-4`).
+    - Row 3: "Active Anomalies & Cluster Hotspots" as 3 large feature cards (`min-h-[220px] min-w-[360px]`) showing centroid coordinates and priority scores.
+    - Row 4: "GIS Spatial Overview" full-width map preview with a dedicated 440px canvas and legend footer.
+  - **Reports List:** Converted into full-width horizontal cards/rows (`1401px` wide x `99px` tall on desktop), retired the restrictive 7/5 split, and updated loading skeletons to match.
+  - **System Information, Report Detail & Incident Detail:** Restructured into wide two-column layouts inside `max-w-[1600px]`.
+  - **Report Incident:** Maintained clean `max-w-5xl` container with generous `p-6 sm:p-8` padding.
 - Production build verified (`npm run build` succeeds cleanly with 0 TypeScript/bundler errors)
 - Dev server verified (`npm run dev` serves HTTP 200 at http://localhost:5173)
 - Consolidated Frontend Design & Motion (Merged into `main` via `motion-3d`):

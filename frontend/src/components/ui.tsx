@@ -197,6 +197,10 @@ export function Card({
       rotateAmplitude={maxTilt}
       scaleOnHover={scaleOnHover}
       glare={glare}
+      containerHeight="auto"
+      containerWidth="100%"
+      imageHeight="auto"
+      imageWidth="100%"
       className="w-full h-full"
     >
       <Tag

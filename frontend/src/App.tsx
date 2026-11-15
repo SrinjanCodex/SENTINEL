@@ -208,7 +208,7 @@ function AppShell() {
 
         <main
           id="main-content"
-          className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8"
+          className="flex-1 max-w-[1600px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8"
         >
           <ErrorBoundary>
             <MainRoutes />
@@ -218,7 +218,7 @@ function AppShell() {
         <QuickReportFAB />
 
         <footer className="bg-slate-900/95 dark:bg-[#090d16]/95 border-t border-slate-800 text-slate-400 text-xs py-6 px-4 sm:px-8 mt-auto backdrop-blur-md">
-          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+          <div className="max-w-[1600px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
             <div className="space-y-1">
               <p className="font-semibold text-slate-300">
                 SENTINEL — AI-Assisted Urban Waterlogging Intelligence Platform

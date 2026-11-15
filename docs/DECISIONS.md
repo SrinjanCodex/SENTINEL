@@ -367,6 +367,34 @@ Provides modern SaaS polish and sensory immersion appropriate for an emergency c
 - Vertical infinite scroll stream: Clutters the dashboard and forces users to scroll past dozens of items to reach downstream panels.
 - Fixed 3-column card grid: Creates tall, ragged card heights that look uneven when text lengths differ. Horizontal row slabs standardize height and improve scannability.
 
+---
+
+## 2026-11-15 — Expansive 1600px Container, TiltedCard Height Fix, & Wide Dashboard Restructuring
+
+**Decision:**
+1. Expand the application max-width container in `App.tsx` and `Navigation.tsx` from `max-w-7xl` (1280px) to `max-w-[1600px]` with generous padding (`px-4 sm:px-6 lg:px-8`).
+2. Fix the React Bits `TiltedCard.tsx` default parameters from hardcoded `containerHeight = '300px'`, `imageHeight = '300px'`, `imageWidth = '300px'` to `containerHeight = 'auto'`, `imageHeight = 'auto'`, `imageWidth = '100%'`, and pass explicit responsive parameters in `<Card>`.
+3. Restructure Dashboard layout into 4 distinct rows:
+   - **Row 1:** 4 wide horizontal KPI slab tiles (`min-h-[120px] max-h-[140px] flex items-center justify-between`) in `grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6`.
+   - **Row 2:** Two-column grid (`lg:grid-cols-12 gap-8`):
+     - **LEFT (`lg:col-span-8`):** "Recent Report Stream" as a large horizontal slab (`min-h-[420px]`) containing full-width horizontal report rows (narrative on left, structured badges in columns, direct inspect link on right).
+     - **RIGHT (`lg:col-span-4`):** "Heuristic Signal Pipeline" card moved to the right-hand side, preserving exact styling, checklist, and action trigger.
+   - **Row 3:** "Active Anomalies & Cluster Hotspots" as 3 large feature cards (`min-h-[220px] min-w-[360px]`) with centroid coordinates and priority scores.
+   - **Row 4:** "GIS Spatial Overview" full-width map preview with a dedicated 440px canvas, active centroids, and legend footer.
+4. Convert `/reports` into full-width horizontal cards (retiring the restrictive 7/5 split and synchronizing the loading skeleton) and restructure `/reports/:id`, `/incidents/:id`, and `/system-info` into wide two-column layouts.
+
+**Reason:**
+- Root Cause Investigation revealed two major bottlenecks:
+  - `max-w-7xl` (1280px) clamped desktop width and left giant dark empty gutters on 1440px+ screens.
+  - React Bits `TiltedCard` defaulted height and image width to 300px, which clamped every `<Card>` wrapped in tilt physics into a narrow, vertical, square box.
+- Fixing `TiltedCard` to respect children and expanding the container to 1600px gives all cards their intended wide horizontal slab proportions.
+- The dashboard row hierarchy now follows executive priority: KPI slabs at top -> live report stream & pipeline -> anomaly clusters -> spatial GIS map preview.
+
+**Alternatives considered:**
+- Completely removing 3D tilt: Unnecessary because `TiltedCard` works smoothly once its hardcoded 300px dimension constraints are removed.
+- Keeping 7/5 split on Reports page: Cramped the narrative text and pushed badges into awkward multi-line stacks; full-width horizontal cards provide significantly better scannability.
+
+
 
 
 

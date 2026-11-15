@@ -95,7 +95,7 @@ function ParamTable({
 
 export default function SystemInfo() {
   return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-8 animate-page-enter">
+    <div className="w-full max-w-[1600px] mx-auto space-y-6 pb-8 animate-page-enter">
       <div className="animate-card-rise stagger-1">
         <PageHeader
           title="System Specifications & Methodology"
