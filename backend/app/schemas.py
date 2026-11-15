@@ -66,6 +66,25 @@ class ReportUpdate(BaseModel):
     photo_reference: Optional[str] = None
 
 
+class ReportAnalysisResponse(BaseModel):
+    """Complete ReportAnalysis serialization schema."""
+    id: str
+    report_id: str
+    severity: Optional[str] = None
+    severity_confidence: Optional[float] = None
+    all_scores: Optional[Dict[str, float]] = None
+    confidence_score: Optional[float] = None
+    confidence_reason: Optional[str] = None
+    extracted_locations: List[str] = []
+    extracted_depth: Optional[str] = None
+    extracted_times: List[str] = []
+    possible_duplicates: List[Dict[str, Any]] = []
+    embedding_provider: Optional[str] = None
+    analysed_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class ReportResponse(BaseModel):
     """Complete Report object returned by the API."""
     id: str
@@ -84,6 +103,7 @@ class ReportResponse(BaseModel):
     reporter_token: str
     is_synthetic: bool = False
     updated_at: datetime
+    analysis: Optional[ReportAnalysisResponse] = None
 
     model_config = ConfigDict(from_attributes=True)
 

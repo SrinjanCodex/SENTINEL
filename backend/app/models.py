@@ -56,6 +56,7 @@ class Report(Base):
 
     # Relationships
     incident_links = relationship("IncidentReport", back_populates="report", cascade="all, delete-orphan")
+    analysis = relationship("ReportAnalysis", back_populates="report", uselist=False, cascade="all, delete-orphan")
 
 
 class Incident(Base):
@@ -173,3 +174,27 @@ class MissingSignal(Base):
     computed_at = Column(DateTime(timezone=True), nullable=False, default=utc_now)
 
     incident = relationship("Incident", back_populates="missing_signals")
+
+
+class ReportAnalysis(Base):
+    """
+    Automated NLP & heuristic analysis result for a single report.
+    Stores predicted severity, extraction details, detected duplicates, and confidence.
+    """
+    __tablename__ = "report_analysis"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    report_id = Column(String(36), ForeignKey("reports.id", ondelete="CASCADE"), unique=True, nullable=False, index=True)
+    severity = Column(String(20), nullable=True)             # low / moderate / high / critical
+    severity_confidence = Column(Float, nullable=True)        # 0.0 - 1.0 probability
+    all_scores = Column(JSON, nullable=True)                 # dict of all class probabilities
+    confidence_score = Column(Float, nullable=True)           # composite 0.0 - 1.0 confidence
+    confidence_reason = Column(Text, nullable=True)          # explanatory text
+    extracted_locations = Column(JSON, nullable=True)        # list of string location hints
+    extracted_depth = Column(String(50), nullable=True)      # e.g. "30 cm", "knee-deep"
+    extracted_times = Column(JSON, nullable=True)            # list of time hints
+    possible_duplicates = Column(JSON, nullable=True)        # list of {id, text, similarity}
+    embedding_provider = Column(String(50), nullable=True)   # "sentence-transformers" | "tfidf"
+    analysed_at = Column(DateTime(timezone=True), nullable=False, default=utc_now)
+
+    report = relationship("Report", back_populates="analysis")
