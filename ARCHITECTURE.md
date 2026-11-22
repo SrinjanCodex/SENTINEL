@@ -193,7 +193,9 @@ See `src/types/index.ts` for full field list.
 | GET | `/api/reports/{id}/analysis` | ✅ Operational | Retrieve stored analysis results for a report |
 | POST | `/api/incidents/cluster` | ✅ Operational | Trigger spatio-temporal report clustering |
 | POST | `/api/analysis/run` | ✅ Operational | Trigger geospatial clustering pipeline (alias) |
-| PATCH | `/api/incidents/{id}/verification` | ⬜ Planned (M5) | Record human verification inspection |
+| GET | `/api/incidents/{id}/priority` | ✅ Operational | Get multi-factor priority score breakdown |
+| GET | `/api/incidents/{id}/missing-signals` | ✅ Operational | Get flagged deterministic audit gaps |
+| PATCH | `/api/incidents/{id}/verification` | ✅ Operational | Record on-site human inspection verification |
 
 ---
 
@@ -230,16 +232,18 @@ Directory: `backend/app/analysis/`
    `score = 0.40 * classifier_probability + 0.30 * entity_completeness + 0.30 * corroboration`
    Generates human-readable explanatory rationale.
 
-### Prioritisation Score (Milestone 5)
+### Prioritisation Score (Milestone 5 — active)
+Directory: `backend/app/prioritisation/scoring.py`
 ```
 score = Σ (normalised_factor × weight) × 100
 ```
-Factors: severity, independent_reports, evidence_strength, historical_recurrence,
-environmental_context, recency. Missing factors excluded and re-normalised.
+Factors: severity (25%), independent_reports (20%), evidence_strength (15%), historical_recurrence (15%),
+environmental_context (15%), recency (10%). Missing factors excluded and re-normalised dynamically.
 
 ---
 
-## Missing-Signal Detector Rules
+## Missing-Signal Detector Rules (Milestone 5 — active)
+Directory: `backend/app/prioritisation/missing_signals.py`
 
 | Rule ID | Severity | Triggers when |
 |---------|----------|---------------|
@@ -252,7 +256,7 @@ environmental_context, recency. Missing factors excluded and re-normalised.
 | MS-WX | Medium | Weather data unavailable or stale |
 | MS-PHOTO | Low | No photo evidence |
 
-Rules are individually testable Python functions (Milestone 5).
+Rules are individually testable Python functions executed against incident models.
 
 ---
 

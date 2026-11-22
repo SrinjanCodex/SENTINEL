@@ -161,9 +161,67 @@ class IncidentResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class ScoringFactorSchema(BaseModel):
+    """Single scoring factor contribution inside PriorityAssessment."""
+    name: str
+    raw_value: float
+    normalised_value: float
+    weight: float
+    contribution: float
+    description: Optional[str] = None
+
+
+class PriorityAssessmentResponse(BaseModel):
+    """Prioritisation score and multi-factor breakdown."""
+    id: str
+    incident_id: str
+    score: float
+    factors: List[ScoringFactorSchema] = []
+    formula_version: str
+    computed_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class MissingSignalResponse(BaseModel):
+    """Actionable evidence gap flagged by deterministic audit rules."""
+    id: str
+    incident_id: str
+    rule_id: str
+    severity: str
+    explanation: str
+    recommended_action: str
+    computed_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class VerificationRequest(BaseModel):
+    """Payload to record an on-site human inspection verification."""
+    new_status: str
+    changed_by: str = "human_operator"
+    note: str
+
+
+class VerificationRecordResponse(BaseModel):
+    """Audit log entry for human verification inspections."""
+    id: str
+    incident_id: str
+    previous_status: str
+    new_status: str
+    changed_by: str
+    timestamp: datetime
+    note: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class IncidentDetailResponse(IncidentResponse):
     """Enriched incident representation with full linked report metadata."""
     linked_reports: List[LinkedReportDetail] = []
+    priority_assessment: Optional[PriorityAssessmentResponse] = None
+    missing_signals: List[MissingSignalResponse] = []
+    verification_records: List[VerificationRecordResponse] = []
 
 
 class ClusteringResponse(BaseModel):

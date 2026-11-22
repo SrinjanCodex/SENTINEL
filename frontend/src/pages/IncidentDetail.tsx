@@ -41,6 +41,11 @@ export default function IncidentDetail() {
   const [incident, setIncident] = useState<Incident | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [verifying, setVerifying] = useState(false);
+  const [verifStatus, setVerifStatus] = useState<any>('verified');
+  const [verifOfficer, setVerifOfficer] = useState('Ward Inspection Officer');
+  const [verifNote, setVerifNote] = useState('');
+  const [verifSuccess, setVerifSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -64,6 +69,27 @@ export default function IncidentDetail() {
       isMounted = false;
     };
   }, [id]);
+
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!incident || !verifNote.trim()) return;
+    setVerifying(true);
+    setVerifSuccess(null);
+    try {
+      const updated = await getApiClient().recordVerification(incident.id, {
+        new_status: verifStatus,
+        changed_by: verifOfficer.trim() || 'Ward Inspection Officer',
+        note: verifNote.trim(),
+      });
+      setIncident(updated);
+      setVerifSuccess(`Incident status updated to '${verifStatus}'.`);
+      setVerifNote('');
+    } catch (err) {
+      setError('Failed to record inspection: ' + ((err as Error)?.message ?? ''));
+    } finally {
+      setVerifying(false);
+    }
+  };
 
   if (loading) return <LoadingSpinner label="Compiling incident evidence graph…" />;
   if (error) return <ErrorAlert message={error} />;
@@ -216,64 +242,198 @@ export default function IncidentDetail() {
             </ul>
           </Card>
 
-          {/* Advanced Features Pipeline Stubs (Milestone 5) — Wide Horizontal Slabs */}
-          <div className="space-y-4 animate-card-rise stagger-4">
-            {/* Score Breakdown Stub */}
-            <Card tilt={false} className="p-5 sm:p-6 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/40">
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-                <div className="md:col-span-4 space-y-1">
-                  <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
-                    <Sliders className="w-4 h-4 text-slate-500 dark:text-slate-400 shrink-0" />
-                    <h3 className="font-bold text-xs uppercase tracking-wider">
-                      Multi-Factor Score Breakdown
-                    </h3>
+          {/* Prioritisation & Missing-Signal Audit Engine (Milestone 5) */}
+          <div className="space-y-6 animate-card-rise stagger-4">
+            {/* Multi-Factor Score Breakdown */}
+            <Card tilt={false} className="overflow-hidden border-slate-200 dark:border-slate-800">
+              <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Sliders className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-xs sm:text-sm uppercase tracking-wider">
+                    Multi-Factor Prioritisation Breakdown
+                  </h3>
+                </div>
+                <span className="text-xs font-mono font-semibold text-teal-600 dark:text-teal-400">
+                  Total Index: {incident.priority_score ?? 0}/100
+                </span>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                  Composite prioritization indicator synthesized across six weighted civic dimensions. Missing factors are automatically re-normalized across available evidence.
+                </p>
+
+                {incident.priority_assessment?.factors && incident.priority_assessment.factors.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {incident.priority_assessment.factors.map((f) => (
+                      <div
+                        key={f.name}
+                        className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 space-y-2"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide">
+                            {f.name.replace(/_/g, ' ')}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
+                              w: {Math.round(f.weight * 100)}%
+                            </span>
+                            <span className="text-xs font-mono font-bold text-teal-600 dark:text-teal-400">
+                              +{f.contribution} pts
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Progress Bar for Normalized Value */}
+                        <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
+                          <div
+                            className="bg-teal-500 h-1.5 rounded-full transition-all duration-500"
+                            style={{ width: `${Math.round(f.normalised_value * 100)}%` }}
+                          />
+                        </div>
+
+                        {f.description && (
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                            {f.description}
+                          </p>
+                        )}
+                      </div>
+                    ))}
                   </div>
-                  <span className="inline-block text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-slate-200/80 dark:bg-slate-700/80 text-slate-600 dark:text-slate-300">
-                    Planned · Milestone 5
-                  </span>
-                </div>
-                <div className="md:col-span-8 text-xs text-slate-500 dark:text-slate-400 leading-relaxed md:border-l md:border-slate-200 dark:md:border-slate-700 md:pl-5">
-                  Upon activation of the Prioritisation Engine in Milestone 5, this panel will display the exact raw factor value, normalized value, weight coefficient, and contribution percentage for each of the six input factors.
-                </div>
+                ) : (
+                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 text-xs text-slate-500 italic">
+                    Prioritisation factors being calibrated by system engine…
+                  </div>
+                )}
               </div>
             </Card>
 
-            {/* Missing-Signal Detector Stub */}
-            <Card tilt={false} className="p-5 sm:p-6 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/40">
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-                <div className="md:col-span-4 space-y-1">
-                  <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
-                    <AlertTriangle className="w-4 h-4 text-slate-500 dark:text-slate-400 shrink-0" />
-                    <h3 className="font-bold text-xs uppercase tracking-wider">
-                      Missing-Signal Audit Flags
-                    </h3>
+            {/* Missing-Signal Audit Flags */}
+            <Card tilt={false} className="overflow-hidden border-slate-200 dark:border-slate-800">
+              <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-500" />
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-xs sm:text-sm uppercase tracking-wider">
+                    Missing-Signal Audit Flags
+                  </h3>
+                </div>
+                <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
+                  {incident.missing_signals?.length ?? 0} Flagged Gaps
+                </span>
+              </div>
+
+              <div className="p-6">
+                {incident.missing_signals && incident.missing_signals.length > 0 ? (
+                  <div className="space-y-3">
+                    {incident.missing_signals.map((sig, idx) => {
+                      const isHigh = sig.severity === 'high';
+                      const isMed = sig.severity === 'medium';
+                      return (
+                        <div
+                          key={`${sig.rule_id}-${idx}`}
+                          className={`p-4 rounded-xl border flex flex-col sm:flex-row sm:items-start justify-between gap-3 ${
+                            isHigh
+                              ? 'bg-rose-50/60 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800/60'
+                              : isMed
+                              ? 'bg-amber-50/60 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800/60'
+                              : 'bg-teal-50/60 dark:bg-teal-950/30 border-teal-200 dark:border-teal-800/60'
+                          }`}
+                        >
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span
+                                className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded uppercase ${
+                                  isHigh
+                                    ? 'bg-rose-200/80 dark:bg-rose-900/60 text-rose-800 dark:text-rose-200'
+                                    : isMed
+                                    ? 'bg-amber-200/80 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200'
+                                    : 'bg-teal-200/80 dark:bg-teal-900/60 text-teal-800 dark:text-teal-200'
+                                }`}
+                              >
+                                {sig.rule_id}
+                              </span>
+                              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 capitalize">
+                                {sig.severity} Severity Gap
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-800 dark:text-slate-200">
+                              {sig.explanation}
+                            </p>
+                          </div>
+                          <div className="sm:max-w-xs text-xs text-slate-600 dark:text-slate-400 sm:border-l sm:border-slate-200/80 dark:sm:border-slate-700/80 sm:pl-3">
+                            <span className="font-semibold block text-[11px] text-slate-700 dark:text-slate-300">Action:</span>
+                            {sig.recommended_action}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                  <span className="inline-block text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-slate-200/80 dark:bg-slate-700/80 text-slate-600 dark:text-slate-300">
-                    Planned · Milestone 5
-                  </span>
-                </div>
-                <div className="md:col-span-8 text-xs text-slate-500 dark:text-slate-400 leading-relaxed md:border-l md:border-slate-200 dark:md:border-slate-700 md:pl-5">
-                  Missing-Signal rules (MS-LOC, MS-VERIFY, MS-CONFLICT, MS-INDEP, MS-HIST, MS-WX) will run deterministically against stored evidence and flag actionable field instructions here.
-                </div>
+                ) : (
+                  <div className="flex items-center gap-2 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 text-xs text-emerald-800 dark:text-emerald-200">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <span>All 8 Missing-Signal validation rules passed. Intelligence profile is complete.</span>
+                  </div>
+                )}
               </div>
             </Card>
 
-            {/* Explainable Alert Stub */}
-            <Card tilt={false} className="p-5 sm:p-6 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/40">
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-                <div className="md:col-span-4 space-y-1">
-                  <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
-                    <Sparkles className="w-4 h-4 text-slate-500 dark:text-slate-400 shrink-0" />
-                    <h3 className="font-bold text-xs uppercase tracking-wider">
-                      Auditable Evidence Narrative
-                    </h3>
-                  </div>
-                  <span className="inline-block text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-slate-200/80 dark:bg-slate-700/80 text-slate-600 dark:text-slate-300">
-                    Planned · Milestone 5
-                  </span>
+            {/* Auditable Evidence Narrative & Verification Trail */}
+            <Card tilt={false} className="overflow-hidden border-slate-200 dark:border-slate-800">
+              <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-xs sm:text-sm uppercase tracking-wider">
+                    Auditable Evidence Narrative
+                  </h3>
                 </div>
-                <div className="md:col-span-8 text-xs text-slate-500 dark:text-slate-400 leading-relaxed md:border-l md:border-slate-200 dark:md:border-slate-700 md:pl-5">
-                  Deterministic code will generate a human-readable explanation explicitly segregating Observations, Model Interpretations, and Verified Field Inspections.
+                <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
+                  Three-Tier Provenance
+                </span>
+              </div>
+
+              <div className="p-6 space-y-5 text-xs text-slate-600 dark:text-slate-300">
+                <div className="space-y-1.5 border-l-2 border-teal-500 pl-3">
+                  <span className="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider text-[11px] block">
+                    Tier 1: Citizen Observations
+                  </span>
+                  <p className="leading-relaxed">
+                    Synthesized from {incident.report_ids.length} geo-referenced citizen observation{incident.report_ids.length !== 1 ? 's' : ''}. First reported at {formatDateTime(incident.first_observed_at)}, latest update at {formatDateTime(incident.last_observed_at)}.
+                  </p>
+                </div>
+
+                <div className="space-y-1.5 border-l-2 border-indigo-500 pl-3">
+                  <span className="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider text-[11px] block">
+                    Tier 2: Model Interpretations
+                  </span>
+                  <p className="leading-relaxed">
+                    Spatio-temporal clustering engine (v{incident.analysis_version}) identified spatial adjacency with a {incident.radius_meters || 300}m heuristic buffer. Priority index calibrated at {incident.priority_score ?? 0}/100.
+                  </p>
+                </div>
+
+                <div className="space-y-1.5 border-l-2 border-amber-500 pl-3">
+                  <span className="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider text-[11px] block">
+                    Tier 3: Verified Field Inspections
+                  </span>
+                  <p className="leading-relaxed mb-3">
+                    Current verification status: <StatusBadge status={incident.verification_status} size="sm" />.
+                  </p>
+
+                  {incident.verification_records && incident.verification_records.length > 0 ? (
+                    <div className="space-y-2 mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                      <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 block">Inspection Log History:</span>
+                      {incident.verification_records.map((rec) => (
+                        <div key={rec.id} className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs space-y-1">
+                          <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                            <strong>{rec.changed_by}</strong>
+                            <span>{formatDateTime(rec.timestamp)}</span>
+                          </div>
+                          <p className="text-slate-800 dark:text-slate-200 italic">"{rec.note}"</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-slate-400 italic">No field inspection has been logged yet.</p>
+                  )}
                 </div>
               </div>
             </Card>
@@ -381,6 +541,77 @@ export default function IncidentDetail() {
               </div>
             </Card>
           )}
+
+          {/* Human Inspection Verification Action Box */}
+          <Card tilt={false} className="p-5 sm:p-6 border-slate-200 dark:border-slate-800 animate-card-rise stagger-5">
+            <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+              <span>Log Field Inspection</span>
+            </h4>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+              Record on-site human verification to transition incident state from suspected to verified.
+            </p>
+
+            {verifSuccess && (
+              <div className="mb-3 p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-xs text-emerald-800 dark:text-emerald-300">
+                {verifSuccess}
+              </div>
+            )}
+
+            <form onSubmit={handleVerify} className="space-y-3">
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Transition Status
+                </label>
+                <select
+                  value={verifStatus}
+                  onChange={(e) => setVerifStatus(e.target.value)}
+                  className="w-full rounded-lg border border-slate-300/80 dark:border-slate-700 px-3 py-1.5 text-xs text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-900 focus:border-teal-500 focus:outline-none"
+                >
+                  <option value="verified">Verified (Confirmed Waterlogging)</option>
+                  <option value="under_verification">Under Verification (Crew En Route)</option>
+                  <option value="resolved">Resolved (Cleared / Receded)</option>
+                  <option value="dismissed">Dismissed (False Positive / Dry)</option>
+                  <option value="suspected">Suspected (Unconfirmed)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Inspector / Officer Name
+                </label>
+                <input
+                  type="text"
+                  value={verifOfficer}
+                  onChange={(e) => setVerifOfficer(e.target.value)}
+                  placeholder="Officer name or Ward QRT tag"
+                  className="w-full rounded-lg border border-slate-300/80 dark:border-slate-700 px-3 py-1.5 text-xs text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-900 focus:border-teal-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Field Inspection Notes *
+                </label>
+                <textarea
+                  required
+                  rows={2}
+                  value={verifNote}
+                  onChange={(e) => setVerifNote(e.target.value)}
+                  placeholder="e.g. Confirmed 30cm standing water; pump unit deployed."
+                  className="w-full rounded-lg border border-slate-300/80 dark:border-slate-700 px-3 py-1.5 text-xs text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-900 focus:border-teal-500 focus:outline-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={verifying || !verifNote.trim()}
+                className="w-full py-2 px-3 text-xs font-semibold rounded-lg bg-teal-600 hover:bg-teal-700 text-white disabled:opacity-50 transition-all shadow-xs btn-press"
+              >
+                {verifying ? 'Recording…' : 'Record Verification Audit'}
+              </button>
+            </form>
+          </Card>
 
           <SafetyNotice />
         </div>

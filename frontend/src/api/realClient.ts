@@ -130,4 +130,14 @@ export class RealApiClient implements ApiClient {
       method: 'POST',
     });
   }
+
+  async recordVerification(
+    incidentId: string,
+    payload: { new_status: string; changed_by: string; note: string },
+  ): Promise<Incident> {
+    return this.request<Incident>(`/api/incidents/${encodeURIComponent(incidentId)}/verification`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  }
 }

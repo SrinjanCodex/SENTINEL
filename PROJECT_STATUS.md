@@ -1,8 +1,8 @@
 # SENTINEL — Project Status
 
 **Last Updated:** 2026-11-22
-**Current Milestone:** 4 — Geospatial Intelligence
-**Status:** ✅ Complete (Milestones 1, 2, 3, and 4 verified; Spatio-Temporal Clustering & GIS Visualizer complete)
+**Current Milestone:** 5 — Prioritisation & Missing-Signal Detector
+**Status:** ✅ Complete (Milestones 1–5 verified; 6-Factor Prioritisation Engine, Missing-Signal Detector & Verification Audit complete)
 
 ---
 
@@ -14,7 +14,7 @@
 | 2 | Backend & Database | ✅ Complete |
 | 3 | Report Analysis | ✅ Complete |
 | 4 | Geospatial Intelligence | ✅ Complete |
-| 5 | Prioritisation & Missing-Signal Detector | ⬜ Planned |
+| 5 | Prioritisation & Missing-Signal Detector | ✅ Complete |
 | 6 | Polish & Validation | ⬜ Planned |
 | 7 | Optional Advanced Features | ⬜ Planned |
 
@@ -250,6 +250,40 @@
   - Linked Citizen Observations table showing distance from centroid, match percentage pills, and independent signal indicators
 - **Automated Test Coverage (104 total tests passing):**
   - 32 backend pytest tests passing (6 new tests in `test_geospatial.py`)
+  - 72 frontend vitest tests passing across 10 suites
+  - TypeScript build (`tsc -b && vite build`) clean with 0 errors
+
+### Milestone 5: Prioritisation & Missing-Signal Detector (Tested)
+- **Multi-Factor Prioritisation Engine (`backend/app/prioritisation/scoring.py`):**
+  - 6-factor formulation: `Severity` (25%), `Independent Reports` (20%), `Evidence Strength` (15%), `Historical Recurrence` (15%), `Environmental Context` (15%), and `Recency` (10%)
+  - Dynamic re-normalization for missing factors, guaranteeing all output scores are strictly bounded in `[0.0, 100.0]`
+  - Emits structured breakdown storing raw value, normalized ratio, active weight, and exact point contribution for full transparency
+- **Deterministic Missing-Signal Detector (`backend/app/prioritisation/missing_signals.py`):**
+  - Evaluates 8 deterministic audit rules:
+    - `MS-LOC` (High): Identifies unmapped or coarse coordinates
+    - `MS-TIME` (Medium): Flags missing observation timestamps
+    - `MS-CONFLICT` (High): Detects contradictory category or severity signals
+    - `MS-INDEP` (High): Flags lack of independent corroboration (< 2 independent reports)
+    - `MS-VERIFY` (High): Detects unverified incident state
+    - `MS-HIST` (Medium): Identifies areas outside documented monsoon flood history
+    - `MS-WX` (Medium): Flags lack of meteorological Doppler/rain gauge confirmation
+    - `MS-PHOTO` (Low): Detects absence of photographic ground evidence
+- **Human Verification Workflow & Audit Log:**
+  - `PATCH /api/incidents/{id}/verification`: Enforces transition state machine (`suspected` → `under_verification` → `verified` / `resolved` / `dismissed`)
+  - Creates immutable `VerificationRecord` tracking timestamp, operator identity, and inspection notes
+  - Triggers automatic assessment refresh upon state transition
+- **RESTful Endpoints:**
+  - `GET /api/incidents/{id}/priority`: Returns `PriorityAssessmentResponse` with 6 factor items
+  - `GET /api/incidents/{id}/missing-signals`: Returns list of `MissingSignalResponse` items
+  - `PATCH /api/incidents/{id}/verification`: Records human field verification
+- **Frontend Incident Correlation Audit View (`IncidentDetail.tsx`):**
+  - Replaced planned stubs with live interactive UI:
+    - Multi-Factor Prioritisation Breakdown card with animated progress meters and point contributions
+    - Missing-Signal Audit Flags with colour-coded severity badges (rose/amber/teal), explanations, and actionable field steps
+    - Three-tier Auditable Evidence Narrative clearly segregating Citizen Observations, Model Interpretations, and Human Field Verifications
+    - Interactive "Log Field Inspection" action box allowing municipal operators to transition status, record officer names, and submit inspection notes
+- **Automated Test Coverage (107 total tests passing):**
+  - 35 backend pytest tests passing (3 new tests in `test_prioritisation.py`)
   - 72 frontend vitest tests passing across 10 suites
   - TypeScript build (`tsc -b && vite build`) clean with 0 errors
 

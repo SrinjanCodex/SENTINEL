@@ -226,6 +226,27 @@ export class MockApiClient implements ApiClient {
     };
   }
 
+  async recordVerification(
+    incidentId: string,
+    payload: { new_status: any; changed_by: string; note: string },
+  ): Promise<Incident> {
+    await this.delay(200);
+    const incident = DEMO_INCIDENTS.find((i) => i.id === incidentId);
+    if (!incident) throw new Error(`Incident not found: ${incidentId}`);
+    incident.verification_status = payload.new_status;
+    const record = {
+      id: `vr-${Date.now()}`,
+      incident_id: incidentId,
+      previous_status: incident.verification_status,
+      new_status: payload.new_status,
+      changed_by: payload.changed_by,
+      timestamp: new Date().toISOString(),
+      note: payload.note,
+    };
+    incident.verification_records = [...(incident.verification_records || []), record];
+    return incident;
+  }
+
   private createMockAnalysis(report: Report): ReportAnalysis {
     const sev = report.reported_severity
       ? report.reported_severity >= 5
