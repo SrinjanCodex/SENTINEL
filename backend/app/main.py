@@ -93,6 +93,26 @@ app.include_router(reports.router, prefix="/api")
 app.include_router(incidents.router, prefix="/api")
 
 
+@app.post("/api/analysis/run", tags=["Analysis"])
+def run_analysis_pipeline():
+    """Trigger the geospatial clustering pipeline across active reports."""
+    from app.database import SessionLocal
+    from app.geospatial.clustering import cluster_reports
+    db = SessionLocal()
+    try:
+        res = cluster_reports(db)
+        return {
+            "status": "success",
+            "clusters_count": res["clusters_count"],
+            "clusters_created": res["clusters_created"],
+            "clusters_updated": res["clusters_updated"],
+            "reports_linked": res["reports_linked"],
+            "incident_ids": res["incident_ids"],
+        }
+    finally:
+        db.close()
+
+
 @app.get("/")
 def root():
     """Root redirect / index notice."""

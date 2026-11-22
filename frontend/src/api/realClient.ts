@@ -117,4 +117,17 @@ export class RealApiClient implements ApiClient {
       method: 'POST',
     });
   }
+
+  async clusterIncidents(): Promise<{
+    status: string;
+    clusters_count: number;
+    clusters_created: number;
+    clusters_updated: number;
+    reports_linked: number;
+    incident_ids: string[];
+  }> {
+    return this.request('/api/incidents/cluster', {
+      method: 'POST',
+    });
+  }
 }

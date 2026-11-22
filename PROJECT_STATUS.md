@@ -1,8 +1,8 @@
 # SENTINEL — Project Status
 
-**Last Updated:** 2026-11-15
-**Current Milestone:** 3 — Report Analysis
-**Status:** ✅ Complete (Milestones 1, 2, and 3 verified; Milestone 3 NLP analysis & frontend inspection complete)
+**Last Updated:** 2026-11-22
+**Current Milestone:** 4 — Geospatial Intelligence
+**Status:** ✅ Complete (Milestones 1, 2, 3, and 4 verified; Spatio-Temporal Clustering & GIS Visualizer complete)
 
 ---
 
@@ -13,7 +13,7 @@
 | 1 | Frontend Foundation | ✅ Complete |
 | 2 | Backend & Database | ✅ Complete |
 | 3 | Report Analysis | ✅ Complete |
-| 4 | Geospatial Intelligence | ⬜ Planned |
+| 4 | Geospatial Intelligence | ✅ Complete |
 | 5 | Prioritisation & Missing-Signal Detector | ⬜ Planned |
 | 6 | Polish & Validation | ⬜ Planned |
 | 7 | Optional Advanced Features | ⬜ Planned |
@@ -217,6 +217,39 @@
   - Interactive "Re-run Analysis" action button with live spinner feedback
 - **Automated Test Coverage (98 total tests passing):**
   - 26 backend pytest tests passing (100% test pass rate across `test_analysis.py`, `test_api.py`, and `test_uploads.py`)
+  - 72 frontend vitest tests passing across 10 suites
+  - TypeScript build (`tsc -b && vite build`) clean with 0 errors
+
+### Milestone 4: Geospatial Intelligence Features (Tested)
+- **Geodesic Distance & Geometry Subsystem (`backend/app/geospatial/haversine.py`):**
+  - Haversine distance calculation in meters between arbitrary WGS84 GPS coordinates
+  - Spatial decay modeling with configurable radius (default 300m)
+  - Geographic centroid calculation (mean lat/lon) for multi-point clusters
+  - Bounding radius calculation representing maximum cluster spatial extent
+- **Multi-Factor Spatio-Temporal Pair Matcher (`backend/app/geospatial/matching.py`):**
+  - Computes weighted pair compatibility:
+    `Score = 0.40 * semantic + 0.30 * geographic + 0.15 * time + 0.15 * category`
+  - Linear time decay across 72-hour sliding observation window
+  - Categorical correlation mapping for interrelated waterlogging types
+  - Deterministic independence evaluation identifying near-duplicate reports (<50m, <1h, >85% semantic similarity)
+- **Graph-Based Connected Component Clustering (`backend/app/geospatial/clustering.py`):**
+  - Groups active geo-referenced reports into incident hypotheses where distance ≤ 300m and pair match score ≥ 0.60
+  - Dynamically synthesizes incident titles, centroid coordinates, and observation time bounds
+  - Automatically creates and updates `Incident` and `IncidentReport` records with match scores, reasons, and independence flags
+  - Updates linked report statuses from `unverified` to `linked`
+- **RESTful Geospatial Endpoints (`backend/app/routers/incidents.py` & `main.py`):**
+  - `POST /api/incidents/cluster` & `POST /api/analysis/run`: Triggers automated clustering pipeline across all active reports
+  - `GET /api/incidents`: Enhanced with bounding radius calculation for each cluster
+  - `GET /api/incidents/{id}`: Returns enriched linked reports with distances from centroid, match scores, description snippets, and coordinates
+- **Frontend GIS Telemetry & Cluster Visualizer (`MapPage.tsx` & `IncidentDetail.tsx`):**
+  - Interactive incident cluster buffers (`Circle` component) showing 150m–300m spatial bounds with severity-adjusted amber/rose shading
+  - Cluster centroid markers with telemetry popups linking directly to Incident Correlation Audit
+  - Layer toggling between Citizen Reports and Incident Clusters
+  - "Run Clustering" trigger button directly from the GIS toolbar
+  - Incident Correlation Detail view with embedded mini GIS Cluster Map showing centroid, radius buffer, and linked citizen report pins
+  - Linked Citizen Observations table showing distance from centroid, match percentage pills, and independent signal indicators
+- **Automated Test Coverage (104 total tests passing):**
+  - 32 backend pytest tests passing (6 new tests in `test_geospatial.py`)
   - 72 frontend vitest tests passing across 10 suites
   - TypeScript build (`tsc -b && vite build`) clean with 0 errors
 

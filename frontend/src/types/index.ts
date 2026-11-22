@@ -91,6 +91,21 @@ export type IncidentStatus =
   | 'dismissed'
   | 'resolved';
 
+export interface LinkedReportDetail {
+  report_id: string;
+  match_score?: number | null;
+  match_reasons?: Record<string, unknown> | null;
+  is_independent: boolean;
+  added_by: string;
+  distance_from_centroid_meters?: number | null;
+  category?: ReportCategory | null;
+  original_description?: string | null;
+  address?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  submitted_at?: string | null;
+}
+
 /**
  * A potential incident — a system-generated hypothesis that several reports
  * may describe the same real-world waterlogging event.
@@ -113,6 +128,8 @@ export interface Incident {
   report_ids: string[];
   /** Priority score 0–100. This is a prioritisation INDICATOR, not a flood probability. */
   priority_score: number | null;
+  radius_meters?: number | null;
+  linked_reports?: LinkedReportDetail[];
 }
 
 // ── Evidence ─────────────────────────────────────────────────────────────────
@@ -243,6 +260,14 @@ export interface ApiClient {
   // Incidents (stubs in Milestone 1 — return empty list)
   listIncidents(): Promise<PaginatedResponse<Incident>>;
   getIncident(id: string): Promise<Incident>;
+  clusterIncidents(): Promise<{
+    status: string;
+    clusters_count: number;
+    clusters_created: number;
+    clusters_updated: number;
+    reports_linked: number;
+    incident_ids: string[];
+  }>;
 
   // Automated Analysis (Milestone 3)
   getReportAnalysis(id: string): Promise<ReportAnalysis | null>;

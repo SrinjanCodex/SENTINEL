@@ -48,6 +48,7 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
     const client = getApiClient();
     Promise.all([
       client.getDashboardStats(),
@@ -55,14 +56,23 @@ export default function Dashboard() {
       client.listIncidents(),
     ])
       .then(([s, r, i]) => {
-        setStats(s);
-        setRecent(r.items);
-        setIncidents(i.items);
+        if (isMounted) {
+          setStats(s);
+          setRecent(r.items);
+          setIncidents(i.items);
+        }
       })
-      .catch((err) =>
-        setError('Could not retrieve dashboard intelligence. ' + (err?.message ?? '')),
-      )
-      .finally(() => setLoading(false));
+      .catch((err) => {
+        if (isMounted) {
+          setError('Could not retrieve dashboard intelligence. ' + (err?.message ?? ''));
+        }
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const totalReportsCount = useCountUp(stats?.total_reports ?? 0, 750);

@@ -37,6 +37,22 @@ def _get_threshold() -> float:
         return _DEFAULT_THRESHOLD
 
 
+def compute_cosine_similarity(text1: str, text2: str) -> float:
+    """Computes cosine similarity between two text strings using normalized embeddings."""
+    if not text1 or not text2:
+        return 0.0
+    try:
+        from sklearn.metrics.pairwise import cosine_similarity  # type: ignore
+
+        v1 = get_embedding(text1.strip()).reshape(1, -1)
+        v2 = get_embedding(text2.strip()).reshape(1, -1)
+        score = float(cosine_similarity(v1, v2)[0][0])
+        return max(0.0, min(1.0, score))
+    except Exception as exc:
+        logger.warning("Cosine similarity calculation failed: %s", exc)
+        return 0.0
+
+
 def find_duplicates(
     new_text: str,
     existing_reports: list[dict],

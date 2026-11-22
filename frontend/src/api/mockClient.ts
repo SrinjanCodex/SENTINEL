@@ -207,6 +207,25 @@ export class MockApiClient implements ApiClient {
     return this.createMockAnalysis(report);
   }
 
+  async clusterIncidents(): Promise<{
+    status: string;
+    clusters_count: number;
+    clusters_created: number;
+    clusters_updated: number;
+    reports_linked: number;
+    incident_ids: string[];
+  }> {
+    await this.delay(400);
+    return {
+      status: 'success',
+      clusters_count: DEMO_INCIDENTS.length,
+      clusters_created: 0,
+      clusters_updated: DEMO_INCIDENTS.length,
+      reports_linked: 8,
+      incident_ids: DEMO_INCIDENTS.map((i) => i.id),
+    };
+  }
+
   private createMockAnalysis(report: Report): ReportAnalysis {
     const sev = report.reported_severity
       ? report.reported_severity >= 5
