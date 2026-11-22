@@ -37,7 +37,13 @@ def cluster_reports(
     )
 
     if not reports:
-        return {"clusters_count": 0, "reports_linked": 0, "incidents": []}
+        return {
+            "clusters_count": 0,
+            "clusters_created": 0,
+            "clusters_updated": 0,
+            "reports_linked": 0,
+            "incident_ids": [],
+        }
 
     n = len(reports)
     # Adjacency list for connected components
