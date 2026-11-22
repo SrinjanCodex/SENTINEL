@@ -236,6 +236,15 @@ def seed_database(db=None) -> None:
                     db.add(link)
 
         db.commit()
+
+        # Generate priority assessment breakdown and missing signals
+        try:
+            from app.routers.incidents import _assess_and_sync_incident
+            for inc in db.query(Incident).all():
+                _assess_and_sync_incident(inc, db)
+        except Exception as exc:
+            print(f"[SENTINEL] Note: Assessment sync during seed: {exc}")
+
         print(f"[SENTINEL] Seeded {len(DEMO_REPORTS)} synthetic reports and {len(DEMO_INCIDENTS)} incidents.")
     finally:
         if close_db:

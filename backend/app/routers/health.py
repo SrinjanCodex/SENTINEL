@@ -85,19 +85,25 @@ def get_system_info():
     """Returns runtime parameters, thresholds, and milestone capability status."""
     return {
         "service": "SENTINEL — Urban Waterlogging Intelligence Platform",
-        "milestone": 2,
+        "version": "1.0.0",
+        "milestone": 6,
         "capabilities": {
             "frontend_foundation": "operational",
             "relational_database": "operational",
             "report_ingestion": "operational",
             "secure_uploads": "operational",
-            "ai_matching_engine": "planned_milestone_3",
-            "spatial_clustering": "planned_milestone_4",
-            "priority_scoring": "planned_milestone_5",
+            "report_analysis_nlp": "operational",
+            "spatial_clustering": "operational",
+            "prioritisation_engine": "operational",
+            "missing_signal_detector": "operational",
+            "verification_audit": "operational",
         },
         "thresholds": {
             "max_upload_size_mb": 5,
             "high_priority_cutoff": 70.0,
             "suspected_cluster_radius_meters": 300,
+            "time_window_hours": 72.0,
+            "duplicate_similarity_threshold": 0.75,
+            "candidate_linking_score": 0.60,
         },
     }

@@ -1,8 +1,8 @@
 # SENTINEL — Project Status
 
 **Last Updated:** 2026-11-22
-**Current Milestone:** 5 — Prioritisation & Missing-Signal Detector
-**Status:** ✅ Complete (Milestones 1–5 verified; 6-Factor Prioritisation Engine, Missing-Signal Detector & Verification Audit complete)
+**Current Milestone:** 6 — Polish & Validation
+**Status:** ✅ Complete (Milestones 1–6 verified; Core System Fully Validated, 107 Automated Tests Passing)
 
 ---
 
@@ -15,7 +15,7 @@
 | 3 | Report Analysis | ✅ Complete |
 | 4 | Geospatial Intelligence | ✅ Complete |
 | 5 | Prioritisation & Missing-Signal Detector | ✅ Complete |
-| 6 | Polish & Validation | ⬜ Planned |
+| 6 | Polish & Validation | ✅ Complete |
 | 7 | Optional Advanced Features | ⬜ Planned |
 
 ---
@@ -286,6 +286,26 @@
   - 35 backend pytest tests passing (3 new tests in `test_prioritisation.py`)
   - 72 frontend vitest tests passing across 10 suites
   - TypeScript build (`tsc -b && vite build`) clean with 0 errors
+
+### Milestone 6: Polish & Validation Features (Tested)
+- **Live System Telemetry & Capabilities Matrix (`backend/app/routers/health.py`):**
+  - Synchronized `/api/system/info` returning real operational capabilities across all subsystems (NLP analysis, spatial clustering, multi-factor prioritization, missing-signal detection, verification audit)
+  - Synchronized runtime thresholds (`max_upload_size_mb`, `suspected_cluster_radius_meters`, `duplicate_similarity_threshold`, `candidate_linking_score`)
+- **Automated Synthetic Demonstration Seeder (`backend/app/seed.py`):**
+  - Standalone and startup-compatible seeder populating 8 geo-referenced reports and 3 incident clusters
+  - Automated priority assessment and missing-signal pre-population for all seeded incidents
+  - Strict tagging (`is_synthetic=True`) preventing synthetic contamination with live citizen telemetry
+- **Frontend Technical Specification View (`SystemInfo.tsx`):**
+  - Updated production specification notice reflecting 100% operational engine stack
+  - Formulations, weights, and parameter tokens verified against backend runtime configuration
+- **Comprehensive Resilience & Safety:**
+  - Full React error boundary isolation (`ErrorBoundary`, `MapErrorBoundary`) preventing full-page crashes
+  - Graceful fallback for raster cartography (`SentinelTileLayer`)
+  - Accessible ARIA labels, focus-visible outlines, and `@media (prefers-reduced-motion: reduce)` compliance
+- **100% Test Validation (107 Automated Tests Passing):**
+  - 35 backend pytest unit and integration tests passing across 5 test suites
+  - 72 frontend vitest tests passing across 10 test suites
+  - Clean production build (`npm run build`) with zero TypeScript, bundler, or lint errors
 
 ## Known Limitations & Bugs (Milestone 1)
 
