@@ -37,6 +37,7 @@ import {
   Clock,
   Sparkles,
   Flame,
+  Download,
 } from 'lucide-react';
 
 const CATEGORY_COLOURS: Record<ReportCategory, string> = {
@@ -87,6 +88,7 @@ export default function MapPage() {
   const [errorState, setErrorState] = useState<{ message: string; details?: string } | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<ReportCategory | ''>('');
   const [viewMode, setViewMode] = useState<'india' | 'cluster'>('india');
+  const apiBase = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000').replace(/\/+$/, '');
 
   const loadMapData = useCallback(() => {
     let isMounted = true;
@@ -249,6 +251,29 @@ export default function MapPage() {
             <Sparkles className="w-3.5 h-3.5" />
             <span>{clustering ? 'Clustering…' : 'Run Clustering'}</span>
           </button>
+
+          {/* GIS Data Export Actions */}
+          <div className="inline-flex rounded-lg border border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-800 p-0.5 shadow-2xs">
+            <a
+              href={`${apiBase}/api/reports/export/geojson`}
+              download="sentinel_reports.geojson"
+              className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+              title="Download geo-referenced reports in GeoJSON format"
+            >
+              <Download className="w-3 h-3" />
+              <span>Reports GeoJSON</span>
+            </a>
+            <span className="text-slate-300 dark:text-slate-700 self-center">|</span>
+            <a
+              href={`${apiBase}/api/incidents/export/geojson`}
+              download="sentinel_incidents.geojson"
+              className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+              title="Download clustered incidents in GeoJSON format"
+            >
+              <Download className="w-3 h-3" />
+              <span>Clusters GeoJSON</span>
+            </a>
+          </div>
 
           <div className="inline-flex rounded-lg border border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-800 p-0.5 shadow-2xs">
             <button

@@ -205,6 +205,76 @@ def list_reports(
     )
 
 
+@router.get("/export/geojson")
+def export_reports_geojson(db: Session = Depends(get_db)):
+    """Exports geo-referenced community reports as GeoJSON FeatureCollection."""
+    reports = db.query(Report).filter(Report.latitude.isnot(None), Report.longitude.isnot(None)).all()
+    features = []
+    for r in reports:
+        features.append({
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [r.longitude, r.latitude],
+            },
+            "properties": {
+                "id": r.id,
+                "category": r.category,
+                "reported_severity": r.reported_severity,
+                "address": r.address,
+                "status": r.status,
+                "submitted_at": r.submitted_at.isoformat() if r.submitted_at else None,
+                "is_synthetic": r.is_synthetic,
+            },
+        })
+    return {
+        "type": "FeatureCollection",
+        "features": features,
+    }
+
+
+@router.get("/export/csv")
+def export_reports_csv(db: Session = Depends(get_db)):
+    """Exports all community reports as standard CSV."""
+    import csv
+    import io
+    from fastapi.responses import Response
+
+    reports = db.query(Report).order_by(Report.submitted_at.desc()).all()
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow([
+        "id",
+        "submitted_at",
+        "category",
+        "reported_severity",
+        "latitude",
+        "longitude",
+        "address",
+        "status",
+        "is_synthetic",
+        "description",
+    ])
+    for r in reports:
+        writer.writerow([
+            r.id,
+            r.submitted_at.isoformat() if r.submitted_at else "",
+            r.category or "",
+            r.reported_severity if r.reported_severity is not None else "",
+            r.latitude if r.latitude is not None else "",
+            r.longitude if r.longitude is not None else "",
+            r.address or "",
+            r.status or "",
+            r.is_synthetic,
+            (r.original_description or "").replace("\n", " "),
+        ])
+    return Response(
+        content=output.getvalue(),
+        media_type="text/csv",
+        headers={"Content-Disposition": 'attachment; filename="sentinel_reports.csv"'},
+    )
+
+
 @router.get("/{report_id}", response_model=ReportResponse)
 def get_report(report_id: str, db: Session = Depends(get_db)) -> ReportResponse:
     """Retrieves an individual report by its unique ID."""

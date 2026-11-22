@@ -29,6 +29,7 @@ import {
   X,
   FileQuestion,
   Compass,
+  Download,
 } from 'lucide-react';
 
 const STATUSES: { value: ReportStatus | ''; label: string }[] = [
@@ -58,6 +59,7 @@ export default function Reports() {
 
   // Filter state derived from URL params
   const search = searchParams.get('search') ?? '';
+  const apiBase = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000').replace(/\/+$/, '');
   const category = (searchParams.get('category') ?? '') as ReportCategory | '';
   const status = (searchParams.get('status') ?? '') as ReportStatus | '';
   const dateFrom = searchParams.get('date_from') ?? '';
@@ -127,14 +129,25 @@ export default function Reports() {
           title="Incident Directory"
           subtitle={`System records contain ${total} community report${total !== 1 ? 's' : ''}. Preserved unaltered with provenance timestamps.`}
           action={
-            <Link
-              to="/report"
-              viewTransition
-              className="inline-flex items-center gap-1.5 bg-teal-600 hover:bg-teal-500 active:bg-teal-700 text-white font-semibold px-3.5 py-2 rounded-lg text-xs shadow-xs transition-all btn-press"
-            >
-              <PlusCircle className="w-4 h-4" />
-              <span>Submit Report</span>
-            </Link>
+            <div className="flex items-center gap-2">
+              <a
+                href={`${apiBase}/api/reports/export/csv`}
+                download="sentinel_reports.csv"
+                className="inline-flex items-center gap-1.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold px-3 py-2 rounded-lg text-xs shadow-2xs transition-all btn-press"
+                title="Export all community reports as CSV"
+              >
+                <Download className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+                <span>Export CSV</span>
+              </a>
+              <Link
+                to="/report"
+                viewTransition
+                className="inline-flex items-center gap-1.5 bg-teal-600 hover:bg-teal-500 active:bg-teal-700 text-white font-semibold px-3.5 py-2 rounded-lg text-xs shadow-xs transition-all btn-press"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span>Submit Report</span>
+              </Link>
+            </div>
           }
         />
       </div>

@@ -84,18 +84,18 @@ def trigger_clustering(
         time_window_hours=time_window_hours,
     )
     # Sync assessments for all formed/updated incidents
-    for inc_id in res["incident_ids"]:
+    for inc_id in res.get("incident_ids", []):
         inc = db.query(Incident).filter(Incident.id == inc_id).first()
         if inc:
             _assess_and_sync_incident(inc, db)
 
     return ClusteringResponse(
         status="success",
-        clusters_count=res["clusters_count"],
-        clusters_created=res["clusters_created"],
-        clusters_updated=res["clusters_updated"],
-        reports_linked=res["reports_linked"],
-        incident_ids=res["incident_ids"],
+        clusters_count=res.get("clusters_count", 0),
+        clusters_created=res.get("clusters_created", 0),
+        clusters_updated=res.get("clusters_updated", 0),
+        reports_linked=res.get("reports_linked", 0),
+        incident_ids=res.get("incident_ids", []),
     )
 
 
@@ -156,6 +156,37 @@ def list_incidents(
         page=page,
         per_page=per_page,
     )
+
+
+@router.get("/export/geojson")
+def export_incidents_geojson(db: Session = Depends(get_db)):
+    """Exports all clustered incident hypotheses as GeoJSON FeatureCollection."""
+    incidents = (
+        db.query(Incident)
+        .filter(Incident.centroid_latitude.isnot(None), Incident.centroid_longitude.isnot(None))
+        .all()
+    )
+    features = []
+    for inc in incidents:
+        features.append({
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [inc.centroid_longitude, inc.centroid_latitude],
+            },
+            "properties": {
+                "id": inc.id,
+                "title": inc.title,
+                "verification_status": inc.verification_status,
+                "priority_score": inc.priority_score,
+                "report_count": len(inc.report_links),
+                "created_at": inc.created_at.isoformat() if inc.created_at else None,
+            },
+        })
+    return {
+        "type": "FeatureCollection",
+        "features": features,
+    }
 
 
 @router.get("/{incident_id}", response_model=IncidentDetailResponse)

@@ -1,8 +1,8 @@
 # SENTINEL — Project Status
 
 **Last Updated:** 2026-11-22
-**Current Milestone:** 6 — Polish & Validation
-**Status:** ✅ Complete (Milestones 1–6 verified; Core System Fully Validated, 107 Automated Tests Passing)
+**Current Milestone:** 7 — Optional Advanced Features
+**Status:** ✅ Complete (Milestones 1–7 verified; 110 Automated Tests Passing: 72 Frontend Vitest + 38 Backend Pytest)
 
 ---
 
@@ -16,11 +16,18 @@
 | 4 | Geospatial Intelligence | ✅ Complete |
 | 5 | Prioritisation & Missing-Signal Detector | ✅ Complete |
 | 6 | Polish & Validation | ✅ Complete |
-| 7 | Optional Advanced Features | ⬜ Planned |
+| 7 | Optional Advanced Features (GIS Export) | ✅ Complete |
 
 ---
 
 ## Completed Features (Tested)
+
+- **Optional Advanced Features (Milestone 7):**
+  - **GeoJSON Reports Export (`GET /api/reports/export/geojson`):** Serializes all geo-referenced community waterlogging reports into standard RFC 7946 GeoJSON `FeatureCollection` with Point coordinates (`[longitude, latitude]`) and rich metadata properties (category, severity, address, verification status, timestamps).
+  - **GeoJSON Incident Clusters Export (`GET /api/incidents/export/geojson`):** Serializes clustered incident hypotheses with centroid Point geometries, priority scores, verification statuses, and linked report counts for external municipal GIS operations (QGIS, ArcGIS, Mapbox).
+  - **CSV Tabular Export (`GET /api/reports/export/csv`):** Generates downloadable RFC 4180 CSV spreadsheet containing sanitized descriptions and provenance metadata for rapid field team analysis.
+  - **Frontend GIS Toolbar Integration:** Added dedicated GeoJSON export shortcuts to the interactive GIS map control bar and a CSV export button to the Incident Directory header.
+  - **Automated Milestone 7 Tests (`backend/tests/test_advanced.py`):** Verified GeoJSON schema structure, coordinates length, and CSV header compliance across 3 new test suites.
 
 - Project scaffolding (React + TypeScript + Vite frontend)
 - Git repository initialised

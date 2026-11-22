@@ -1,7 +1,7 @@
 # SENTINEL — Architecture
 
-**Last Updated:** 2026-11-15
-**Current State:** Milestone 3 — Report Analysis complete (FastAPI + SQLite + NLP Severity Classifier & Entity Extractor)
+**Last Updated:** 2026-11-22
+**Current State:** Milestones 1–7 complete (FastAPI + SQLite + NLP Severity Classifier & Entity Extractor + Geospatial Clustering + Prioritisation & Missing-Signal Detector + GIS GeoJSON/CSV Data Export)
 
 ---
 
