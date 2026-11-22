@@ -317,9 +317,9 @@ Output goes to `frontend/dist/`. Check that the build completes with no errors.
 | Secure photo upload | ✅ Complete | EXIF sanitization, type/size enforcement via Pillow |
 | Semantic report matching & analysis | ✅ Complete | Milestone 3: NLP severity classification, entity extraction, duplicate detection, confidence score |
 | Geographic clustering | ✅ Complete | Multi-factor spatio-temporal clustering with Haversine distance, centroid calculation, and Leaflet cluster buffers |
-| Prioritisation scoring | ⬜ Planned | Milestone 5 |
-| Missing-Signal Detector | ⬜ Planned | Milestone 5 |
-| Explainable alerts | ⬜ Planned | Milestone 5 |
+| Prioritisation scoring | ✅ Complete | 6-factor composite index (0–100) with dynamic re-normalization for missing data |
+| Missing-Signal Detector | ✅ Complete | 8 deterministic audit rules (MS-LOC, MS-TIME, MS-CONFLICT, MS-INDEP, MS-VERIFY, MS-HIST, MS-WX, MS-PHOTO) |
+| Explainable alerts | ✅ Complete | Transparent three-tier auditable narrative + multi-factor point contributions showing WHY an area received its score |
 
 ---
 
