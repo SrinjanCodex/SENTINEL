@@ -4,18 +4,23 @@
  */
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { MapContainer, Circle, CircleMarker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 import { getApiClient } from '../api';
 import type { Incident } from '../types';
 import {
   Card,
   PageHeader,
   StatusBadge,
+  CategoryBadge,
   PriorityMeter,
   SyntheticBanner,
   LoadingSpinner,
   ErrorAlert,
   SafetyNotice,
 } from '../components/ui';
+import { SentinelTileLayer } from '../components/SentinelTileLayer';
+import { MapErrorBoundary } from '../components/ErrorBoundary';
 import { formatDateTime, formatCoords } from '../lib/formatters';
 import {
   ChevronRight,
@@ -27,6 +32,8 @@ import {
   AlertTriangle,
   Sliders,
   Sparkles,
+  CheckCircle2,
+  Copy,
 } from 'lucide-react';
 
 export default function IncidentDetail() {
@@ -37,14 +44,25 @@ export default function IncidentDetail() {
 
   useEffect(() => {
     if (!id) return;
+    let isMounted = true;
     setLoading(true);
     getApiClient()
       .getIncident(id)
-      .then(setIncident)
-      .catch((err) =>
-        setError('Could not retrieve incident telemetry. ' + ((err as Error)?.message ?? '')),
-      )
-      .finally(() => setLoading(false));
+      .then((data) => {
+        if (isMounted) setIncident(data);
+      })
+      .catch((err) => {
+        if (isMounted) {
+          setError('Could not retrieve incident telemetry. ' + ((err as Error)?.message ?? ''));
+        }
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
   if (loading) return <LoadingSpinner label="Compiling incident evidence graph…" />;
@@ -123,26 +141,78 @@ export default function IncidentDetail() {
                   Linked Citizen Observations ({incident.report_ids.length})
                 </h2>
               </div>
-              <span className="text-xs text-slate-500 dark:text-slate-400">Linked via 300m radius heuristic</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                {incident.radius_meters ? `r = ${incident.radius_meters}m buffer` : '300m radius heuristic'}
+              </span>
             </div>
 
             <ul className="divide-y divide-slate-100 dark:divide-slate-800">
-              {incident.report_ids.map((rid) => (
-                <li key={rid} className="px-6 py-4 hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <span className="w-2.5 h-2.5 rounded-full bg-teal-500 shrink-0" />
-                    <span className="font-mono text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200">{rid}</span>
-                    <span className="hidden sm:inline-block text-xs text-slate-400 dark:text-slate-500">Citizen Observation Record</span>
-                  </div>
-                  <Link
-                    to={`/reports/${rid}`}
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 underline shrink-0"
-                  >
-                    <span>Audit Report Details</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </Link>
-                </li>
-              ))}
+              {incident.linked_reports && incident.linked_reports.length > 0 ? (
+                incident.linked_reports.map((lr) => (
+                  <li key={lr.report_id} className="p-5 sm:p-6 hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors space-y-2.5">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-mono text-xs font-bold text-slate-900 dark:text-slate-100">
+                          {lr.report_id.slice(0, 8)}…
+                        </span>
+                        {lr.category && <CategoryBadge category={lr.category} />}
+                        {lr.match_score != null && (
+                          <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full bg-teal-50 dark:bg-teal-950/40 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800/60">
+                            {Math.round(lr.match_score * 100)}% Match
+                          </span>
+                        )}
+                        {lr.distance_from_centroid_meters != null && (
+                          <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                            {lr.distance_from_centroid_meters}m from centroid
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {lr.is_independent ? (
+                          <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700 dark:text-emerald-400 font-medium">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>Independent</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[11px] text-amber-600 dark:text-amber-400 font-medium">
+                            <Copy className="w-3.5 h-3.5" />
+                            <span>Near-Duplicate</span>
+                          </span>
+                        )}
+                        <Link
+                          to={`/reports/${lr.report_id}`}
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 underline ml-2 shrink-0"
+                        >
+                          <span>Inspect Report</span>
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </Link>
+                      </div>
+                    </div>
+                    {lr.original_description && (
+                      <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 italic">
+                        "{lr.original_description}"
+                      </p>
+                    )}
+                  </li>
+                ))
+              ) : (
+                incident.report_ids.map((rid) => (
+                  <li key={rid} className="px-6 py-4 hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <span className="w-2.5 h-2.5 rounded-full bg-teal-500 shrink-0" />
+                      <span className="font-mono text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200">{rid}</span>
+                      <span className="hidden sm:inline-block text-xs text-slate-400 dark:text-slate-500">Citizen Observation Record</span>
+                    </div>
+                    <Link
+                      to={`/reports/${rid}`}
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 underline shrink-0"
+                    >
+                      <span>Audit Report Details</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </li>
+                ))
+              )}
             </ul>
           </Card>
 
@@ -249,6 +319,68 @@ export default function IncidentDetail() {
               </div>
             </div>
           </Card>
+
+          {/* Mini Cluster GIS Map Preview */}
+          {incident.centroid_latitude != null && incident.centroid_longitude != null && (
+            <Card tilt={false} className="overflow-hidden border-slate-200 dark:border-slate-800 animate-card-rise stagger-5">
+              <div className="px-4 py-2.5 bg-slate-50/70 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
+                  <span>Geospatial Cluster Bounds</span>
+                </span>
+                <span className="text-[10px] font-mono text-teal-600 dark:text-teal-400 font-semibold">
+                  r = {incident.radius_meters || 300}m
+                </span>
+              </div>
+              <div style={{ height: '220px' }} className="w-full relative bg-slate-100 dark:bg-slate-900">
+                <MapErrorBoundary height="220px">
+                  <MapContainer
+                    center={[incident.centroid_latitude, incident.centroid_longitude]}
+                    zoom={15}
+                    style={{ height: '100%', width: '100%' }}
+                  >
+                    <SentinelTileLayer />
+                    <Circle
+                      center={[incident.centroid_latitude, incident.centroid_longitude]}
+                      radius={incident.radius_meters || 300}
+                      pathOptions={{ color: '#0d9488', fillColor: '#0d9488', fillOpacity: 0.15, weight: 1.5 }}
+                    />
+                    <CircleMarker
+                      center={[incident.centroid_latitude, incident.centroid_longitude]}
+                      radius={7}
+                      pathOptions={{ color: '#0f172a', fillColor: '#0d9488', fillOpacity: 1, weight: 2 }}
+                    >
+                      <Popup>
+                        <div className="p-1 text-xs">
+                          <strong>Cluster Centroid</strong>
+                          <p>{incident.title}</p>
+                        </div>
+                      </Popup>
+                    </CircleMarker>
+                    {incident.linked_reports?.map((lr) => (
+                      lr.latitude != null && lr.longitude != null && (
+                        <CircleMarker
+                          key={lr.report_id}
+                          center={[lr.latitude, lr.longitude]}
+                          radius={5}
+                          pathOptions={{ color: '#2563eb', fillColor: '#38bdf8', fillOpacity: 0.9, weight: 1 }}
+                        >
+                          <Popup>
+                            <div className="p-1 text-xs">
+                              <strong>Citizen Report</strong>
+                              {lr.distance_from_centroid_meters != null && (
+                                <p>{lr.distance_from_centroid_meters}m from centroid</p>
+                              )}
+                            </div>
+                          </Popup>
+                        </CircleMarker>
+                      )
+                    ))}
+                  </MapContainer>
+                </MapErrorBoundary>
+              </div>
+            </Card>
+          )}
 
           <SafetyNotice />
         </div>

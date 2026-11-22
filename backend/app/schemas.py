@@ -126,6 +126,22 @@ class DashboardStatsResponse(BaseModel):
     is_demonstration: bool
 
 
+class LinkedReportDetail(BaseModel):
+    """Detailed metadata for a report linked to an incident cluster."""
+    report_id: str
+    match_score: Optional[float] = None
+    match_reasons: Optional[Dict[str, Any]] = None
+    is_independent: bool = True
+    added_by: str = "system"
+    distance_from_centroid_meters: Optional[float] = None
+    category: Optional[str] = None
+    original_description: Optional[str] = None
+    address: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    submitted_at: Optional[datetime] = None
+
+
 class IncidentResponse(BaseModel):
     """Incident model representation."""
     id: str
@@ -140,8 +156,24 @@ class IncidentResponse(BaseModel):
     analysis_version: str
     priority_score: Optional[float] = None
     report_ids: List[str] = []
+    radius_meters: Optional[float] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class IncidentDetailResponse(IncidentResponse):
+    """Enriched incident representation with full linked report metadata."""
+    linked_reports: List[LinkedReportDetail] = []
+
+
+class ClusteringResponse(BaseModel):
+    """Result of geospatial clustering execution."""
+    status: str = "success"
+    clusters_count: int
+    clusters_created: int
+    clusters_updated: int
+    reports_linked: int
+    incident_ids: List[str] = []
 
 
 class PaginatedIncidentsResponse(BaseModel):

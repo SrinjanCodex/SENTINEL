@@ -16,11 +16,11 @@ SENTINEL connects community reports, geographic data, historical records, and en
 | 1 — Frontend Foundation | ✅ Complete |
 | 2 — Backend & Database | ✅ Complete |
 | 3 — Report Analysis | ✅ Complete |
-| 4 — Geospatial Intelligence | ⬜ Planned |
+| 4 — Geospatial Intelligence | ✅ Complete |
 | 5 — Prioritisation & Missing-Signal Detector | ⬜ Planned |
 | 6 — Polish & Validation | ⬜ Planned |
 
-**What works right now:** Full React frontend + FastAPI backend + SQLite database (`sentinel.db`) + Milestone 3 Automated NLP Report Analysis. Supports creating, retrieving, searching, and filtering reports, automated severity classification (scikit-learn), rule-based entity extraction (location, depth, time), semantic duplicate report detection (cosine similarity), composite confidence scoring with explanatory rationale, interactive report analysis UI, secure photo upload with EXIF sanitization, and automated test coverage (72 frontend vitest tests + 26 backend pytest tests). Toggle between offline mock and live backend via `VITE_USE_MOCK_API`.
+**What works right now:** Full React frontend + FastAPI backend + SQLite database (`sentinel.db`) + Milestone 3 Automated NLP Report Analysis + Milestone 4 Geospatial Intelligence. Supports creating, retrieving, searching, and filtering reports, automated severity classification (scikit-learn), rule-based entity extraction (location, depth, time), semantic duplicate report detection (cosine similarity), composite confidence scoring with explanatory rationale, interactive report analysis UI, secure photo upload with EXIF sanitization, Haversine distance, multi-factor spatio-temporal matching, graph-based connected components clustering (`POST /api/incidents/cluster`), interactive GIS map with incident cluster buffers and layer toggling, mini cluster map preview on incident audit, and automated test coverage (72 frontend vitest tests + 32 backend pytest tests). Toggle between offline mock and live backend via `VITE_USE_MOCK_API`.
 
 ---
 

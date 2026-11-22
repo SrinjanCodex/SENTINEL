@@ -191,8 +191,23 @@ See `src/types/index.ts` for full field list.
 | GET | `/api/incidents/{id}` | ✅ Operational | Incident detail with linked report IDs |
 | POST | `/api/reports/{id}/analyze` | ✅ Operational | Trigger automated NLP/heuristic report analysis |
 | GET | `/api/reports/{id}/analysis` | ✅ Operational | Retrieve stored analysis results for a report |
-| POST | `/api/analysis/run` | ⬜ Planned (M4) | Trigger geospatial clustering pipeline |
+| POST | `/api/incidents/cluster` | ✅ Operational | Trigger spatio-temporal report clustering |
+| POST | `/api/analysis/run` | ✅ Operational | Trigger geospatial clustering pipeline (alias) |
 | PATCH | `/api/incidents/{id}/verification` | ⬜ Planned (M5) | Record human verification inspection |
+
+---
+
+## Geospatial Subsystem (Milestone 4 — active)
+
+Directory: `backend/app/geospatial/`
+1. **Haversine Distance & Spatial Decay (`haversine.py`):** Calculates spherical great-circle distances in meters between WGS84 coordinates ($R = 6,371,000\text{ m}$). Computes spatial decay compatibility $[0.0, 1.0]$ decaying smoothly to 0 at 300m radius. Computes cluster centroids and bounding radii.
+2. **Multi-Factor Spatio-Temporal Matcher (`matching.py`):**
+   ```
+   Pair Match Score = 0.40 * semantic + 0.30 * geographic + 0.15 * time + 0.15 * category
+   ```
+   Evaluates 72-hour observation sliding decay, semantic text embedding similarity, category correlation matrix, and marks near-duplicate reports (<50m, <1h, >85% semantic) with `is_independent=False`.
+3. **Connected-Component Graph Clustering (`clustering.py`):**
+   Builds an adjacency graph between reports where distance $\le 300\text{ m}$ and match score $\ge 0.60$. Extracts connected components, calculates centroid and bounds, derives dominant category titles, creates/updates `Incident` hypotheses, links reports with match reasons, and transitions status from `unverified` to `linked`.
 
 ---
 
