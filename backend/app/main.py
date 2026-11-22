@@ -27,6 +27,12 @@ async def lifespan(app: FastAPI):
     """Application lifespan context manager for startup and shutdown tasks."""
     logger.info("Initializing SENTINEL SQLite database tables...")
     init_db()
+    # Pre-warm the severity classification pipeline
+    try:
+        from app.analysis.classifier import _load_pipeline
+        _load_pipeline()
+    except Exception as exc:
+        logger.warning("Could not pre-warm severity classifier: %s", exc)
     logger.info("SENTINEL backend started successfully.")
     yield
     logger.info("SENTINEL backend shutting down.")
@@ -80,7 +86,8 @@ async def generic_exception_handler(request: Request, exc: Exception):
     )
 
 
-# Register API routers under /api
+# Register API routers
+app.include_router(health.router)  # /health root convenience endpoint
 app.include_router(health.router, prefix="/api")
 app.include_router(reports.router, prefix="/api")
 app.include_router(incidents.router, prefix="/api")

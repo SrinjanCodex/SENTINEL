@@ -15,12 +15,12 @@ SENTINEL connects community reports, geographic data, historical records, and en
 |-----------|--------|
 | 1 — Frontend Foundation | ✅ Complete |
 | 2 — Backend & Database | ✅ Complete |
-| 3 — Report Analysis | ⬜ Planned |
+| 3 — Report Analysis | ✅ Complete |
 | 4 — Geospatial Intelligence | ⬜ Planned |
 | 5 — Prioritisation & Missing-Signal Detector | ⬜ Planned |
 | 6 — Polish & Validation | ⬜ Planned |
 
-**What works right now:** Full React frontend + FastAPI backend + SQLite database (`sentinel.db`). Supports creating, retrieving, searching, and filtering waterlogging reports with real SQLite persistence, secure photo upload with EXIF sanitization, dashboard aggregations, synthetic data seeding, and automated test coverage (57 frontend tests + 14 backend tests). Toggle between offline mock and live backend via `VITE_USE_MOCK_API`.
+**What works right now:** Full React frontend + FastAPI backend + SQLite database (`sentinel.db`) + Milestone 3 Automated NLP Report Analysis. Supports creating, retrieving, searching, and filtering reports, automated severity classification (scikit-learn), rule-based entity extraction (location, depth, time), semantic duplicate report detection (cosine similarity), composite confidence scoring with explanatory rationale, interactive report analysis UI, secure photo upload with EXIF sanitization, and automated test coverage (72 frontend vitest tests + 26 backend pytest tests). Toggle between offline mock and live backend via `VITE_USE_MOCK_API`.
 
 ---
 
@@ -205,8 +205,81 @@ tests/test_uploads.py::test_upload_photo_valid_png PASSED
 tests/test_uploads.py::test_upload_photo_oversized_rejected PASSED
 tests/test_uploads.py::test_upload_photo_invalid_extension PASSED
 tests/test_uploads.py::test_upload_photo_corrupted_image PASSED
-======================== 14 passed in 1.52s ========================
+tests/test_analysis.py::test_extractor_locations PASSED
+tests/test_analysis.py::test_extractor_depth_numeric_and_descriptive PASSED
+tests/test_analysis.py::test_extractor_time_hints PASSED
+tests/test_analysis.py::test_extractor_all_combined PASSED
+tests/test_analysis.py::test_classifier_predict_shape_and_classes PASSED
+tests/test_analysis.py::test_classifier_empty_input PASSED
+tests/test_analysis.py::test_duplicate_detection_similar_and_dissimilar PASSED
+tests/test_analysis.py::test_duplicate_detection_empty PASSED
+tests/test_analysis.py::test_confidence_score_range_and_reason PASSED
+tests/test_analysis.py::test_embedding_generation_and_caching PASSED
+tests/test_analysis.py::test_api_analyze_and_get_analysis_endpoints PASSED
+tests/test_analysis.py::test_api_analysis_404_not_found PASSED
+======================== 26 passed in 4.60s ========================
 ```
+
+---
+
+## Milestone 3 — Report Analysis (Quick Start & Manual Testing)
+
+Milestone 3 equips SENTINEL with automated NLP and heuristic intelligence to parse citizen reports, classify severity, extract civic landmarks and water depths, detect duplicate submissions, and compute an explainable confidence score.
+
+### 1. Train the Severity Classifier
+The classifier is trained on realistic urban flood reports from `backend/data/seed_reports.csv` and serialized to `backend/data/severity_model.joblib`:
+
+```powershell
+cd backend
+.\.venv\Scripts\Activate.ps1
+python scripts/train_classifier.py
+```
+
+### 2. Manual Testing with curl / PowerShell
+
+#### A. Create a Report (Auto-triggers Analysis)
+```powershell
+$body = @{
+  original_description = "Severe waterlogging on Park Street near Fire Station. Water is 40 cm deep since morning with several cars stranded."
+  address = "Park Street, Kolkata"
+  reported_severity = 4
+} | ConvertTo-Json
+
+$report = Invoke-RestMethod -Uri http://127.0.0.1:8000/api/reports -Method Post -ContentType "application/json" -Body $body
+$report.id
+```
+
+Equivalent with `curl`:
+```bash
+curl -X POST http://127.0.0.1:8000/api/reports \
+  -H "Content-Type: application/json" \
+  -d '{"original_description":"Severe waterlogging on Park Street near Fire Station. Water is 40 cm deep since morning with several cars stranded.","address":"Park Street, Kolkata","reported_severity":4}'
+```
+
+#### B. Fetch Report Analysis
+```powershell
+Invoke-RestMethod -Uri "http://127.0.0.1:8000/api/reports/$($report.id)/analysis" | ConvertTo-Json
+```
+
+Equivalent with `curl`:
+```bash
+curl http://127.0.0.1:8000/api/reports/<REPORT_ID>/analysis
+```
+
+#### C. Trigger On-Demand Re-Analysis
+```powershell
+Invoke-RestMethod -Uri "http://127.0.0.1:8000/api/reports/$($report.id)/analyze" -Method Post | ConvertTo-Json
+```
+
+Equivalent with `curl`:
+```bash
+curl -X POST http://127.0.0.1:8000/api/reports/<REPORT_ID>/analyze
+```
+
+### 3. Known Limitations (Milestone 3)
+- **Embedding Provider Wheel Availability:** On Python 3.14 environments where PyTorch wheels are not yet pre-built, the system automatically and transparently operates in `tfidf` mode using 512-dimensional normalized feature vectors, requiring zero downloads and working 100% offline. If running on Python 3.11–3.12, `sentence-transformers` (`all-MiniLM-L6-v2`) can be installed for dense semantic embeddings.
+- **Seed Training Corpus Size:** The severity classifier is trained on 50 seed examples. It accurately demonstrates multi-class classification and probability calibration, but for production deployment, continuous retraining on broader municipal datasets is recommended.
+- **Synchronous Duplicate Comparison Window:** Duplicate detection scans the most recent 100 reports in the database to maintain fast sub-second API response times without requiring background task workers or external vector databases.
 
 ---
 
@@ -235,7 +308,7 @@ Output goes to `frontend/dist/`. Check that the build completes with no errors.
 | Incident Investigation page | ✅ Stub | Demo data only; full clustering in Milestone 4 |
 | Backend API & SQLite DB | ✅ Complete | FastAPI + SQLAlchemy 2.0 (`sentinel.db`) |
 | Secure photo upload | ✅ Complete | EXIF sanitization, type/size enforcement via Pillow |
-| Semantic report matching | ⬜ Planned | Milestone 3 |
+| Semantic report matching & analysis | ✅ Complete | Milestone 3: NLP severity classification, entity extraction, duplicate detection, confidence score |
 | Geographic clustering | ⬜ Planned | Milestone 4 |
 | Prioritisation scoring | ⬜ Planned | Milestone 5 |
 | Missing-Signal Detector | ⬜ Planned | Milestone 5 |

@@ -46,6 +46,30 @@ export interface Report {
   /** True when this report is part of the demonstration dataset. */
   is_synthetic: boolean;
   updated_at: string;
+  /** Automated analysis results (Milestone 3). */
+  analysis?: ReportAnalysis | null;
+}
+
+export interface DuplicateReportMatch {
+  id: string;
+  text: string;
+  similarity: number;
+}
+
+export interface ReportAnalysis {
+  id: string;
+  report_id: string;
+  severity: 'low' | 'moderate' | 'high' | 'critical' | 'uncertain' | null;
+  severity_confidence: number | null;
+  all_scores?: Record<string, number> | null;
+  confidence_score: number | null;
+  confidence_reason: string | null;
+  extracted_locations: string[];
+  extracted_depth: string | null;
+  extracted_times: string[];
+  possible_duplicates: DuplicateReportMatch[];
+  embedding_provider: string | null;
+  analysed_at: string;
 }
 
 /** Data submitted by a user to create a new report. */
@@ -219,4 +243,8 @@ export interface ApiClient {
   // Incidents (stubs in Milestone 1 — return empty list)
   listIncidents(): Promise<PaginatedResponse<Incident>>;
   getIncident(id: string): Promise<Incident>;
+
+  // Automated Analysis (Milestone 3)
+  getReportAnalysis(id: string): Promise<ReportAnalysis | null>;
+  analyzeReport(id: string): Promise<ReportAnalysis>;
 }

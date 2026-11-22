@@ -1,8 +1,8 @@
 # SENTINEL — Project Status
 
-**Last Updated:** 2026-11-13
-**Current Milestone:** 2 — Backend & Database
-**Status:** ✅ Complete (Milestones 1 & 2 verified; React Bits sensory additions implemented on branch `reactbits-ui`; ready for review)
+**Last Updated:** 2026-11-15
+**Current Milestone:** 3 — Report Analysis
+**Status:** ✅ Complete (Milestones 1, 2, and 3 verified; Milestone 3 NLP analysis & frontend inspection complete)
 
 ---
 
@@ -12,7 +12,7 @@
 |---|-----------|--------|
 | 1 | Frontend Foundation | ✅ Complete |
 | 2 | Backend & Database | ✅ Complete |
-| 3 | Report Analysis | ⬜ Planned |
+| 3 | Report Analysis | ✅ Complete |
 | 4 | Geospatial Intelligence | ⬜ Planned |
 | 5 | Prioritisation & Missing-Signal Detector | ⬜ Planned |
 | 6 | Polish & Validation | ⬜ Planned |
@@ -180,6 +180,45 @@
 - Full frontend client integration via `RealApiClient` in `frontend/src/api/realClient.ts`:
   - Dynamically activated when `VITE_USE_MOCK_API=false`
   - Fully tested for query parameters, error unpacking, and offline fallbacks
+
+### Milestone 3: Report Analysis Features (Tested)
+- **Rule-Based Entity Extractor (`backend/app/analysis/extractor.py`):**
+  - Extracts location references (`near X`, `at X`, `on X Road/Street`, landmarks, wards, sectors)
+  - Extracts numeric water depths (`30 cm`, `2 feet`, `45 cm`) and descriptive observations (`knee-deep`, `ankle-deep`, `waist-deep`)
+  - Extracts temporal context (`since morning`, `last night`, `since yesterday evening`)
+  - Standalone and combined extraction tested across edge cases
+- **Dual-Mode Embedding Provider (`backend/app/analysis/embeddings.py`):**
+  - Seamless support for Sentence Transformers (`all-MiniLM-L6-v2`) with lazy loading and SHA-256 caching
+  - Zero-download, offline-safe fallback using normalized 512-dimensional feature hashing vectors
+  - Fixed-dimension output guaranteeing mathematical cosine compatibility across all report comparisons
+- **Semantic Duplicate Report Detector (`backend/app/analysis/duplicates.py`):**
+  - Computes cosine similarity of report text embeddings against existing database reports
+  - Configurable similarity threshold via `DUPLICATE_THRESHOLD` environment variable (default 0.75)
+  - Returns ranked list of matching reports with similarity percentages and excerpt previews
+- **Severity Classifier (`backend/app/analysis/classifier.py`):**
+  - Scikit-learn NLP Pipeline (`TfidfVectorizer` + balanced `LogisticRegression`)
+  - Predicts report severity (`low`, `moderate`, `high`, `critical`) with class probabilities
+  - Includes 50 realistic civic seed reports (`backend/data/seed_reports.csv`) representing Kolkata waterlogging scenarios
+  - Persisted model file (`backend/data/severity_model.joblib`) with standalone training script (`backend/scripts/train_classifier.py`)
+  - Cross-validation accuracy: ~78%
+- **Composite Confidence Scorer (`backend/app/analysis/confidence.py`):**
+  - Synthesizes 3 independent weighted signals: Classifier probability (40%), Entity completeness (30%), and Corroboration (30%)
+  - Generates clear, human-readable explanatory reasoning strings for every score
+- **Relational Storage & REST API Endpoints:**
+  - `ReportAnalysis` SQLAlchemy model with `report_analysis` SQLite table, linked 1-to-1 with `Report`
+  - Automatic background analysis on report intake (`POST /api/reports`) with fail-safe error isolation
+  - On-demand analysis trigger endpoint: `POST /api/reports/{id}/analyze`
+  - Analysis retrieval endpoint: `GET /api/reports/{id}/analysis`
+- **Frontend Report Detail Analysis View (`ReportDetail.tsx`):**
+  - Colour-coded severity badge (critical: rose, high: orange, moderate: amber, low: teal)
+  - Animated composite confidence meter with explanatory rationale text
+  - Extracted entity chips (civic locations, water depth mention, temporal hints)
+  - Corroborating duplicate reports list with percentage match badges and direct inspection links
+  - Interactive "Re-run Analysis" action button with live spinner feedback
+- **Automated Test Coverage (98 total tests passing):**
+  - 26 backend pytest tests passing (100% test pass rate across `test_analysis.py`, `test_api.py`, and `test_uploads.py`)
+  - 72 frontend vitest tests passing across 10 suites
+  - TypeScript build (`tsc -b && vite build`) clean with 0 errors
 
 ## Known Limitations & Bugs (Milestone 1)
 

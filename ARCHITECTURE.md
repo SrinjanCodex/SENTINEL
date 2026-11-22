@@ -1,7 +1,7 @@
 # SENTINEL — Architecture
 
-**Last Updated:** 2026-10-21
-**Current State:** Milestone 2 — Full-stack operational (FastAPI + SQLite backend connected)
+**Last Updated:** 2026-11-15
+**Current State:** Milestone 3 — Report Analysis complete (FastAPI + SQLite + NLP Severity Classifier & Entity Extractor)
 
 ---
 
@@ -153,6 +153,23 @@ Planned SQLite/SQLAlchemy models:
 | is_independent | BOOLEAN | Not a near-duplicate |
 | added_by | VARCHAR | 'system' or 'human' |
 
+### ReportAnalysis (Milestone 3)
+| Column | Type | Notes |
+|--------|------|-------|
+| id | UUID/string | Primary key |
+| report_id | FK → Report | Unique 1-to-1 link, indexed |
+| severity | VARCHAR(20) | Predicted label: low / moderate / high / critical / uncertain |
+| severity_confidence | FLOAT | Classifier model probability (0.0–1.0) |
+| all_scores | JSON | Dictionary of probabilities across all severity classes |
+| confidence_score | FLOAT | Composite 0.0–1.0 confidence score |
+| confidence_reason | TEXT | Human-readable explanation of confidence factors |
+| extracted_locations | JSON | List of rule-extracted street names, landmarks, wards |
+| extracted_depth | VARCHAR(50) | Extracted numeric or descriptive water depth |
+| extracted_times | JSON | List of extracted temporal phrases |
+| possible_duplicates | JSON | List of matching reports with similarity scores |
+| embedding_provider | VARCHAR(50) | "sentence-transformers" or "tfidf" |
+| analysed_at | DATETIME | Timestamp of analysis execution |
+
 ### Evidence, VerificationRecord, PriorityAssessment, MissingSignal
 See `src/types/index.ts` for full field list.
 
@@ -172,7 +189,8 @@ See `src/types/index.ts` for full field list.
 | POST | `/api/reports/upload-photo` | ✅ Operational | Secure photo upload (EXIF stripped, Pillow verified) |
 | GET | `/api/incidents` | ✅ Operational | List potential incidents |
 | GET | `/api/incidents/{id}` | ✅ Operational | Incident detail with linked report IDs |
-| GET | `/api/reports/{id}/matches` | ⬜ Planned (M3) | Ranked similar reports via semantic matching |
+| POST | `/api/reports/{id}/analyze` | ✅ Operational | Trigger automated NLP/heuristic report analysis |
+| GET | `/api/reports/{id}/analysis` | ✅ Operational | Retrieve stored analysis results for a report |
 | POST | `/api/analysis/run` | ⬜ Planned (M4) | Trigger geospatial clustering pipeline |
 | PATCH | `/api/incidents/{id}/verification` | ⬜ Planned (M5) | Record human verification inspection |
 
@@ -187,17 +205,15 @@ File: `src/lib/classification.ts`
 - If no category scores clearly ahead → "uncertain"
 - Tested in `__tests__/classification.test.ts`
 
-### Milestone 3 — Semantic Similarity (planned)
-- `TextSimilarityProvider` interface with two implementations:
-  1. `EmbeddingProvider` — Sentence Transformers (all-MiniLM-L6-v2)
-  2. `TFIDFProvider` — scikit-learn TF-IDF fallback (works with no ML model)
-- App runs with reduced capability if embedding model cannot be downloaded
-
-### Pair Match Score (Milestone 3)
-```
-score = (semantic × 0.40) + (geographic × 0.30) + (time × 0.15) + (category × 0.15)
-```
-All weights configurable. Score threshold: 0.60.
+### Milestone 3 — Automated Report Analysis (active)
+Directory: `backend/app/analysis/`
+1. **Entity Extractor (`extractor.py`):** Rule-based regex parser extracting location hints (roads, landmarks, wards), water depth mentions (numeric measurements and descriptive phrases), and observation time references.
+2. **Embeddings Engine (`embeddings.py`):** Provides fixed-dimension vector representations for text. Loads `all-MiniLM-L6-v2` when available, with automatic zero-download fallback to 512-dimensional normalized hashing vectors. Results are cached via SHA-256 keys.
+3. **Semantic Duplicate Detector (`duplicates.py`):** Evaluates cosine similarity of report embeddings against recent database reports, filtering by `DUPLICATE_THRESHOLD` (default 0.75).
+4. **Severity Classifier (`classifier.py`):** Scikit-learn Pipeline with `TfidfVectorizer` and balanced `LogisticRegression`, trained on 50 civic seed reports (`data/seed_reports.csv`) and saved via `joblib`.
+5. **Confidence Engine (`confidence.py`):** Produces composite score:
+   `score = 0.40 * classifier_probability + 0.30 * entity_completeness + 0.30 * corroboration`
+   Generates human-readable explanatory rationale.
 
 ### Prioritisation Score (Milestone 5)
 ```

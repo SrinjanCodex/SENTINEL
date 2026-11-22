@@ -12,6 +12,7 @@
 import type {
   ApiClient,
   Report,
+  ReportAnalysis,
   Incident,
   CreateReportPayload,
   DashboardStats,
@@ -190,5 +191,45 @@ export class MockApiClient implements ApiClient {
     const incident = DEMO_INCIDENTS.find((i) => i.id === id);
     if (!incident) throw new Error(`Incident not found: ${id}`);
     return incident;
+  }
+
+  async getReportAnalysis(id: string): Promise<ReportAnalysis | null> {
+    await this.delay();
+    const report = (await this.listReports({ per_page: 100 })).items.find((r) => r.id === id);
+    if (!report) return null;
+    return this.createMockAnalysis(report);
+  }
+
+  async analyzeReport(id: string): Promise<ReportAnalysis> {
+    await this.delay();
+    const report = (await this.listReports({ per_page: 100 })).items.find((r) => r.id === id);
+    if (!report) throw new Error(`Report not found: ${id}`);
+    return this.createMockAnalysis(report);
+  }
+
+  private createMockAnalysis(report: Report): ReportAnalysis {
+    const sev = report.reported_severity
+      ? report.reported_severity >= 5
+        ? 'critical'
+        : report.reported_severity >= 4
+          ? 'high'
+          : report.reported_severity >= 3
+            ? 'moderate'
+            : 'low'
+      : 'moderate';
+    return {
+      id: `analysis-${report.id}`,
+      report_id: report.id,
+      severity: sev,
+      severity_confidence: 0.85,
+      confidence_score: 0.78,
+      confidence_reason: `Mock heuristic classification (${sev}); location context extracted`,
+      extracted_locations: report.address ? [report.address] : ['Central Avenue'],
+      extracted_depth: '25 cm',
+      extracted_times: ['since morning'],
+      possible_duplicates: [],
+      embedding_provider: 'mock-tfidf',
+      analysed_at: new Date().toISOString(),
+    };
   }
 }
