@@ -106,6 +106,16 @@ export interface LinkedReportDetail {
   submitted_at?: string | null;
 }
 
+export interface VerificationRecord {
+  id: string;
+  incident_id: string;
+  previous_status: IncidentStatus;
+  new_status: IncidentStatus;
+  changed_by: string;
+  timestamp: string;
+  note: string;
+}
+
 /**
  * A potential incident — a system-generated hypothesis that several reports
  * may describe the same real-world waterlogging event.
@@ -130,6 +140,9 @@ export interface Incident {
   priority_score: number | null;
   radius_meters?: number | null;
   linked_reports?: LinkedReportDetail[];
+  priority_assessment?: PriorityAssessment | null;
+  missing_signals?: MissingSignal[];
+  verification_records?: VerificationRecord[];
 }
 
 // ── Evidence ─────────────────────────────────────────────────────────────────
@@ -189,6 +202,7 @@ export interface ScoringFactor {
   normalised_value: number;
   weight: number;
   contribution: number;
+  description?: string | null;
 }
 
 export interface PriorityAssessment {
@@ -272,4 +286,10 @@ export interface ApiClient {
   // Automated Analysis (Milestone 3)
   getReportAnalysis(id: string): Promise<ReportAnalysis | null>;
   analyzeReport(id: string): Promise<ReportAnalysis>;
+
+  // Prioritisation & Verification (Milestone 5)
+  recordVerification(
+    incidentId: string,
+    payload: { new_status: IncidentStatus; changed_by: string; note: string },
+  ): Promise<Incident>;
 }
