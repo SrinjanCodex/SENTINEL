@@ -312,11 +312,11 @@ Output goes to `frontend/dist/`. Check that the build completes with no errors.
 | Interactive map | ✅ Working | India-centered overview + street-level inspection |
 | Keyword classification | ✅ Working | Baseline heuristic (AI matching in Milestone 3) |
 | System Information page | ✅ Working | Static placeholder & API status telemetry |
-| Incident Investigation page | ✅ Stub | Demo data only; full clustering in Milestone 4 |
+| Incident Investigation page | ✅ Complete | Operational cluster telemetry with linked observation audit, distance from centroid, and spatial inspection |
 | Backend API & SQLite DB | ✅ Complete | FastAPI + SQLAlchemy 2.0 (`sentinel.db`) |
 | Secure photo upload | ✅ Complete | EXIF sanitization, type/size enforcement via Pillow |
 | Semantic report matching & analysis | ✅ Complete | Milestone 3: NLP severity classification, entity extraction, duplicate detection, confidence score |
-| Geographic clustering | ⬜ Planned | Milestone 4 |
+| Geographic clustering | ✅ Complete | Multi-factor spatio-temporal clustering with Haversine distance, centroid calculation, and Leaflet cluster buffers |
 | Prioritisation scoring | ⬜ Planned | Milestone 5 |
 | Missing-Signal Detector | ⬜ Planned | Milestone 5 |
 | Explainable alerts | ⬜ Planned | Milestone 5 |

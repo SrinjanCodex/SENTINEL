@@ -1,6 +1,6 @@
 /**
  * SENTINEL — Incident Cluster Audit & Triage
- * Comprehensive cluster telemetry with corroboration details and Missing-Signal inspection stubs
+ * Comprehensive cluster telemetry with corroboration details and Missing-Signal inspection
  */
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
@@ -116,13 +116,15 @@ export default function IncidentDetail() {
         />
       </div>
 
-      <div className="animate-fade-in stagger-2">
-        <SyntheticBanner message="This incident was algorithmically synthesized from baseline demonstration data to illustrate multi-report correlation." />
-      </div>
+      {(incident.id.startsWith('inc-demo-') || incident.analysis_version.includes('demo')) && (
+        <div className="animate-fade-in stagger-2">
+          <SyntheticBanner message="This incident was algorithmically synthesized from baseline demonstration data to illustrate multi-report correlation." />
+        </div>
+      )}
 
       {/* Main Two-Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column: Primary Header, Linked Observations, Milestone 5 Stubs */}
+        {/* Left Column: Primary Header, Linked Observations, Operational Intelligence */}
         <div className="lg:col-span-8 space-y-6">
           {/* Primary Header Card — Wide Slab */}
           <Card hoverEffect={true} tilt={false} className="p-6 sm:p-7 animate-card-rise stagger-2">
