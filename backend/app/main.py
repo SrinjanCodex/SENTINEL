@@ -86,7 +86,8 @@ async def generic_exception_handler(request: Request, exc: Exception):
     )
 
 
-# Register API routers under /api
+# Register API routers
+app.include_router(health.router)  # /health root convenience endpoint
 app.include_router(health.router, prefix="/api")
 app.include_router(reports.router, prefix="/api")
 app.include_router(incidents.router, prefix="/api")
