@@ -40,59 +40,65 @@ Install these before starting:
 
 ---
 
-## Quick Start (Milestone 2 — Full Stack: Frontend + Backend)
+## Run Demo in 5 Minutes (Quick Start from Clean Clone)
 
-Open **VS Code**, then open two terminal tabs (`` Ctrl+Shift+` ``).
+Get the complete SENTINEL platform (Frontend + FastAPI Backend + SQLite + NLP Analysis + Geospatial Clustering) up and running in under 5 minutes from a clean git clone.
 
-### Terminal 1: Start the Backend (FastAPI + SQLite)
+### 1. Environment Setup
 
 ```powershell
-# 1. Navigate to the backend folder
+# In the SENTINEL repository root:
+Copy-Item .env.example .env
+```
+*(By default, `.env` configures standard OpenStreetMap tiles and connects seamlessly to the FastAPI backend).*
+
+### 2. Start the Backend (Terminal 1)
+
+```powershell
+# Open a terminal in the SENTINEL directory
 cd backend
 
-# 2. Create Python virtual environment (if not already created)
+# Create and activate virtual environment
 python -m venv .venv
-
-# 3. Activate virtual environment
-# Note: If PowerShell shows an execution policy error, run:
-# Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .\.venv\Scripts\Activate.ps1
 
-# 4. Install backend dependencies
+# Install backend dependencies
 pip install -r requirements.txt
 
-# 5. Seed synthetic demonstration data (optional, creates initial records)
+# Pre-seed realistic urban waterlogging reports and initial clusters
 python -m app.seed
 
-# 6. Start the FastAPI backend server
+# Launch the FastAPI backend
 python run.py
 ```
+- API Endpoint: **http://127.0.0.1:8000**
+- Interactive Swagger Documentation: **http://127.0.0.1:8000/docs**
+- Health Telemetry: **http://127.0.0.1:8000/api/health**
 
-The backend API will be available at: **http://127.0.0.1:8000**
-- Interactive Swagger API documentation: **http://127.0.0.1:8000/docs**
-- Health telemetry: **http://127.0.0.1:8000/api/health**
-
-### Terminal 2: Start the Frontend (React + Vite)
+### 3. Start the Frontend (Terminal 2)
 
 ```powershell
-# 1. Navigate to the frontend folder
+# Open a second terminal in the SENTINEL directory
 cd frontend
 
-# 2. Install dependencies (only needed once, or after pulling changes)
+# Install dependencies
 npm install
 
-# 3. Start the Vite development server
+# Start the Vite development server
 npm run dev
 ```
+- Open browser at: **http://localhost:5173**
 
-The frontend will be available at: **http://localhost:5173**
+> 💡 **Connect to Live Backend:**
+> In the root `.env`, set `VITE_USE_MOCK_API=false` to route all report submissions, NLP analysis, and clustering directly through the FastAPI backend and SQLite database.
 
-> 💡 **To connect the frontend to the live backend:**
-> In your root `.env` file, set:
-> ```env
-> VITE_USE_MOCK_API=false
-> ```
-> And restart the frontend dev server (`Ctrl+C` then `npm run dev`). When set to `false`, all report submissions and statistics are read and written to `backend/sentinel.db`. When set to `true`, it uses browser `localStorage`.
+### 4. Guided Feature Tour (5-Minute Walkthrough)
+
+1. **Intake & Submission:** Navigate to `/report` and submit a community report describing waterlogging (e.g., *"Knee-deep water accumulating near Park Street metro entrance due to choked drain"*).
+2. **Automated NLP Analysis:** On submission, the backend automatically runs severity classification, extracts location/water-depth/time entities, checks for duplicates, and assigns a calibrated confidence score.
+3. **GIS & Geospatial Clustering:** Visit `/map` to see community reports visualized on the interactive Leaflet GIS map. Click **Run Clustering** to run multi-factor spatio-temporal clustering and form incident hypotheses with 150m–300m spatial buffer rings.
+4. **Prioritisation & Evidence Audit:** Click any cluster or go to `/incidents/{id}` to inspect the 6-factor prioritisation score (0–100), transparent factor breakdown, missing-signal audit gaps (`MS-LOC`, `MS-INDEP`, `MS-VERIFY`), and log a field inspection.
+5. **GIS Data Export:** Download GeoJSON report geometries and incident clusters directly from the `/map` toolbar or export CSV tabular records from `/reports`.
 
 ---
 

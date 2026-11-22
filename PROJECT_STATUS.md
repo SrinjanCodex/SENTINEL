@@ -1,8 +1,13 @@
 # SENTINEL — Project Status
 
+**Version:** 1.0.0
 **Last Updated:** 2026-11-22
-**Current Milestone:** 7 — Optional Advanced Features
-**Status:** ✅ Complete (Milestones 1–7 verified; 110 Automated Tests Passing: 72 Frontend Vitest + 38 Backend Pytest)
+**Status:** ✅ Project Complete (Release v1.0.0 — All Milestones 1–7 fully implemented, verified, and operational; 110 Automated Tests Passing)
+
+### System Documentation Links
+- [System Architecture Specification](ARCHITECTURE.md)
+- [Quick Start & 5-Minute Tour](README.md)
+- [Architectural Decision Records](docs/DECISIONS.md)
 
 ---
 
